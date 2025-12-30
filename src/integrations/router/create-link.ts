@@ -26,7 +26,9 @@ export const createLink = <Key extends keyof NavigationPaths>(
     (previous, [key, value]) => previous.replace(`:${key}`, `${value}`),
     String(path),
   );
-  return `${resolvedPath}?${searchParams}`;
+
+  // oxlint-disable-next-line no-magic-numbers
+  return searchParams.size === 0 ? resolvedPath : `${resolvedPath}?${searchParams}`;
 };
 
 export const buildSearchParams = (query?: Record<string, unknown>): URLSearchParams => {
