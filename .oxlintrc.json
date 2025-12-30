@@ -12,16 +12,22 @@
   },
   "globals": {
     "document": "readonly",
-    "HTMLElement": "readonly"
+    "HTMLElement": "readonly",
+    "URLSearchParams": "readonly"
   },
   "rules": {
     "import/prefer-default-export": "off",
     "import/no-named-export": "off",
+    "import/no-unassigned-import": "off",
+    "import/consistent-type-specifier-style": "off",
+    "import/exports-last": "off",
+    "import/group-exports": "off",
     "typescript/explicit-module-boundary-types": "off",
     "typescript/explicit-function-return-type": "off",
     "eslint/arrow-body-style": "off",
-    "import/no-unassigned-import": "off",
     "eslint/sort-imports": "off",
-    "import/consistent-type-specifier-style": "off"
+    "eslint/no-ternary": "off",
+    "eslint/no-undefined": "off",
+    "unicorn/no-array-reduce": "off"
   }
 }

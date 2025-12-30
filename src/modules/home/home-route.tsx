@@ -1,5 +1,7 @@
+import { A } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { Comp } from "../../comp";
+import { createLink } from "../../integrations/router/create-link";
 
 export const HomeRoute: Component = () => {
   return (
@@ -8,6 +10,7 @@ export const HomeRoute: Component = () => {
       <button class="btn">AA</button>
       <span>Homepage</span>
       <Comp />
+      <A href={createLink("/board/:boardId", { params: { boardId: "3" } })}>Board</A>
     </div>
   );
 };
