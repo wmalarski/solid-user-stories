@@ -1,6 +1,6 @@
-import { createLink } from "@/integrations/router/create-link";
 import { A } from "@solidjs/router";
 import type { Component } from "solid-js";
+import { createLink } from "~/integrations/router/create-link";
 
 export const HomeRoute: Component = () => {
   return (

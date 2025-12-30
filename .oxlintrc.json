@@ -1,6 +1,13 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["import", "typescript", "unicorn", "jsx-a11y", "oxc", "promise"],
+  "plugins": [
+    "import",
+    "typescript",
+    "unicorn",
+    "jsx-a11y",
+    "oxc",
+    "promise"
+  ],
   "categories": {
     "correctness": "error",
     "nursery": "error",
@@ -13,7 +20,9 @@
   "globals": {
     "document": "readonly",
     "HTMLElement": "readonly",
-    "URLSearchParams": "readonly"
+    "URLSearchParams": "readonly",
+    "URL": "readonly",
+    "console": "readonly"
   },
   "rules": {
     "import/prefer-default-export": "off",
@@ -28,6 +37,10 @@
     "eslint/sort-imports": "off",
     "eslint/no-ternary": "off",
     "eslint/no-undefined": "off",
-    "unicorn/no-array-reduce": "off"
+    "unicorn/no-array-reduce": "off",
+    "import/max-dependencies": "off",
+    "eslint/no-empty-function": "off",
+    "eslint/id-length": "off",
+    "oxc/no-optional-chaining": "off"
   }
 }
