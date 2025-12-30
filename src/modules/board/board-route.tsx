@@ -1,6 +1,5 @@
 import { useParams } from "@solidjs/router";
 import { createMemo, type Component } from "solid-js";
-import { Comp } from "../../comp";
 
 export const BoardRoute: Component = () => {
   const params = useParams();
@@ -12,7 +11,6 @@ export const BoardRoute: Component = () => {
       <button class="btn">AA</button>
       <span>BoardRoute</span>
       <span>{boardId()}</span>
-      <Comp />
     </div>
   );
 };
