@@ -1,10 +1,13 @@
-import { Comp } from "./comp";
+import { Route, Router } from "@solidjs/router";
 import type { Component } from "solid-js";
+import { BoardRoute } from "./modules/board/board-route";
+import { HomeRoute } from "./modules/home/home-route";
 
 export const App: Component = () => (
   <>
-    <h1 class="text-2xl text-red-900">Hello world!!!!</h1>
-    <button class="btn">AA</button>
-    <Comp />
+    <Router>
+      <Route path="/" component={HomeRoute} />
+      <Route path="/board/:boardId" component={BoardRoute} />
+    </Router>
   </>
 );
