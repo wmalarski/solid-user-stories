@@ -22,7 +22,8 @@
     "HTMLElement": "readonly",
     "URLSearchParams": "readonly",
     "URL": "readonly",
-    "console": "readonly"
+    "console": "readonly",
+    "window": "readonly"
   },
   "rules": {
     "import/prefer-default-export": "off",
@@ -41,6 +42,17 @@
     "import/max-dependencies": "off",
     "eslint/no-empty-function": "off",
     "eslint/id-length": "off",
-    "oxc/no-optional-chaining": "off"
+    "oxc/no-optional-chaining": "off",
+    "typescript/consistent-type-definitions": "off",
+    "promise/catch-or-return": "off",
+    "oxc/no-rest-spread-properties": "off",
+    "eslint/capitalized-comments": "off",
+    "unicorn/number-literal-case": "off",
+    "unicorn/numeric-separators-style": "off",
+    "eslint/max-lines-per-function": "off",
+    "eslint/max-statements": "off",
+    "oxc/no-async-await": "off",
+    "unicorn/prefer-dom-node-remove": "off",
+    "eslint/no-magic-numbers": "off"
   }
 }

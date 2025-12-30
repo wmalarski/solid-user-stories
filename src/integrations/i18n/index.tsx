@@ -10,6 +10,13 @@ import {
 } from "solid-js";
 
 const enDict = {
+  board: {
+    zoom: {
+      reset: "Reset zoom",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+    },
+  },
   common: {
     cancel: "Cancel",
     clear: "Clear",

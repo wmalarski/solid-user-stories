@@ -17,6 +17,7 @@
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.4",
     "@tailwindcss/vite": "^4.1.18",
+    "pixi.js": "^8.14.3",
     "solid-js": "^1.9.10",
     "tailwind-merge": "^3.4.0",
     "tailwind-variants": "^3.2.2",

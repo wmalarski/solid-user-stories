@@ -27,7 +27,6 @@ export const createLink = <Key extends keyof NavigationPaths>(
     String(path),
   );
 
-  // oxlint-disable-next-line no-magic-numbers
   return searchParams.size === 0 ? resolvedPath : `${resolvedPath}?${searchParams}`;
 };
 
