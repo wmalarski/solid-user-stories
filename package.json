@@ -13,7 +13,9 @@
     "format": "oxfmt --write ."
   },
   "dependencies": {
-    "solid-js": "^1.9.10"
+    "@tailwindcss/vite": "^4.1.18",
+    "solid-js": "^1.9.10",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "oxfmt": "^0.21.0",

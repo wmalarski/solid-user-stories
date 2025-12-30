@@ -3,6 +3,7 @@ import { App } from "./app";
 import { render } from "solid-js/web";
 // oxlint-disable-next-line sort-imports
 import "solid-devtools";
+import "./index.css";
 
 const root = document.querySelector("#root");
 
