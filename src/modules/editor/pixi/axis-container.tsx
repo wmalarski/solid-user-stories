@@ -62,6 +62,15 @@ const HorizontalAxisContainer: Component<HorizontalAxisContainerProps> = (props)
 
   return (
     <>
+      <For each={positions()}>
+        {(position) => (
+          <AxisGridItem
+            axisContainer={props.axisContainer}
+            orientation="horizontal"
+            position={position}
+          />
+        )}
+      </For>
       <HorizontalAxisGraphics axisContainer={props.axisContainer} />
       <For each={collection.data}>
         {(axis, index) => (
@@ -174,6 +183,15 @@ export const VerticalAxisContainer: Component<VerticalAxisContainerProps> = (pro
 
   return (
     <>
+      <For each={positions()}>
+        {(position) => (
+          <AxisGridItem
+            axisContainer={props.axisContainer}
+            orientation="vertical"
+            position={position}
+          />
+        )}
+      </For>
       <VerticalAxisGraphics axisContainer={props.axisContainer} />
       <For each={collection.data}>
         {(axis, index) => (
@@ -289,6 +307,54 @@ const AxisNameText: Component<AxisNameTextProps> = (props) => {
 
   onCleanup(() => {
     props.itemContainer.removeChild(title);
+  });
+
+  return null;
+};
+
+type AxisGridProps = {
+  position: number;
+  orientation: AxisModel["orientation"];
+  axisContainer: Container;
+};
+
+const AxisGridItem: Component<AxisGridProps> = (props) => {
+  const transform = useTransformState();
+
+  const graphics = new Graphics();
+
+  createEffect(() => {
+    const transformValue = transform();
+
+    if (props.orientation === "horizontal") {
+      const xPosition = transformValue.x() + props.position * transformValue.scale();
+
+      graphics.clear();
+      graphics
+        .moveTo(xPosition, 0)
+        .lineTo(xPosition, window.outerHeight)
+        .fill({ color: 0x77aa33 })
+        .stroke({ color: 0x66bb44 });
+    }
+
+    if (props.orientation === "vertical") {
+      const yPosition = transformValue.y() + props.position * transformValue.scale();
+
+      graphics.clear();
+      graphics
+        .moveTo(0, yPosition)
+        .lineTo(window.outerWidth, yPosition)
+        .fill({ color: 0x77aa33 })
+        .stroke({ color: 0x66bb44 });
+    }
+  });
+
+  onMount(() => {
+    props.axisContainer.addChild(graphics);
+  });
+
+  onCleanup(() => {
+    props.axisContainer.removeChild(graphics);
   });
 
   return null;
