@@ -9,11 +9,11 @@ import {
 } from "solid-js";
 import type { Point2D } from "../utils/types";
 
-interface TransformState {
+type TransformState = {
   scale: number;
   x: number;
   y: number;
-}
+};
 
 const scaleBy = 1.1;
 

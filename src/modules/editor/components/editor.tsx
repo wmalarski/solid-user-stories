@@ -1,4 +1,6 @@
 import { type Component, createSignal, lazy, Show } from "solid-js";
+import type { BoardModel } from "~/integrations/tanstack-db/schema";
+import { BoardContextProvider } from "../contexts/board-context";
 
 const PixiStage = lazy(() =>
   // oxlint-disable-next-line prefer-await-to-then
@@ -8,11 +10,15 @@ const PixiStage = lazy(() =>
 );
 
 type EditorProps = {
-  boardId: string;
+  board: BoardModel;
 };
 
-export const Editor: Component<EditorProps> = () => {
-  return <ClientBoard />;
+export const Editor: Component<EditorProps> = (props) => {
+  return (
+    <BoardContextProvider board={props.board}>
+      <ClientBoard />
+    </BoardContextProvider>
+  );
 };
 
 const ClientBoard: Component = () => {

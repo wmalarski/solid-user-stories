@@ -7,6 +7,10 @@ export interface NavigationPaths {
     params: never;
     search: never;
   };
+  "/404": {
+    params: never;
+    search: never;
+  };
 }
 
 type PathNeverCond<Type> = [Type] extends [never] ? unknown : { params: Type };
