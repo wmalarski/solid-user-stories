@@ -1,5 +1,5 @@
 import { Navigate, useParams } from "@solidjs/router";
-import { useLiveQuery } from "@tanstack/solid-db";
+import { eq, useLiveQuery } from "@tanstack/solid-db";
 import { createMemo, Show, Suspense, type Component } from "solid-js";
 import { createLink } from "~/integrations/router/create-link";
 import { boardsCollection } from "~/integrations/tanstack-db/collections";
@@ -12,7 +12,7 @@ export const BoardRoute: Component = () => {
   const board = useLiveQuery((q) =>
     q
       .from({ board: boardsCollection })
-      .where(({ board }) => board.id === boardId())
+      .where(({ board }) => eq(board.id, boardId()))
       .findOne(),
   );
 

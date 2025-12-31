@@ -59,12 +59,27 @@ type HorizontalAxisGraphicsProps = {
 };
 
 const HorizontalAxisGraphics: Component<HorizontalAxisGraphicsProps> = (props) => {
+  const app = usePixiApp();
   const theme = useBoardTheme();
 
   const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
 
+  const drawGraphics = (width = window.outerWidth) => {
+    graphics.rect(100, 0, width - 100, 100).fill({ color: 0xaabbcc });
+  };
+
   createEffect(() => {
-    graphics.rect(0, 0, 500, 100).fill({ color: 0xaabbcc });
+    drawGraphics();
+  });
+
+  createEffect(() => {
+    const listener = (screenWidth: number) => {
+      drawGraphics(screenWidth);
+    };
+    app.renderer?.on("resize", listener);
+    return () => {
+      app.renderer?.off("resize", listener);
+    };
   });
 
   onMount(() => {
@@ -106,7 +121,39 @@ type VerticalAxisGraphicsProps = {
   axisContainer: Container;
 };
 
-const VerticalAxisGraphics: Component<VerticalAxisGraphicsProps> = () => {
+const VerticalAxisGraphics: Component<VerticalAxisGraphicsProps> = (props) => {
+  const app = usePixiApp();
+  const theme = useBoardTheme();
+
+  const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
+
+  const drawGraphics = (height = window.outerHeight) => {
+    graphics.rect(0, 100, 100, height - 100).fill({ color: 0xccbbaa });
+  };
+
+  createEffect(() => {
+    drawGraphics();
+  });
+
+  createEffect(() => {
+    const listener = (_screenWidth: number, screenHeigth: number) => {
+      drawGraphics(screenHeigth);
+    };
+    app.renderer?.on("resize", listener);
+    return () => {
+      app.renderer?.off("resize", listener);
+    };
+  });
+
+  onMount(() => {
+    props.axisContainer.addChild(graphics);
+  });
+
+  onCleanup(() => {
+    props.axisContainer.removeChild(graphics);
+    graphics.destroy();
+  });
+
   return null;
 };
 

@@ -29,7 +29,7 @@ export const ZoomBar: Component = () => {
   };
 
   return (
-    <div class="absolute bottom-4 left-4 flex gap-1 rounded-3xl bg-base-300 p-1 shadow-lg">
+    <div class="absolute bottom-4 right-6 flex gap-1 rounded-3xl bg-base-300 p-1 shadow-lg">
       <Tooltip data-tip={t("board.zoom.zoomIn")}>
         <Button
           aria-label={t("board.zoom.zoomIn")}
