@@ -5,6 +5,7 @@ import { MinusIcon } from "~/ui/icons/minus-icon";
 import { PlusIcon } from "~/ui/icons/plus-icon";
 import { Tooltip } from "~/ui/tooltip/tooltip";
 import { useTransformState } from "../contexts/transform-state";
+import { ToolContainer } from "./tool-container";
 
 export const ZoomBar: Component = () => {
   const { t } = useI18n();
@@ -29,7 +30,7 @@ export const ZoomBar: Component = () => {
   };
 
   return (
-    <div class="absolute bottom-4 right-6 flex gap-1 rounded-3xl bg-base-300 p-1 shadow-lg">
+    <ToolContainer class="bottom-2 right-6">
       <Tooltip data-tip={t("board.zoom.zoomIn")}>
         <Button
           aria-label={t("board.zoom.zoomIn")}
@@ -64,6 +65,6 @@ export const ZoomBar: Component = () => {
           <MinusIcon />
         </Button>
       </Tooltip>
-    </div>
+    </ToolContainer>
   );
 };

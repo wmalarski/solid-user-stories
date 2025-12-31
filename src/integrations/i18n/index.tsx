@@ -11,6 +11,9 @@ import {
 
 const enDict = {
   board: {
+    axis: {
+      insertAxis: "Add axis",
+    },
     zoom: {
       reset: "Reset zoom",
       zoomIn: "Zoom in",

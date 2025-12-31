@@ -1,6 +1,10 @@
 import { type Component, createSignal, lazy, Show } from "solid-js";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { BoardContextProvider } from "../contexts/board-context";
+import {
+  InsertHorizontalAxisItemButton,
+  InsertVerticalAxisItemButton,
+} from "./insert-axis-item-buttons";
 
 const PixiStage = lazy(() =>
   // oxlint-disable-next-line prefer-await-to-then
@@ -17,6 +21,8 @@ export const Editor: Component<EditorProps> = (props) => {
   return (
     <BoardContextProvider board={props.board}>
       <ClientBoard />
+      <InsertHorizontalAxisItemButton />
+      <InsertVerticalAxisItemButton />
     </BoardContextProvider>
   );
 };

@@ -3,13 +3,14 @@ import { useLiveQuery } from "@tanstack/solid-db";
 import { For, type Component } from "solid-js";
 import { createLink } from "~/integrations/router/create-link";
 import { boardsCollection } from "~/integrations/tanstack-db/collections";
+import { createId } from "~/integrations/tanstack-db/create-id";
 import { Button } from "~/ui/button/button";
 
 export const HomeRoute: Component = () => {
   const navigate = useNavigate();
 
   const onAddClick = async () => {
-    const boardId = String(Date.now());
+    const boardId = createId();
     const tx = boardsCollection.insert({
       description: "description",
       id: boardId,
