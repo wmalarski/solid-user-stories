@@ -1,5 +1,5 @@
 import { and, eq, useLiveQuery } from "@tanstack/solid-db";
-import { Container, Graphics } from "pixi.js";
+import { Container, Graphics, Text, TextStyle } from "pixi.js";
 import { createEffect, createMemo, For, onCleanup, onMount, type Component } from "solid-js";
 import { axisCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
@@ -110,7 +110,6 @@ const HorizontalAxisGraphics: Component<HorizontalAxisGraphicsProps> = (props) =
 
   onCleanup(() => {
     props.axisContainer.removeChild(graphics);
-    graphics.destroy();
   });
 
   return null;
@@ -127,29 +126,35 @@ const HorizontalAxisItemGraphics: Component<HorizontalAxisItemGraphicsProps> = (
 
   const transform = useTransformState();
 
-  const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
+  const itemContainer = new Container();
+  const graphics = new Graphics();
 
   createEffect(() => {
-    graphics.clear();
-    graphics.rect(props.positionX ?? 0, 0, props.axis.size, 100).fill({ color: 0x11dd99 });
+    itemContainer.zIndex = theme().axisContainerZIndex;
   });
 
   createEffect(() => {
     const transformValue = transform();
-    graphics.x = transformValue.x();
-    graphics.scale.set(transformValue.scale(), 1);
+    graphics.clear();
+    graphics.rect(0, 0, props.axis.size * transformValue.scale(), 100).fill({ color: 0x11dd99 });
+  });
+
+  createEffect(() => {
+    const transformValue = transform();
+    itemContainer.x = transformValue.x() + (props.positionX ?? 0) * transformValue.scale();
   });
 
   onMount(() => {
-    props.axisContainer.addChild(graphics);
+    itemContainer.addChild(graphics);
+    props.axisContainer.addChild(itemContainer);
   });
 
   onCleanup(() => {
-    props.axisContainer.removeChild(graphics);
-    graphics.destroy();
+    itemContainer.removeChild(graphics);
+    props.axisContainer.removeChild(itemContainer);
   });
 
-  return null;
+  return <AxisNameText axis={props.axis} itemContainer={itemContainer} />;
 };
 
 type VerticalAxisContainerProps = {
@@ -234,26 +239,56 @@ const VerticalAxisItemGraphics: Component<VerticalAxisItemGraphicsProps> = (prop
 
   const transform = useTransformState();
 
-  const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
+  const itemContainer = new Container();
+  const graphics = new Graphics();
 
   createEffect(() => {
-    graphics.clear();
-    graphics.rect(0, props.positionY ?? 0, 100, props.axis.size).fill({ color: 0xffeedd });
+    itemContainer.zIndex = theme().axisContainerZIndex;
   });
 
   createEffect(() => {
     const transformValue = transform();
-    graphics.y = transformValue.y();
-    graphics.scale.set(1, transformValue.scale());
+    graphics.clear();
+    graphics.rect(0, 0, 100, props.axis.size * transformValue.scale()).fill({ color: 0xffeedd });
+  });
+
+  createEffect(() => {
+    const transformValue = transform();
+    itemContainer.y = transformValue.y() + (props.positionY ?? 0) * transformValue.scale();
   });
 
   onMount(() => {
-    props.axisContainer.addChild(graphics);
+    itemContainer.addChild(graphics);
+    props.axisContainer.addChild(itemContainer);
   });
 
   onCleanup(() => {
-    props.axisContainer.removeChild(graphics);
-    graphics.destroy();
+    itemContainer.removeChild(graphics);
+    props.axisContainer.removeChild(itemContainer);
+  });
+
+  return <AxisNameText axis={props.axis} itemContainer={itemContainer} />;
+};
+
+type AxisNameTextProps = {
+  axis: AxisModel;
+  itemContainer: Container;
+};
+
+const AxisNameText: Component<AxisNameTextProps> = (props) => {
+  const style = new TextStyle({ fontSize: 16 });
+  const title = new Text({ style });
+
+  createEffect(() => {
+    title.text = props.axis.name;
+  });
+
+  onMount(() => {
+    props.itemContainer.addChild(title);
+  });
+
+  onCleanup(() => {
+    props.itemContainer.removeChild(title);
   });
 
   return null;

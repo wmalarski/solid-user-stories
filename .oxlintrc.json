@@ -30,6 +30,7 @@
     "eslint/capitalized-comments": "off",
     "eslint/id-length": "off",
     "eslint/max-lines-per-function": "off",
+    "eslint/max-lines": "off",
     "eslint/max-statements": "off",
     "eslint/no-empty-function": "off",
     "eslint/no-magic-numbers": "off",
