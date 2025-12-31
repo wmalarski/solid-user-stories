@@ -20,6 +20,11 @@ export const useBoardContext = () => {
   return useContext(BoardContext);
 };
 
+export const useBoardId = () => {
+  const context = useContext(BoardContext);
+  return createMemo(() => context().board.id);
+};
+
 type BoardContextProviderProps = ParentProps<{
   board: BoardModel;
 }>;

@@ -9,6 +9,7 @@ import {
 
 const createBoardThemeContext = () => {
   return {
+    axisContainerZIndex: 5,
     backgroundDarkColor: 0x1d1d21,
     // cursorContainerZIndex: 5,
     // cursorGraphicsZIndex: 6,

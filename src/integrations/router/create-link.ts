@@ -22,11 +22,11 @@ export const createLink = <Key extends keyof NavigationPaths>(
     SearchNeverCond<NavigationPaths[Key]["search"]>,
 ) => {
   const unsafeOptions = options as unknown as {
-    params: Record<string, unknown>;
-    search: Record<string, unknown>;
+    params?: Record<string, unknown>;
+    search?: Record<string, unknown>;
   };
   const searchParams = buildSearchParams(unsafeOptions.search);
-  const resolvedPath = Object.entries(unsafeOptions.params).reduce(
+  const resolvedPath = Object.entries(unsafeOptions.params ?? {}).reduce(
     (previous, [key, value]) => previous.replace(`:${key}`, `${value}`),
     String(path),
   );
