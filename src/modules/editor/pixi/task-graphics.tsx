@@ -51,10 +51,10 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
 
   useDragObject({
     displayObject: taskContainer,
-    onDragMove: () => {
+    onDragEnd: () => {
       taskCollection.update(props.task.id, (draft) => {
-        draft.positionX = graphics.x;
-        draft.positionY = graphics.y;
+        draft.positionX = taskContainer.x;
+        draft.positionY = taskContainer.y;
       });
     },
   });

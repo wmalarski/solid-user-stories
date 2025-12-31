@@ -13,6 +13,8 @@ export const AxisContainer: Component = () => {
   const theme = useBoardTheme();
 
   const axisContainer = new Container({
+    // x: 100,
+    // y: 100,
     zIndex: theme().axisContainerZIndex,
   });
 
@@ -39,7 +41,7 @@ const getPositions = (collection: AxisModel[]) => {
       previous.push(last + current.size);
       return previous;
     },
-    [0],
+    [100],
   );
 };
 
@@ -85,7 +87,7 @@ const HorizontalAxisGraphics: Component<HorizontalAxisGraphicsProps> = (props) =
   const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
 
   const drawGraphics = (width = window.outerWidth) => {
-    graphics.rect(100, 0, width - 100, 100).fill({ color: 0xaabbcc });
+    graphics.rect(0, 0, width, 100).fill({ color: 0xaabbcc });
   };
 
   createEffect(() => {
@@ -127,13 +129,9 @@ const HorizontalAxisItemGraphics: Component<HorizontalAxisItemGraphicsProps> = (
 
   const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
 
-  const drawGraphics = () => {
+  createEffect(() => {
     graphics.clear();
     graphics.rect(props.positionX ?? 0, 0, props.axis.size, 100).fill({ color: 0x11dd99 });
-  };
-
-  createEffect(() => {
-    drawGraphics();
   });
 
   createEffect(() => {
@@ -196,7 +194,7 @@ const VerticalAxisGraphics: Component<VerticalAxisGraphicsProps> = (props) => {
   const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
 
   const drawGraphics = (height = window.outerHeight) => {
-    graphics.rect(0, 100, 100, height - 100).fill({ color: 0xccbbaa });
+    graphics.rect(0, 0, 100, height).fill({ color: 0xccbbaa });
   };
 
   createEffect(() => {
@@ -238,19 +236,15 @@ const VerticalAxisItemGraphics: Component<VerticalAxisItemGraphicsProps> = (prop
 
   const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
 
-  const drawGraphics = () => {
-    const transformValues = transform();
-
-    const positionY =
-      ((props.positionY ?? 0) + 100 + transformValues.y()) * transformValues.scale();
-    const height = props.axis.size * transformValues.scale();
-
+  createEffect(() => {
     graphics.clear();
-    graphics.rect(0, positionY, 100, height).fill({ color: 0xffeedd });
-  };
+    graphics.rect(0, props.positionY ?? 0, 100, props.axis.size).fill({ color: 0xffeedd });
+  });
 
   createEffect(() => {
-    drawGraphics();
+    const transformValue = transform();
+    graphics.y = transformValue.y();
+    graphics.scale.set(1, transformValue.scale());
   });
 
   onMount(() => {

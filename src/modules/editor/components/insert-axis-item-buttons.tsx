@@ -53,8 +53,8 @@ const InsertAxisItemButton: Component<InsertAxisItemButtonProps> = (props) => {
       description: `Description:${taskId}`,
       estimate: 1,
       id: taskId,
-      positionX: 0,
-      positionY: 0,
+      positionX: 100,
+      positionY: 100,
       title: `Title:${taskId}`,
     });
   };
