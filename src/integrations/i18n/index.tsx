@@ -14,6 +14,9 @@ const enDict = {
     axis: {
       insertAxis: "Add axis",
     },
+    tasks: {
+      insertTask: "Add task",
+    },
     zoom: {
       reset: "Reset zoom",
       zoomIn: "Zoom in",

@@ -128,18 +128,18 @@ const HorizontalAxisItemGraphics: Component<HorizontalAxisItemGraphicsProps> = (
   const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
 
   const drawGraphics = () => {
-    const transformValues = transform();
-
-    const positionX =
-      ((props.positionX ?? 0) + 100 - transformValues.x()) * transformValues.scale();
-    const width = props.axis.size * transformValues.scale();
-
     graphics.clear();
-    graphics.rect(positionX, 0, width, 100).fill({ color: 0xddeeff });
+    graphics.rect(props.positionX ?? 0, 0, props.axis.size, 100).fill({ color: 0x11dd99 });
   };
 
   createEffect(() => {
     drawGraphics();
+  });
+
+  createEffect(() => {
+    const transformValue = transform();
+    graphics.x = transformValue.x();
+    graphics.scale.set(transformValue.scale(), 1);
   });
 
   onMount(() => {
@@ -242,7 +242,7 @@ const VerticalAxisItemGraphics: Component<VerticalAxisItemGraphicsProps> = (prop
     const transformValues = transform();
 
     const positionY =
-      ((props.positionY ?? 0) + 100 - transformValues.y()) * transformValues.scale();
+      ((props.positionY ?? 0) + 100 + transformValues.y()) * transformValues.scale();
     const height = props.axis.size * transformValues.scale();
 
     graphics.clear();
