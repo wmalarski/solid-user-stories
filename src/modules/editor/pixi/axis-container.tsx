@@ -1,9 +1,10 @@
 import { and, eq, useLiveQuery } from "@tanstack/solid-db";
 import { Container, Graphics } from "pixi.js";
-import { createEffect, For, onCleanup, onMount, type Component } from "solid-js";
+import { createEffect, createMemo, For, onCleanup, onMount, type Component } from "solid-js";
 import { axisCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { useBoardId } from "../contexts/board-context";
+import { useTransformState } from "../contexts/transform-state";
 import { useBoardTheme } from "./board-theme";
 import { usePixiApp } from "./pixi-app";
 
@@ -31,6 +32,17 @@ export const AxisContainer: Component = () => {
   );
 };
 
+const getPositions = (collection: AxisModel[]) => {
+  return collection.reduce(
+    (previous, current) => {
+      const last = previous.at(-1) ?? 0;
+      previous.push(last + current.size);
+      return previous;
+    },
+    [0],
+  );
+};
+
 type HorizontalAxisContainerProps = {
   axisContainer: Container;
 };
@@ -44,11 +56,19 @@ const HorizontalAxisContainer: Component<HorizontalAxisContainerProps> = (props)
       .where(({ axis }) => and(eq(axis.boardId, boardId()), eq(axis.orientation, "horizontal"))),
   );
 
+  const positions = createMemo(() => getPositions(collection.data));
+
   return (
     <>
       <HorizontalAxisGraphics axisContainer={props.axisContainer} />
       <For each={collection.data}>
-        {(axis) => <AxisGraphics axis={axis} axisContainer={props.axisContainer} />}
+        {(axis, index) => (
+          <HorizontalAxisItemGraphics
+            positionX={positions().at(index())}
+            axis={axis}
+            axisContainer={props.axisContainer}
+          />
+        )}
       </For>
     </>
   );
@@ -94,6 +114,46 @@ const HorizontalAxisGraphics: Component<HorizontalAxisGraphicsProps> = (props) =
   return null;
 };
 
+type HorizontalAxisItemGraphicsProps = {
+  axisContainer: Container;
+  axis: AxisModel;
+  positionX?: number;
+};
+
+const HorizontalAxisItemGraphics: Component<HorizontalAxisItemGraphicsProps> = (props) => {
+  const theme = useBoardTheme();
+
+  const transform = useTransformState();
+
+  const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
+
+  const drawGraphics = () => {
+    const transformValues = transform();
+
+    const positionX =
+      ((props.positionX ?? 0) + 100 - transformValues.x()) * transformValues.scale();
+    const width = props.axis.size * transformValues.scale();
+
+    graphics.clear();
+    graphics.rect(positionX, 0, width, 100).fill({ color: 0xddeeff });
+  };
+
+  createEffect(() => {
+    drawGraphics();
+  });
+
+  onMount(() => {
+    props.axisContainer.addChild(graphics);
+  });
+
+  onCleanup(() => {
+    props.axisContainer.removeChild(graphics);
+    graphics.destroy();
+  });
+
+  return null;
+};
+
 type VerticalAxisContainerProps = {
   axisContainer: Container;
 };
@@ -107,11 +167,19 @@ export const VerticalAxisContainer: Component<VerticalAxisContainerProps> = (pro
       .where(({ axis }) => and(eq(axis.boardId, boardId()), eq(axis.orientation, "vertical"))),
   );
 
+  const positions = createMemo(() => getPositions(collection.data));
+
   return (
     <>
       <VerticalAxisGraphics axisContainer={props.axisContainer} />
       <For each={collection.data}>
-        {(axis) => <AxisGraphics axis={axis} axisContainer={props.axisContainer} />}
+        {(axis, index) => (
+          <VerticalAxisItemGraphics
+            positionY={positions().at(index())}
+            axis={axis}
+            axisContainer={props.axisContainer}
+          />
+        )}
       </For>
     </>
   );
@@ -157,11 +225,42 @@ const VerticalAxisGraphics: Component<VerticalAxisGraphicsProps> = (props) => {
   return null;
 };
 
-type AxisGraphicsProps = {
+type VerticalAxisItemGraphicsProps = {
   axisContainer: Container;
   axis: AxisModel;
+  positionY?: number;
 };
 
-const AxisGraphics: Component<AxisGraphicsProps> = () => {
+const VerticalAxisItemGraphics: Component<VerticalAxisItemGraphicsProps> = (props) => {
+  const theme = useBoardTheme();
+
+  const transform = useTransformState();
+
+  const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
+
+  const drawGraphics = () => {
+    const transformValues = transform();
+
+    const positionY =
+      ((props.positionY ?? 0) + 100 - transformValues.y()) * transformValues.scale();
+    const height = props.axis.size * transformValues.scale();
+
+    graphics.clear();
+    graphics.rect(0, positionY, 100, height).fill({ color: 0xffeedd });
+  };
+
+  createEffect(() => {
+    drawGraphics();
+  });
+
+  onMount(() => {
+    props.axisContainer.addChild(graphics);
+  });
+
+  onCleanup(() => {
+    props.axisContainer.removeChild(graphics);
+    graphics.destroy();
+  });
+
   return null;
 };
