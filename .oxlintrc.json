@@ -35,6 +35,7 @@
     "eslint/no-magic-numbers": "off",
     "eslint/no-ternary": "off",
     "eslint/no-undefined": "off",
+    "eslint/prefer-destructuring": "off",
     "eslint/sort-imports": "off",
     "import/consistent-type-specifier-style": "off",
     "import/exports-last": "off",
