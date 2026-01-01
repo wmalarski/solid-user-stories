@@ -1,7 +1,12 @@
 import { eq, useLiveQuery } from "@tanstack/solid-db";
 import type { FederatedPointerEvent } from "pixi.js";
-import { For, onCleanup, onMount, type Component } from "solid-js";
-import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
+import { createMemo, For, onCleanup, onMount, type Component } from "solid-js";
+import {
+  axisCollection,
+  edgeCollection,
+  taskCollection,
+} from "~/integrations/tanstack-db/collections";
+import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { useBoardId } from "../contexts/board-context";
 import { useSelectionContext } from "../contexts/selection-context";
 import { RIGHT_BUTTON } from "../utils/constants";
@@ -15,9 +20,22 @@ export const StoriesBoard: Component = () => {
   useStageTransform();
   useStageDeselect();
 
+  const boardId = useBoardId();
+
+  const axis = useLiveQuery((q) =>
+    q.from({ axis: axisCollection }).where(({ axis }) => eq(axis.boardId, boardId())),
+  );
+
+  const values = createMemo(() => getAxisValues(axis.data));
+
   return (
     <>
-      <AxisContainer />
+      <AxisContainer
+        horizontal={values().horizontal}
+        horizontalPositions={values().horizontalPositions}
+        vertical={values().vertical}
+        verticalPositions={values().verticalPositions}
+      />
       <TaskGraphicsList />
       <EdgeGraphicsList />
       <DrawingEdgeGraphics />
@@ -70,4 +88,35 @@ const useStageDeselect = () => {
   onCleanup(() => {
     container.off("pointerdown", onPointerDown);
   });
+};
+
+const getPositions = (collection: AxisModel[]) => {
+  return collection.reduce(
+    (previous, current) => {
+      const last = previous.at(-1) ?? 0;
+      previous.push(last + current.size);
+      return previous;
+    },
+    [0],
+  );
+};
+
+const getAxisValues = (entries: AxisModel[]) => {
+  const horizontal: AxisModel[] = [];
+  const vertical: AxisModel[] = [];
+
+  for (const entry of entries) {
+    const array = entry.orientation === "horizontal" ? horizontal : vertical;
+    array.push(entry);
+  }
+
+  const horizontalPositions = getPositions(horizontal);
+  const verticalPositions = getPositions(vertical);
+
+  return {
+    horizontal,
+    horizontalPositions,
+    vertical,
+    verticalPositions,
+  };
 };

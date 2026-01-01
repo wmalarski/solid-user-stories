@@ -1,21 +1,22 @@
-import { and, eq, useLiveQuery } from "@tanstack/solid-db";
 import { Container, Graphics, Text, TextStyle } from "pixi.js";
-import { createEffect, createMemo, For, onCleanup, onMount, type Component } from "solid-js";
-import { axisCollection } from "~/integrations/tanstack-db/collections";
+import { createEffect, For, onCleanup, onMount, type Component } from "solid-js";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
-import { useBoardId } from "../contexts/board-context";
 import { useTransformPoint, useTransformState } from "../contexts/transform-state";
-import { useBoardTheme } from "./board-theme";
+import { AXIS_CONTAINER_ZINDEX, AXIS_OFFSET } from "../utils/constants";
 import { usePixiApp } from "./pixi-app";
 
-export const AxisContainer: Component = () => {
+type AxisContainerProps = {
+  horizontal: AxisModel[];
+  horizontalPositions: number[];
+  vertical: AxisModel[];
+  verticalPositions: number[];
+};
+
+export const AxisContainer: Component<AxisContainerProps> = (props) => {
   const app = usePixiApp();
-  const theme = useBoardTheme();
 
   const axisContainer = new Container({
-    // x: 100,
-    // y: 100,
-    zIndex: theme().axisContainerZIndex,
+    zIndex: AXIS_CONTAINER_ZINDEX,
   });
 
   onMount(() => {
@@ -28,55 +29,44 @@ export const AxisContainer: Component = () => {
 
   return (
     <>
-      <HorizontalAxisContainer axisContainer={axisContainer} />
-      <VerticalAxisContainer axisContainer={axisContainer} />
+      <AxisContent
+        collection={props.horizontal}
+        positions={props.horizontalPositions}
+        axisContainer={axisContainer}
+        orientation="horizontal"
+      />
+      <AxisContent
+        collection={props.vertical}
+        positions={props.verticalPositions}
+        axisContainer={axisContainer}
+        orientation="vertical"
+      />
     </>
   );
 };
 
-const getPositions = (collection: AxisModel[]) => {
-  return collection.reduce(
-    (previous, current) => {
-      const last = previous.at(-1) ?? 0;
-      previous.push(last + current.size);
-      return previous;
-    },
-    [100],
-  );
-};
-
-type HorizontalAxisContainerProps = {
+type AxisContentProps = {
   axisContainer: Container;
+  collection: AxisModel[];
+  positions: number[];
+  orientation: AxisModel["orientation"];
 };
 
-const HorizontalAxisContainer: Component<HorizontalAxisContainerProps> = (props) => {
-  const boardId = useBoardId();
-
-  const collection = useLiveQuery((q) =>
-    q
-      .from({ axis: axisCollection })
-      .where(({ axis }) => and(eq(axis.boardId, boardId()), eq(axis.orientation, "horizontal"))),
-  );
-
-  const positions = createMemo(() => getPositions(collection.data));
-
+const AxisContent: Component<AxisContentProps> = (props) => {
   return (
     <>
-      <For each={positions()}>
-        {(position) => (
-          <AxisGridItem
-            axisContainer={props.axisContainer}
-            orientation="horizontal"
-            position={position}
-          />
-        )}
-      </For>
-      <HorizontalAxisGraphics axisContainer={props.axisContainer} />
-      <For each={collection.data}>
+      <AxisGrid
+        axisContainer={props.axisContainer}
+        orientation={props.orientation}
+        positions={props.positions}
+      />
+      <AxisGraphics axisContainer={props.axisContainer} orientation={props.orientation} />
+      <For each={props.collection}>
         {(axis, index) => (
-          <HorizontalAxisItemGraphics
-            positionX={positions().at(index())}
+          <AxisItemGraphics
+            position={props.positions.at(index())}
             axis={axis}
+            orientation={props.orientation}
             axisContainer={props.axisContainer}
           />
         )}
@@ -85,18 +75,26 @@ const HorizontalAxisContainer: Component<HorizontalAxisContainerProps> = (props)
   );
 };
 
-type HorizontalAxisGraphicsProps = {
+type AxisGraphicsProps = {
   axisContainer: Container;
+  orientation: AxisModel["orientation"];
 };
 
-const HorizontalAxisGraphics: Component<HorizontalAxisGraphicsProps> = (props) => {
+const AxisGraphics: Component<AxisGraphicsProps> = (props) => {
   const app = usePixiApp();
-  const theme = useBoardTheme();
 
-  const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
+  const graphics = new Graphics();
 
-  const drawGraphics = (width = window.outerWidth) => {
-    graphics.rect(0, 0, width, 100).fill({ color: 0xaabbcc });
+  const drawGraphics = (screenWidth?: number, screenHeight?: number) => {
+    graphics.clear();
+
+    if (props.orientation === "vertical") {
+      graphics.rect(0, 0, AXIS_OFFSET, screenHeight ?? window.outerHeight);
+    } else {
+      graphics.rect(0, 0, screenWidth ?? window.outerWidth, AXIS_OFFSET);
+    }
+
+    graphics.fill({ color: 0xaabbcc });
   };
 
   createEffect(() => {
@@ -124,81 +122,28 @@ const HorizontalAxisGraphics: Component<HorizontalAxisGraphicsProps> = (props) =
   return null;
 };
 
-type HorizontalAxisItemGraphicsProps = {
-  axisContainer: Container;
-  axis: AxisModel;
-  positionX?: number;
-};
-
-const HorizontalAxisItemGraphics: Component<HorizontalAxisItemGraphicsProps> = (props) => {
-  const theme = useBoardTheme();
-
-  const transform = useTransformState();
-  const transformPoint = useTransformPoint();
-
-  const itemContainer = new Container();
-  const graphics = new Graphics();
-
-  createEffect(() => {
-    itemContainer.zIndex = theme().axisContainerZIndex;
-  });
-
-  createEffect(() => {
-    const transformValue = transform();
-    graphics.clear();
-    graphics.rect(0, 0, props.axis.size * transformValue.scale(), 100).fill({ color: 0x11dd99 });
-  });
-
-  createEffect(() => {
-    itemContainer.x = transformPoint({ x: props.positionX ?? 0, y: 0 }).x;
-  });
-
-  onMount(() => {
-    itemContainer.addChild(graphics);
-    props.axisContainer.addChild(itemContainer);
-  });
-
-  onCleanup(() => {
-    itemContainer.removeChild(graphics);
-    props.axisContainer.removeChild(itemContainer);
-  });
-
-  return <AxisNameText axis={props.axis} itemContainer={itemContainer} />;
-};
-
 type VerticalAxisContainerProps = {
   axisContainer: Container;
+  collection: AxisModel[];
+  positions: number[];
 };
 
 export const VerticalAxisContainer: Component<VerticalAxisContainerProps> = (props) => {
-  const boardId = useBoardId();
-
-  const collection = useLiveQuery((q) =>
-    q
-      .from({ axis: axisCollection })
-      .where(({ axis }) => and(eq(axis.boardId, boardId()), eq(axis.orientation, "vertical"))),
-  );
-
-  const positions = createMemo(() => getPositions(collection.data));
-
   return (
     <>
-      <For each={positions()}>
-        {(position) => (
-          <AxisGridItem
-            axisContainer={props.axisContainer}
-            orientation="vertical"
-            position={position}
-          />
-        )}
-      </For>
-      <VerticalAxisGraphics axisContainer={props.axisContainer} />
-      <For each={collection.data}>
+      <AxisGrid
+        axisContainer={props.axisContainer}
+        orientation="vertical"
+        positions={props.positions}
+      />
+      <AxisGraphics axisContainer={props.axisContainer} orientation="vertical" />
+      <For each={props.collection}>
         {(axis, index) => (
-          <VerticalAxisItemGraphics
-            positionY={positions().at(index())}
+          <AxisItemGraphics
             axis={axis}
             axisContainer={props.axisContainer}
+            position={props.positions.at(index())}
+            orientation="vertical"
           />
         )}
       </For>
@@ -206,55 +151,14 @@ export const VerticalAxisContainer: Component<VerticalAxisContainerProps> = (pro
   );
 };
 
-type VerticalAxisGraphicsProps = {
-  axisContainer: Container;
-};
-
-const VerticalAxisGraphics: Component<VerticalAxisGraphicsProps> = (props) => {
-  const app = usePixiApp();
-  const theme = useBoardTheme();
-
-  const graphics = new Graphics({ zIndex: theme().axisContainerZIndex });
-
-  const drawGraphics = (height = window.outerHeight) => {
-    graphics.rect(0, 0, 100, height).fill({ color: 0xccbbaa });
-  };
-
-  createEffect(() => {
-    drawGraphics();
-  });
-
-  createEffect(() => {
-    const listener = (_screenWidth: number, screenHeigth: number) => {
-      drawGraphics(screenHeigth);
-    };
-    app.renderer?.on("resize", listener);
-    return () => {
-      app.renderer?.off("resize", listener);
-    };
-  });
-
-  onMount(() => {
-    props.axisContainer.addChild(graphics);
-  });
-
-  onCleanup(() => {
-    props.axisContainer.removeChild(graphics);
-    graphics.destroy();
-  });
-
-  return null;
-};
-
-type VerticalAxisItemGraphicsProps = {
+type AxisItemGraphicsProps = {
   axisContainer: Container;
   axis: AxisModel;
-  positionY?: number;
+  position?: number;
+  orientation: AxisModel["orientation"];
 };
 
-const VerticalAxisItemGraphics: Component<VerticalAxisItemGraphicsProps> = (props) => {
-  const theme = useBoardTheme();
-
+const AxisItemGraphics: Component<AxisItemGraphicsProps> = (props) => {
   const transform = useTransformState();
   const transformPoint = useTransformPoint();
 
@@ -262,17 +166,29 @@ const VerticalAxisItemGraphics: Component<VerticalAxisItemGraphicsProps> = (prop
   const graphics = new Graphics();
 
   createEffect(() => {
-    itemContainer.zIndex = theme().axisContainerZIndex;
-  });
-
-  createEffect(() => {
     const transformValue = transform();
     graphics.clear();
-    graphics.rect(0, 0, 100, props.axis.size * transformValue.scale()).fill({ color: 0xffeedd });
+
+    if (props.orientation === "vertical") {
+      graphics.rect(0, 0, AXIS_OFFSET, props.axis.size * transformValue.scale());
+    } else {
+      graphics.rect(0, 0, props.axis.size * transformValue.scale(), AXIS_OFFSET);
+    }
+
+    graphics.fill({ color: 0xffeedd });
   });
 
   createEffect(() => {
-    itemContainer.y = transformPoint({ x: 0, y: props.positionY ?? 0 }).y;
+    const point = transformPoint({
+      x: (props.position ?? 0) + AXIS_OFFSET,
+      y: (props.position ?? 0) + AXIS_OFFSET,
+    });
+
+    if (props.orientation === "vertical") {
+      itemContainer.y = point.y;
+    } else {
+      itemContainer.x = point.x;
+    }
   });
 
   onMount(() => {
@@ -313,12 +229,32 @@ const AxisNameText: Component<AxisNameTextProps> = (props) => {
 };
 
 type AxisGridProps = {
+  axisContainer: Container;
+  orientation: AxisModel["orientation"];
+  positions: number[];
+};
+
+export const AxisGrid: Component<AxisGridProps> = (props) => {
+  return (
+    <For each={props.positions}>
+      {(position) => (
+        <AxisGridItem
+          axisContainer={props.axisContainer}
+          orientation={props.orientation}
+          position={position}
+        />
+      )}
+    </For>
+  );
+};
+
+type AxisGridItemProps = {
   position: number;
   orientation: AxisModel["orientation"];
   axisContainer: Container;
 };
 
-const AxisGridItem: Component<AxisGridProps> = (props) => {
+const AxisGridItem: Component<AxisGridItemProps> = (props) => {
   const transformPoint = useTransformPoint();
 
   const graphics = new Graphics();
@@ -326,23 +262,18 @@ const AxisGridItem: Component<AxisGridProps> = (props) => {
   createEffect(() => {
     graphics.clear();
 
-    const position = transformPoint({ x: props.position, y: props.position });
+    const position = transformPoint({
+      x: props.position + AXIS_OFFSET,
+      y: props.position + AXIS_OFFSET,
+    });
 
     if (props.orientation === "horizontal") {
-      graphics
-        .moveTo(position.x, 0)
-        .lineTo(position.x, window.outerHeight)
-        .fill({ color: 0x77aa33 })
-        .stroke({ color: 0x66bb44 });
+      graphics.moveTo(position.x, 0).lineTo(position.x, window.outerHeight);
+    } else {
+      graphics.moveTo(0, position.y).lineTo(window.outerWidth, position.y);
     }
 
-    if (props.orientation === "vertical") {
-      graphics
-        .moveTo(0, position.y)
-        .lineTo(window.outerWidth, position.y)
-        .fill({ color: 0x77aa33 })
-        .stroke({ color: 0x66bb44 });
-    }
+    graphics.fill({ color: 0x77aa33 }).stroke({ color: 0x66bb44 });
   });
 
   onMount(() => {

@@ -62,7 +62,7 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
   });
 
   createEffect(() => {
-    title.text = `${props.task.title}\n${props.task.description}\n${props.task.estimate}`;
+    title.text = `${props.task.title}\n${props.task.description}\n${props.task.estimate}\nX:${props.task.axisX}\nY:${props.task.axisY}`;
   });
 
   onMount(() => {
@@ -75,7 +75,6 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
     taskContainer.removeChild(graphics);
     taskContainer.removeChild(title);
     container.removeChild(taskContainer);
-    graphics.destroy();
   });
 
   useDragObject({

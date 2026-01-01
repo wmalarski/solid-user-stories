@@ -6,6 +6,7 @@ import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { Button } from "~/ui/button/button";
 import { PlusIcon } from "~/ui/icons/plus-icon";
 import { useBoardId } from "../contexts/board-context";
+import { AXIS_OFFSET } from "../utils/constants";
 import { ToolContainer } from "./tool-container";
 
 export const InsertHorizontalAxisItemButton: Component = () => {
@@ -53,8 +54,8 @@ const InsertAxisItemButton: Component<InsertAxisItemButtonProps> = (props) => {
       description: `Description:${taskId}`,
       estimate: 1,
       id: taskId,
-      positionX: 100,
-      positionY: 100,
+      positionX: AXIS_OFFSET,
+      positionY: AXIS_OFFSET,
       title: `Title:${taskId}`,
     });
   };
