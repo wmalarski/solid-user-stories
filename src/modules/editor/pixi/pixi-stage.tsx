@@ -1,5 +1,6 @@
 import type { Component } from "solid-js";
 import { ZoomBar } from "../components/zoom-bar";
+import { EdgeDrawingStateContextProvider } from "../contexts/edge-drawing-context";
 import { TransformStateProvider } from "../contexts/transform-state";
 import { BoardThemeProvider } from "./board-theme";
 import { PixiAppProvider } from "./pixi-app";
@@ -14,7 +15,9 @@ export const PixiStage: Component<PixiStageProps> = (props) => {
     <BoardThemeProvider>
       <PixiAppProvider canvas={props.canvas}>
         <TransformStateProvider>
-          <StoriesBoard />
+          <EdgeDrawingStateContextProvider>
+            <StoriesBoard />
+          </EdgeDrawingStateContextProvider>
           <ZoomBar />
         </TransformStateProvider>
       </PixiAppProvider>

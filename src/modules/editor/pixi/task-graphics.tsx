@@ -1,7 +1,11 @@
+import type { FederatedMouseEvent } from "pixi.js";
 import { Container, Graphics, Text, TextStyle } from "pixi.js";
 import { createEffect, onCleanup, onMount, type Component } from "solid-js";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
+import type { TaskHandleType } from "../contexts/edge-drawing-context";
+import { useEdgeDrawingContext } from "../contexts/edge-drawing-context";
+import { RIGHT_BUTTON } from "../utils/constants";
 import { useBoardTheme } from "./board-theme";
 import { usePixiContainer } from "./pixi-app";
 import { useDragObject } from "./use-drag-object";
@@ -67,29 +71,33 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
 
   return (
     <>
-      <TaskHandle positionX={0} taskContainer={taskContainer} />
-      <TaskHandle positionX={TASK_GRPAHICS_WIDTH} taskContainer={taskContainer} />
+      <TaskHandle task={props.task} handle="left" taskContainer={taskContainer} />
+      <TaskHandle task={props.task} handle="right" taskContainer={taskContainer} />
     </>
   );
 };
 
 type TaskHandleProps = {
   taskContainer: Container;
-  positionX: number;
+  task: TaskModel;
+  handle: TaskHandleType;
 };
 
 const TaskHandle: Component<TaskHandleProps> = (props) => {
   const theme = useBoardTheme();
 
+  const edgeDrawing = useEdgeDrawingContext();
+
   const graphics = new Graphics();
 
   createEffect(() => {
     const handleOffset = TASK_HANDLE_SIZE / 2;
+    const positionX = props.handle === "left" ? 0 : TASK_GRPAHICS_WIDTH;
 
     graphics.clear();
     graphics
       .rect(
-        props.positionX - handleOffset,
+        positionX - handleOffset,
         TASK_GRPAHICS_HEIGHT / 2 - handleOffset,
         TASK_HANDLE_SIZE,
         TASK_HANDLE_SIZE,
@@ -103,6 +111,78 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
 
   onCleanup(() => {
     props.taskContainer.removeChild(graphics);
+  });
+
+  const onPointerUp = (event: FederatedMouseEvent) => {
+    // const parent = args.displayObject.parent;
+
+    if (event.button === RIGHT_BUTTON) {
+      return;
+    }
+
+    event.stopPropagation();
+
+    const edgeDrawingValue = edgeDrawing();
+
+    const source = edgeDrawingValue.source();
+
+    console.log("[onPointerUp]", props.task, source);
+
+    edgeDrawingValue.setSource(null);
+
+    // const transform = parent.worldTransform;
+    // const inverted = transform.applyInverse(event.global);
+
+    // setShift(subtractPoint(inverted, args.displayObject));
+
+    // parent.on("pointermove", onDragMove);
+    // parent.once("pointerup", onDragEnd);
+    // parent.once("pointerupoutside", onDragEnd);
+
+    // args.onDragStart?.(event);
+
+    // app.canvas.style.cursor = "grab";
+  };
+
+  const onPointerDown = (event: FederatedMouseEvent) => {
+    // const parent = args.displayObject.parent;
+
+    if (event.button === RIGHT_BUTTON) {
+      return;
+    }
+
+    event.stopPropagation();
+
+    const edgeDrawingValue = edgeDrawing();
+
+    edgeDrawingValue.setSource(
+      (source) => source ?? { handle: props.handle, taskId: props.task.id },
+    );
+
+    console.log("[onPointerDown]", props.task);
+
+    // const transform = parent.worldTransform;
+    // const inverted = transform.applyInverse(event.global);
+
+    // setShift(subtractPoint(inverted, args.displayObject));
+
+    // parent.on("pointermove", onDragMove);
+    // parent.once("pointerup", onDragEnd);
+    // parent.once("pointerupoutside", onDragEnd);
+
+    // args.onDragStart?.(event);
+
+    // app.canvas.style.cursor = "grab";
+  };
+
+  onMount(() => {
+    graphics.on("pointerdown", onPointerDown);
+    graphics.on("pointerup", onPointerUp);
+  });
+
+  onCleanup(() => {
+    graphics.off("pointerdown", onPointerDown);
+    graphics.off("pointerup", onPointerUp);
   });
 
   return null;

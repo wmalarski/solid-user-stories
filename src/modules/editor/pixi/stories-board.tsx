@@ -11,8 +11,8 @@ export const StoriesBoard: Component = () => {
 
   return (
     <>
-      <TaskGraphicsList />
       <AxisContainer />
+      <TaskGraphicsList />
     </>
   );
 };
