@@ -4,7 +4,7 @@ import { createEffect, createMemo, For, onCleanup, onMount, type Component } fro
 import { axisCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { useBoardId } from "../contexts/board-context";
-import { useTransformState } from "../contexts/transform-state";
+import { useTransformPoint, useTransformState } from "../contexts/transform-state";
 import { useBoardTheme } from "./board-theme";
 import { usePixiApp } from "./pixi-app";
 
@@ -134,6 +134,7 @@ const HorizontalAxisItemGraphics: Component<HorizontalAxisItemGraphicsProps> = (
   const theme = useBoardTheme();
 
   const transform = useTransformState();
+  const transformPoint = useTransformPoint();
 
   const itemContainer = new Container();
   const graphics = new Graphics();
@@ -149,8 +150,7 @@ const HorizontalAxisItemGraphics: Component<HorizontalAxisItemGraphicsProps> = (
   });
 
   createEffect(() => {
-    const transformValue = transform();
-    itemContainer.x = transformValue.x() + (props.positionX ?? 0) * transformValue.scale();
+    itemContainer.x = transformPoint({ x: props.positionX ?? 0, y: 0 }).x;
   });
 
   onMount(() => {
@@ -256,6 +256,7 @@ const VerticalAxisItemGraphics: Component<VerticalAxisItemGraphicsProps> = (prop
   const theme = useBoardTheme();
 
   const transform = useTransformState();
+  const transformPoint = useTransformPoint();
 
   const itemContainer = new Container();
   const graphics = new Graphics();
@@ -271,8 +272,7 @@ const VerticalAxisItemGraphics: Component<VerticalAxisItemGraphicsProps> = (prop
   });
 
   createEffect(() => {
-    const transformValue = transform();
-    itemContainer.y = transformValue.y() + (props.positionY ?? 0) * transformValue.scale();
+    itemContainer.y = transformPoint({ x: 0, y: props.positionY ?? 0 }).y;
   });
 
   onMount(() => {
@@ -319,31 +319,27 @@ type AxisGridProps = {
 };
 
 const AxisGridItem: Component<AxisGridProps> = (props) => {
-  const transform = useTransformState();
+  const transformPoint = useTransformPoint();
 
   const graphics = new Graphics();
 
   createEffect(() => {
-    const transformValue = transform();
+    graphics.clear();
+
+    const position = transformPoint({ x: props.position, y: props.position });
 
     if (props.orientation === "horizontal") {
-      const xPosition = transformValue.x() + props.position * transformValue.scale();
-
-      graphics.clear();
       graphics
-        .moveTo(xPosition, 0)
-        .lineTo(xPosition, window.outerHeight)
+        .moveTo(position.x, 0)
+        .lineTo(position.x, window.outerHeight)
         .fill({ color: 0x77aa33 })
         .stroke({ color: 0x66bb44 });
     }
 
     if (props.orientation === "vertical") {
-      const yPosition = transformValue.y() + props.position * transformValue.scale();
-
-      graphics.clear();
       graphics
-        .moveTo(0, yPosition)
-        .lineTo(window.outerWidth, yPosition)
+        .moveTo(0, position.y)
+        .lineTo(window.outerWidth, position.y)
         .fill({ color: 0x77aa33 })
         .stroke({ color: 0x66bb44 });
     }

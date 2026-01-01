@@ -80,3 +80,16 @@ export const TransformStateProvider: Component<ParentProps> = (props) => {
     <TransformStateContext.Provider value={value}>{props.children}</TransformStateContext.Provider>
   );
 };
+
+export const useTransformPoint = () => {
+  const transform = useTransformState();
+
+  return (point: Point2D) => {
+    const value = transform();
+    const scale = value.scale();
+    return {
+      x: point.x * scale + value.x(),
+      y: point.y * scale + value.y(),
+    };
+  };
+};
