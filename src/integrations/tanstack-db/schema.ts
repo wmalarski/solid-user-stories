@@ -15,6 +15,7 @@ export const TaskSchema = v.object({
 
 export const EdgeSchema = v.object({
   boardId: v.string(),
+  breakX: v.number(),
   id: v.string(),
   source: v.string(),
   target: v.string(),

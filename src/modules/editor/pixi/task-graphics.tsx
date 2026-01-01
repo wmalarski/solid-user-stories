@@ -1,9 +1,14 @@
 import { type FederatedMouseEvent, Container, Graphics, Text, TextStyle } from "pixi.js";
 import { type Component, createEffect, createMemo, onCleanup, onMount, Show } from "solid-js";
-import { taskCollection } from "~/integrations/tanstack-db/collections";
+import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
+import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
-import type { SourceState } from "../contexts/edge-drawing-context";
-import { type TaskHandleType, useEdgeDrawingContext } from "../contexts/edge-drawing-context";
+import { useBoardId } from "../contexts/board-context";
+import {
+  type SourceState,
+  type TaskHandleType,
+  useEdgeDrawingContext,
+} from "../contexts/edge-drawing-context";
 import { RIGHT_BUTTON } from "../utils/constants";
 import { useBoardTheme } from "./board-theme";
 import { usePixiContainer } from "./pixi-app";
@@ -95,8 +100,20 @@ type EdgeDrawingListenerProps = {
 };
 
 const EdgeDrawingListener: Component<EdgeDrawingListenerProps> = (props) => {
+  const boardId = useBoardId();
+
   const onPointerUp = (event: FederatedMouseEvent) => {
-    console.log("[TaskGraphics-onPointerUp]", props.task, event, props.source);
+    if (event.button === RIGHT_BUTTON) {
+      return;
+    }
+
+    edgeCollection.insert({
+      boardId: boardId(),
+      breakX: (props.source.positionX + event.x) / 2,
+      id: createId(),
+      source: props.source.taskId,
+      target: props.task.id,
+    });
   };
 
   onMount(() => {

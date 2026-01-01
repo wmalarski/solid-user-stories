@@ -1,5 +1,6 @@
 import { Graphics, type FederatedPointerEvent } from "pixi.js";
-import { onCleanup, onMount, Show, type Component } from "solid-js";
+import { createEffect, onCleanup, onMount, Show, type Component } from "solid-js";
+import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { useEdgeDrawingContext, type SourceState } from "../contexts/edge-drawing-context";
 import { useTransformPoint } from "../contexts/transform-state";
 import { useBoardTheme } from "./board-theme";
@@ -54,6 +55,38 @@ const DrawingEdgeGraphicsContent: Component<DrawingEdgeGraphicsContentProps> = (
   onCleanup(() => {
     container.off("pointerup", onPointerUp);
     container.off("pointermove", onPointerMove);
+    container.removeChild(graphics);
+  });
+
+  return null;
+};
+
+type EdgeGraphicsProps = {
+  edge: EdgeModel;
+  source: TaskModel;
+  target: TaskModel;
+};
+
+export const EdgeGraphics: Component<EdgeGraphicsProps> = (props) => {
+  const theme = useBoardTheme();
+
+  const container = usePixiContainer();
+
+  const graphics = new Graphics();
+
+  createEffect(() => {
+    graphics.clear();
+    graphics
+      .moveTo(props.source.positionX, props.source.positionY)
+      .lineTo(props.target.positionX, props.target.positionY)
+      .stroke({ color: theme().edgeColor });
+  });
+
+  onMount(() => {
+    container.addChild(graphics);
+  });
+
+  onCleanup(() => {
     container.removeChild(graphics);
   });
 
