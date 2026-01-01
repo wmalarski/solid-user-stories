@@ -9,6 +9,7 @@ import {
   type TaskHandleType,
   useEdgeDrawingContext,
 } from "../contexts/edge-drawing-context";
+import { useIsSelected, useSelectionContext } from "../contexts/selection-context";
 import {
   RIGHT_BUTTON,
   TASK_GRPAHICS_HEIGHT,
@@ -30,6 +31,9 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
 
   const container = usePixiContainer();
 
+  const isSelected = useIsSelected(() => props.task.id);
+  const selection = useSelectionContext();
+
   const edgeDrawing = useEdgeDrawingContext();
 
   const taskContainer = new Container();
@@ -39,15 +43,17 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
   const title = new Text({ style });
 
   createEffect(() => {
+    const isSelectedValue = isSelected();
+    const themeValue = theme();
+
     graphics.clear();
     graphics
       .rect(0, 0, TASK_GRPAHICS_WIDTH, TASK_GRPAHICS_HEIGHT)
-      .fill({ color: theme().taskBackgroundColor });
-  });
+      .fill({ color: themeValue.taskBackgroundColor });
 
-  createEffect(() => {
-    taskContainer.label = `CONTAINER:${props.task}`;
-    graphics.label = `GRAPHICS:${props.task}`;
+    if (isSelectedValue) {
+      graphics.stroke({ color: themeValue.selectionColor, width: 2 });
+    }
   });
 
   createEffect(() => {
@@ -79,6 +85,9 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
         draft.positionX = taskContainer.x;
         draft.positionY = taskContainer.y;
       });
+    },
+    onDragStart: () => {
+      selection().setSelection([props.task.id]);
     },
   });
 

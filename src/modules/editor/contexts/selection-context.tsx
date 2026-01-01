@@ -46,6 +46,11 @@ export const useSelectionContext = () => {
   return useContext(SelectionContext);
 };
 
+export const useIsSelected = (elementId: Accessor<string>) => {
+  const context = useSelectionContext();
+  return createMemo(() => context().selection().includes(elementId()));
+};
+
 export const SelectionContextProvider: Component<ParentProps> = (props) => {
   const value = createMemo(() => createSelectionContext());
 

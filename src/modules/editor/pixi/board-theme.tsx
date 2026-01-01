@@ -13,6 +13,7 @@ const createBoardThemeContext = () => {
     backgroundDarkColor: 0x1d1d21,
     edgeColor: 0xee3322,
     edgeDrawingColor: 0xee1122,
+    selectionColor: 0xeeff33,
     taskBackgroundColor: 0x998877,
     taskHandleBackgroundColor: 0x228877,
     // cursorContainerZIndex: 5,
