@@ -22,22 +22,18 @@ const createEdgeDrawingContext = () => {
   return { setSource, source };
 };
 
-const EdgeDrawingStateContext = createContext<
-  Accessor<ReturnType<typeof createEdgeDrawingContext>>
->(() => {
-  throw new Error("EdgeDrawingStateContext not defined");
-});
+const EdgeDrawingContext = createContext<Accessor<ReturnType<typeof createEdgeDrawingContext>>>(
+  () => {
+    throw new Error("EdgeDrawingContext not defined");
+  },
+);
 
 export const useEdgeDrawingContext = () => {
-  return useContext(EdgeDrawingStateContext);
+  return useContext(EdgeDrawingContext);
 };
 
-export const EdgeDrawingStateContextProvider: Component<ParentProps> = (props) => {
+export const EdgeDrawingContextProvider: Component<ParentProps> = (props) => {
   const value = createMemo(() => createEdgeDrawingContext());
 
-  return (
-    <EdgeDrawingStateContext.Provider value={value}>
-      {props.children}
-    </EdgeDrawingStateContext.Provider>
-  );
+  return <EdgeDrawingContext.Provider value={value}>{props.children}</EdgeDrawingContext.Provider>;
 };
