@@ -5,19 +5,21 @@ import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { useBoardId } from "../contexts/board-context";
 import {
-  type SourceState,
+  type DrawingState,
   type TaskHandleType,
   useEdgeDrawingContext,
 } from "../contexts/edge-drawing-context";
-import { RIGHT_BUTTON } from "../utils/constants";
+import {
+  RIGHT_BUTTON,
+  TASK_GRPAHICS_HEIGHT,
+  TASK_GRPAHICS_WIDTH,
+  TASK_HANDLE_SIZE,
+} from "../utils/constants";
 import { useBoardTheme } from "./board-theme";
 import { usePixiContainer } from "./pixi-app";
 import { useDragObject } from "./use-drag-object";
 
-const TASK_GRPAHICS_WIDTH = 200;
-const TASK_GRPAHICS_HEIGHT = 100;
 const TASK_TEXT_FONT_SIZE = 16;
-const TASK_HANDLE_SIZE = 10;
 
 type TaskGraphicsProps = {
   task: TaskModel;
@@ -96,7 +98,7 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
 type EdgeDrawingListenerProps = {
   taskContainer: Container;
   task: TaskModel;
-  source: SourceState;
+  source: DrawingState;
 };
 
 const EdgeDrawingListener: Component<EdgeDrawingListenerProps> = (props) => {
@@ -107,12 +109,14 @@ const EdgeDrawingListener: Component<EdgeDrawingListenerProps> = (props) => {
       return;
     }
 
+    const isSource = props.source.handle === "left";
+
     edgeCollection.insert({
       boardId: boardId(),
       breakX: (props.source.positionX + event.x) / 2,
       id: createId(),
-      source: props.source.taskId,
-      target: props.task.id,
+      source: isSource ? props.task.id : props.source.taskId,
+      target: isSource ? props.source.taskId : props.task.id,
     });
   };
 

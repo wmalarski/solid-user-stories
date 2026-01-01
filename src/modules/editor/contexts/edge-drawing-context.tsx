@@ -10,7 +10,7 @@ import {
 
 export type TaskHandleType = "left" | "right";
 
-export type SourceState = {
+export type DrawingState = {
   taskId: string;
   handle: TaskHandleType;
   positionX: number;
@@ -18,7 +18,7 @@ export type SourceState = {
 };
 
 const createEdgeDrawingContext = () => {
-  const [source, setSource] = createSignal<SourceState | null>(null);
+  const [source, setSource] = createSignal<DrawingState | null>(null);
   return { setSource, source };
 };
 

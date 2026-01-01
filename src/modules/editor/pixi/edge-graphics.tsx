@@ -1,8 +1,9 @@
 import { Graphics, type FederatedPointerEvent } from "pixi.js";
 import { createEffect, onCleanup, onMount, Show, type Component } from "solid-js";
 import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
-import { useEdgeDrawingContext, type SourceState } from "../contexts/edge-drawing-context";
+import { useEdgeDrawingContext, type DrawingState } from "../contexts/edge-drawing-context";
 import { useTransformPoint } from "../contexts/transform-state";
+import { TASK_GRPAHICS_HEIGHT, TASK_GRPAHICS_WIDTH } from "../utils/constants";
 import { useBoardTheme } from "./board-theme";
 import { usePixiContainer } from "./pixi-app";
 
@@ -17,7 +18,7 @@ export const DrawingEdgeGraphics: Component = () => {
 };
 
 type DrawingEdgeGraphicsContentProps = {
-  source: SourceState;
+  source: DrawingState;
 };
 
 const DrawingEdgeGraphicsContent: Component<DrawingEdgeGraphicsContentProps> = (props) => {
@@ -75,10 +76,12 @@ export const EdgeGraphics: Component<EdgeGraphicsProps> = (props) => {
   const graphics = new Graphics();
 
   createEffect(() => {
+    const heightOffset = TASK_GRPAHICS_HEIGHT / 2;
+
     graphics.clear();
     graphics
-      .moveTo(props.source.positionX, props.source.positionY)
-      .lineTo(props.target.positionX, props.target.positionY)
+      .moveTo(props.source.positionX + TASK_GRPAHICS_WIDTH, props.source.positionY + heightOffset)
+      .lineTo(props.target.positionX, props.target.positionY + heightOffset)
       .stroke({ color: theme().edgeColor });
   });
 
