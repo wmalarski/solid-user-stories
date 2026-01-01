@@ -3,6 +3,7 @@ import { createEffect, For, onCleanup, onMount, type Component } from "solid-js"
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { useTransformPoint, useTransformState } from "../contexts/transform-state";
 import { AXIS_CONTAINER_ZINDEX, AXIS_OFFSET } from "../utils/constants";
+import { useBoardTheme } from "./board-theme";
 import { usePixiApp } from "./pixi-app";
 
 type AxisContainerProps = {
@@ -83,6 +84,8 @@ type AxisGraphicsProps = {
 const AxisGraphics: Component<AxisGraphicsProps> = (props) => {
   const app = usePixiApp();
 
+  const theme = useBoardTheme();
+
   const graphics = new Graphics();
 
   const drawGraphics = (screenWidth?: number, screenHeight?: number) => {
@@ -94,7 +97,7 @@ const AxisGraphics: Component<AxisGraphicsProps> = (props) => {
       graphics.rect(0, 0, screenWidth ?? window.outerWidth, AXIS_OFFSET);
     }
 
-    graphics.fill({ color: 0xaabbcc });
+    graphics.fill({ color: theme().axisBoackgroundColor });
   };
 
   createEffect(() => {
@@ -159,6 +162,8 @@ type AxisItemGraphicsProps = {
 };
 
 const AxisItemGraphics: Component<AxisItemGraphicsProps> = (props) => {
+  const theme = useBoardTheme();
+
   const transform = useTransformState();
   const transformPoint = useTransformPoint();
 
@@ -175,7 +180,7 @@ const AxisItemGraphics: Component<AxisItemGraphicsProps> = (props) => {
       graphics.rect(0, 0, props.axis.size * transformValue.scale(), AXIS_OFFSET);
     }
 
-    graphics.fill({ color: 0xffeedd });
+    graphics.fill({ color: theme().axisItemBoackgroundColor });
   });
 
   createEffect(() => {
@@ -255,6 +260,8 @@ type AxisGridItemProps = {
 };
 
 const AxisGridItem: Component<AxisGridItemProps> = (props) => {
+  const theme = useBoardTheme();
+
   const transformPoint = useTransformPoint();
 
   const graphics = new Graphics();
@@ -267,13 +274,13 @@ const AxisGridItem: Component<AxisGridItemProps> = (props) => {
       y: props.position + AXIS_OFFSET,
     });
 
-    if (props.orientation === "horizontal") {
-      graphics.moveTo(position.x, 0).lineTo(position.x, window.outerHeight);
-    } else {
+    if (props.orientation === "vertical") {
       graphics.moveTo(0, position.y).lineTo(window.outerWidth, position.y);
+    } else {
+      graphics.moveTo(position.x, 0).lineTo(position.x, window.outerHeight);
     }
 
-    graphics.fill({ color: 0x77aa33 }).stroke({ color: 0x66bb44 });
+    graphics.stroke({ color: theme().axisGridColor });
   });
 
   onMount(() => {

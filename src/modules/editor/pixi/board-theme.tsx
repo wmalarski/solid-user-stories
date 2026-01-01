@@ -9,6 +9,9 @@ import {
 
 const createBoardThemeContext = () => {
   return {
+    axisBoackgroundColor: 0xaabbcc,
+    axisGridColor: 0x66bb44,
+    axisItemBoackgroundColor: 0xffeedd,
     backgroundDarkColor: 0x1d1d21,
     edgeColor: 0xee3322,
     edgeDrawingColor: 0xee1122,
