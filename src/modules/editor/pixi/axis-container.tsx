@@ -1,19 +1,13 @@
 import { Container, Graphics, Text, TextStyle } from "pixi.js";
 import { createEffect, For, onCleanup, onMount, type Component } from "solid-js";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
+import { useBoardContext } from "../contexts/board-context";
 import { useTransformPoint, useTransformState } from "../contexts/transform-state";
 import { AXIS_CONTAINER_ZINDEX, AXIS_OFFSET } from "../utils/constants";
 import { useBoardTheme } from "./board-theme";
 import { usePixiApp } from "./pixi-app";
 
-type AxisContainerProps = {
-  horizontal: AxisModel[];
-  horizontalPositions: number[];
-  vertical: AxisModel[];
-  verticalPositions: number[];
-};
-
-export const AxisContainer: Component<AxisContainerProps> = (props) => {
+export const AxisContainer: Component = () => {
   const app = usePixiApp();
 
   const axisContainer = new Container({
@@ -30,42 +24,28 @@ export const AxisContainer: Component<AxisContainerProps> = (props) => {
 
   return (
     <>
-      <AxisContent
-        collection={props.horizontal}
-        positions={props.horizontalPositions}
-        axisContainer={axisContainer}
-        orientation="horizontal"
-      />
-      <AxisContent
-        collection={props.vertical}
-        positions={props.verticalPositions}
-        axisContainer={axisContainer}
-        orientation="vertical"
-      />
+      <AxisContent axisContainer={axisContainer} orientation="horizontal" />
+      <AxisContent axisContainer={axisContainer} orientation="vertical" />
     </>
   );
 };
 
 type AxisContentProps = {
   axisContainer: Container;
-  collection: AxisModel[];
-  positions: number[];
   orientation: AxisModel["orientation"];
 };
 
 const AxisContent: Component<AxisContentProps> = (props) => {
+  const boardContext = useBoardContext();
+
   return (
     <>
-      <AxisGrid
-        axisContainer={props.axisContainer}
-        orientation={props.orientation}
-        positions={props.positions}
-      />
+      <AxisGrid axisContainer={props.axisContainer} orientation={props.orientation} />
       <AxisGraphics axisContainer={props.axisContainer} orientation={props.orientation} />
-      <For each={props.collection}>
+      <For each={boardContext().axis[props.orientation].axis}>
         {(axis, index) => (
           <AxisItemGraphics
-            position={props.positions.at(index())}
+            position={boardContext().axis[props.orientation].positions.at(index())}
             axis={axis}
             orientation={props.orientation}
             axisContainer={props.axisContainer}
@@ -123,35 +103,6 @@ const AxisGraphics: Component<AxisGraphicsProps> = (props) => {
   });
 
   return null;
-};
-
-type VerticalAxisContainerProps = {
-  axisContainer: Container;
-  collection: AxisModel[];
-  positions: number[];
-};
-
-export const VerticalAxisContainer: Component<VerticalAxisContainerProps> = (props) => {
-  return (
-    <>
-      <AxisGrid
-        axisContainer={props.axisContainer}
-        orientation="vertical"
-        positions={props.positions}
-      />
-      <AxisGraphics axisContainer={props.axisContainer} orientation="vertical" />
-      <For each={props.collection}>
-        {(axis, index) => (
-          <AxisItemGraphics
-            axis={axis}
-            axisContainer={props.axisContainer}
-            position={props.positions.at(index())}
-            orientation="vertical"
-          />
-        )}
-      </For>
-    </>
-  );
 };
 
 type AxisItemGraphicsProps = {
@@ -236,12 +187,13 @@ const AxisNameText: Component<AxisNameTextProps> = (props) => {
 type AxisGridProps = {
   axisContainer: Container;
   orientation: AxisModel["orientation"];
-  positions: number[];
 };
 
 export const AxisGrid: Component<AxisGridProps> = (props) => {
+  const boardContext = useBoardContext();
+
   return (
-    <For each={props.positions}>
+    <For each={boardContext().axis[props.orientation].positions}>
       {(position) => (
         <AxisGridItem
           axisContainer={props.axisContainer}
