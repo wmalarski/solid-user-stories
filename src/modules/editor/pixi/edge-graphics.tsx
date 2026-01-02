@@ -1,5 +1,5 @@
 import { Graphics, type FederatedMouseEvent, type FederatedPointerEvent } from "pixi.js";
-import { createEffect, onCleanup, onMount, Show, type Component } from "solid-js";
+import { createEffect, Show, type Component } from "solid-js";
 import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { useEdgeDrawingContext, type DrawingState } from "../contexts/edge-drawing-context";
 import { useIsSelected, useSelectionContext } from "../contexts/selection-context";
@@ -8,6 +8,7 @@ import { RIGHT_BUTTON, TASK_GRPAHICS_HEIGHT, TASK_GRPAHICS_WIDTH } from "../util
 import { useBoardTheme } from "./board-theme";
 import { usePixiContainer } from "./pixi-app";
 import { createMountAsChild } from "./utils/create-mount-as-child";
+import { createPointerListeners } from "./utils/create-pointer-listeners";
 
 export const DrawingEdgeGraphics: Component = () => {
   const edgeDrawing = useEdgeDrawingContext();
@@ -35,28 +36,19 @@ const DrawingEdgeGraphicsContent: Component<DrawingEdgeGraphicsContentProps> = (
   const graphics = new Graphics({ eventMode: "none" });
   createMountAsChild(container, graphics);
 
-  const onPointerMove = (event: FederatedPointerEvent) => {
-    const eventPosition = transformPoint(event);
+  createPointerListeners(container, {
+    onPointerMove: (event: FederatedPointerEvent) => {
+      const eventPosition = transformPoint(event);
 
-    graphics.clear();
-    graphics
-      .moveTo(props.source.positionX, props.source.positionY)
-      .lineTo(eventPosition.x, eventPosition.y)
-      .stroke({ color: theme().edgeDrawingColor });
-  };
-
-  const onPointerUp = (_event: FederatedPointerEvent) => {
-    edgeDrawing().setSource(null);
-  };
-
-  onMount(() => {
-    container.on("pointerup", onPointerUp);
-    container.on("pointermove", onPointerMove);
-  });
-
-  onCleanup(() => {
-    container.off("pointerup", onPointerUp);
-    container.off("pointermove", onPointerMove);
+      graphics.clear();
+      graphics
+        .moveTo(props.source.positionX, props.source.positionY)
+        .lineTo(eventPosition.x, eventPosition.y)
+        .stroke({ color: theme().edgeDrawingColor });
+    },
+    onPointerUp: () => {
+      edgeDrawing().setSource(null);
+    },
   });
 
   return null;
@@ -91,20 +83,14 @@ export const EdgeGraphics: Component<EdgeGraphicsProps> = (props) => {
       .stroke({ color: isSelectedValue ? themeValue.selectionColor : themeValue.edgeColor });
   });
 
-  const onPointerDown = (event: FederatedMouseEvent) => {
-    if (event.button === RIGHT_BUTTON) {
-      return;
-    }
+  createPointerListeners(graphics, {
+    onPointerDown: (event: FederatedMouseEvent) => {
+      if (event.button === RIGHT_BUTTON) {
+        return;
+      }
 
-    selection().setSelection([props.edge.id]);
-  };
-
-  onMount(() => {
-    graphics.on("pointerdown", onPointerDown);
-  });
-
-  onCleanup(() => {
-    graphics.off("pointerdown", onPointerDown);
+      selection().setSelection([props.edge.id]);
+    },
   });
 
   return null;

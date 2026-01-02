@@ -1,5 +1,5 @@
 import { type FederatedMouseEvent, Container, Graphics, Text, TextStyle } from "pixi.js";
-import { type Component, createEffect, createMemo, onCleanup, onMount, Show } from "solid-js";
+import { type Component, createEffect, createMemo, Show } from "solid-js";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
@@ -18,8 +18,9 @@ import {
 } from "../utils/constants";
 import { useBoardTheme } from "./board-theme";
 import { usePixiContainer } from "./pixi-app";
-import { useDragObject } from "./use-drag-object";
 import { createMountAsChild } from "./utils/create-mount-as-child";
+import { createObjectDrag } from "./utils/create-object-drag";
+import { createPointerListeners } from "./utils/create-pointer-listeners";
 
 const TASK_TEXT_FONT_SIZE = 16;
 
@@ -70,8 +71,7 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
     title.text = `${props.task.title}\n${props.task.description}\n${props.task.estimate}\nX:${props.task.axisX}\nY:${props.task.axisY}`;
   });
 
-  useDragObject({
-    displayObject: taskContainer,
+  createObjectDrag(taskContainer, {
     onDragEnd: () => {
       taskCollection.update(props.task.id, (draft) => {
         draft.positionX = taskContainer.x;
@@ -105,28 +105,22 @@ type EdgeDrawingListenerProps = {
 const EdgeDrawingListener: Component<EdgeDrawingListenerProps> = (props) => {
   const boardId = useBoardId();
 
-  const onPointerUp = (event: FederatedMouseEvent) => {
-    if (event.button === RIGHT_BUTTON) {
-      return;
-    }
+  createPointerListeners(props.taskContainer, {
+    onPointerUp: (event: FederatedMouseEvent) => {
+      if (event.button === RIGHT_BUTTON) {
+        return;
+      }
 
-    const isSource = props.source.handle === "left";
+      const isSource = props.source.handle === "left";
 
-    edgeCollection.insert({
-      boardId: boardId(),
-      breakX: (props.source.positionX + event.x) / 2,
-      id: createId(),
-      source: isSource ? props.task.id : props.source.taskId,
-      target: isSource ? props.source.taskId : props.task.id,
-    });
-  };
-
-  onMount(() => {
-    props.taskContainer.on("pointerup", onPointerUp);
-  });
-
-  onCleanup(() => {
-    props.taskContainer.off("pointerup", onPointerUp);
+      edgeCollection.insert({
+        boardId: boardId(),
+        breakX: (props.source.positionX + event.x) / 2,
+        id: createId(),
+        source: isSource ? props.task.id : props.source.taskId,
+        target: isSource ? props.source.taskId : props.task.id,
+      });
+    },
   });
 
   return null;
@@ -164,33 +158,27 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
       .fill({ color: theme().taskHandleBackgroundColor });
   });
 
-  const onPointerDown = (event: FederatedMouseEvent) => {
-    if (event.button === RIGHT_BUTTON) {
-      return;
-    }
+  createPointerListeners(graphics, {
+    onPointerDown: (event: FederatedMouseEvent) => {
+      if (event.button === RIGHT_BUTTON) {
+        return;
+      }
 
-    event.stopPropagation();
+      event.stopPropagation();
 
-    const edgeDrawingValue = edgeDrawing();
-    const { positionX, positionY } = localPosition();
+      const edgeDrawingValue = edgeDrawing();
+      const { positionX, positionY } = localPosition();
 
-    edgeDrawingValue.setSource(
-      (source) =>
-        source ?? {
-          handle: props.handle,
-          positionX: props.task.positionX + positionX,
-          positionY: props.task.positionY + positionY,
-          taskId: props.task.id,
-        },
-    );
-  };
-
-  onMount(() => {
-    graphics.on("pointerdown", onPointerDown);
-  });
-
-  onCleanup(() => {
-    graphics.off("pointerdown", onPointerDown);
+      edgeDrawingValue.setSource(
+        (source) =>
+          source ?? {
+            handle: props.handle,
+            positionX: props.task.positionX + positionX,
+            positionY: props.task.positionY + positionY,
+            taskId: props.task.id,
+          },
+      );
+    },
   });
 
   return null;
