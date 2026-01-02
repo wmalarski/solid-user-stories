@@ -10,6 +10,7 @@ import {
   useContext,
 } from "solid-js";
 import { useBoardTheme } from "./board-theme";
+import { createMountAsChild } from "./utils/create-mount-as-child";
 
 const PixiAppContext = createContext<Application>({} as unknown as Application);
 
@@ -39,6 +40,7 @@ export const PixiAppProvider: Component<PixiAppProviderProps> = (props) => {
   };
 
   const container = new Container({ hitArea });
+  createMountAsChild(app.stage, container);
 
   createResource(async () => {
     await app.init({
@@ -64,14 +66,6 @@ export const PixiAppProvider: Component<PixiAppProviderProps> = (props) => {
 
   onCleanup(() => {
     window.removeEventListener("resize", onResize);
-  });
-
-  onMount(() => {
-    app.stage.addChild(container);
-  });
-
-  onCleanup(() => {
-    app.stage.removeChild(container);
   });
 
   return (

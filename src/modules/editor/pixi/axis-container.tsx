@@ -1,26 +1,18 @@
 import { Container, Graphics, Text, TextStyle } from "pixi.js";
-import { createEffect, For, onCleanup, onMount, type Component } from "solid-js";
+import { createEffect, For, type Component } from "solid-js";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { useBoardContext } from "../contexts/board-context";
 import { useTransformPoint, useTransformState } from "../contexts/transform-state";
 import { AXIS_CONTAINER_ZINDEX, AXIS_OFFSET } from "../utils/constants";
 import { useBoardTheme } from "./board-theme";
 import { usePixiApp } from "./pixi-app";
+import { createMountAsChild } from "./utils/create-mount-as-child";
 
 export const AxisContainer: Component = () => {
   const app = usePixiApp();
 
-  const axisContainer = new Container({
-    zIndex: AXIS_CONTAINER_ZINDEX,
-  });
-
-  onMount(() => {
-    app.stage.addChild(axisContainer);
-  });
-
-  onCleanup(() => {
-    app.stage.removeChild(axisContainer);
-  });
+  const axisContainer = new Container({ zIndex: AXIS_CONTAINER_ZINDEX });
+  createMountAsChild(app.stage, axisContainer);
 
   return (
     <>
@@ -67,6 +59,7 @@ const AxisGraphics: Component<AxisGraphicsProps> = (props) => {
   const theme = useBoardTheme();
 
   const graphics = new Graphics();
+  createMountAsChild(props.axisContainer, graphics);
 
   const drawGraphics = (screenWidth?: number, screenHeight?: number) => {
     graphics.clear();
@@ -94,14 +87,6 @@ const AxisGraphics: Component<AxisGraphicsProps> = (props) => {
     };
   });
 
-  onMount(() => {
-    props.axisContainer.addChild(graphics);
-  });
-
-  onCleanup(() => {
-    props.axisContainer.removeChild(graphics);
-  });
-
   return null;
 };
 
@@ -119,7 +104,10 @@ const AxisItemGraphics: Component<AxisItemGraphicsProps> = (props) => {
   const transformPoint = useTransformPoint();
 
   const itemContainer = new Container();
+  createMountAsChild(props.axisContainer, itemContainer);
+
   const graphics = new Graphics();
+  createMountAsChild(itemContainer, graphics);
 
   createEffect(() => {
     const transformValue = transform();
@@ -147,16 +135,6 @@ const AxisItemGraphics: Component<AxisItemGraphicsProps> = (props) => {
     }
   });
 
-  onMount(() => {
-    itemContainer.addChild(graphics);
-    props.axisContainer.addChild(itemContainer);
-  });
-
-  onCleanup(() => {
-    itemContainer.removeChild(graphics);
-    props.axisContainer.removeChild(itemContainer);
-  });
-
   return <AxisNameText axis={props.axis} itemContainer={itemContainer} />;
 };
 
@@ -167,18 +145,12 @@ type AxisNameTextProps = {
 
 const AxisNameText: Component<AxisNameTextProps> = (props) => {
   const style = new TextStyle({ fontSize: 16 });
+
   const title = new Text({ style });
+  createMountAsChild(props.itemContainer, title);
 
   createEffect(() => {
     title.text = props.axis.name;
-  });
-
-  onMount(() => {
-    props.itemContainer.addChild(title);
-  });
-
-  onCleanup(() => {
-    props.itemContainer.removeChild(title);
   });
 
   return null;
@@ -217,6 +189,7 @@ const AxisGridItem: Component<AxisGridItemProps> = (props) => {
   const transformPoint = useTransformPoint();
 
   const graphics = new Graphics();
+  createMountAsChild(props.axisContainer, graphics);
 
   createEffect(() => {
     graphics.clear();
@@ -233,14 +206,6 @@ const AxisGridItem: Component<AxisGridItemProps> = (props) => {
     }
 
     graphics.stroke({ color: theme().axisGridColor });
-  });
-
-  onMount(() => {
-    props.axisContainer.addChild(graphics);
-  });
-
-  onCleanup(() => {
-    props.axisContainer.removeChild(graphics);
   });
 
   return null;

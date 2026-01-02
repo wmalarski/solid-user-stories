@@ -19,6 +19,7 @@ import {
 import { useBoardTheme } from "./board-theme";
 import { usePixiContainer } from "./pixi-app";
 import { useDragObject } from "./use-drag-object";
+import { createMountAsChild } from "./utils/create-mount-as-child";
 
 const TASK_TEXT_FONT_SIZE = 16;
 
@@ -37,10 +38,14 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
   const edgeDrawing = useEdgeDrawingContext();
 
   const taskContainer = new Container();
+  createMountAsChild(container, taskContainer);
+
   const graphics = new Graphics();
+  createMountAsChild(taskContainer, graphics);
 
   const style = new TextStyle({ fontSize: TASK_TEXT_FONT_SIZE });
   const title = new Text({ style });
+  createMountAsChild(taskContainer, title);
 
   createEffect(() => {
     const isSelectedValue = isSelected();
@@ -63,18 +68,6 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
 
   createEffect(() => {
     title.text = `${props.task.title}\n${props.task.description}\n${props.task.estimate}\nX:${props.task.axisX}\nY:${props.task.axisY}`;
-  });
-
-  onMount(() => {
-    taskContainer.addChild(graphics);
-    taskContainer.addChild(title);
-    container.addChild(taskContainer);
-  });
-
-  onCleanup(() => {
-    taskContainer.removeChild(graphics);
-    taskContainer.removeChild(title);
-    container.removeChild(taskContainer);
   });
 
   useDragObject({
@@ -151,6 +144,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   const edgeDrawing = useEdgeDrawingContext();
 
   const graphics = new Graphics();
+  createMountAsChild(props.taskContainer, graphics);
 
   const localPosition = createMemo(() => {
     const handleX = props.handle === "left" ? 0 : TASK_GRPAHICS_WIDTH;
@@ -168,14 +162,6 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
     graphics
       .rect(positionX - handleOffset, positionY - handleOffset, TASK_HANDLE_SIZE, TASK_HANDLE_SIZE)
       .fill({ color: theme().taskHandleBackgroundColor });
-  });
-
-  onMount(() => {
-    props.taskContainer.addChild(graphics);
-  });
-
-  onCleanup(() => {
-    props.taskContainer.removeChild(graphics);
   });
 
   const onPointerDown = (event: FederatedMouseEvent) => {

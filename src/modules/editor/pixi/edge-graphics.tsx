@@ -7,6 +7,7 @@ import { useTransformPoint } from "../contexts/transform-state";
 import { RIGHT_BUTTON, TASK_GRPAHICS_HEIGHT, TASK_GRPAHICS_WIDTH } from "../utils/constants";
 import { useBoardTheme } from "./board-theme";
 import { usePixiContainer } from "./pixi-app";
+import { createMountAsChild } from "./utils/create-mount-as-child";
 
 export const DrawingEdgeGraphics: Component = () => {
   const edgeDrawing = useEdgeDrawingContext();
@@ -31,9 +32,9 @@ const DrawingEdgeGraphicsContent: Component<DrawingEdgeGraphicsContentProps> = (
 
   const edgeDrawing = useEdgeDrawingContext();
 
-  const graphics = new Graphics({
-    eventMode: "none",
-  });
+  const graphics = new Graphics({ eventMode: "none" });
+  createMountAsChild(container, graphics);
+
   const onPointerMove = (event: FederatedPointerEvent) => {
     const eventPosition = transformPoint(event);
 
@@ -51,13 +52,11 @@ const DrawingEdgeGraphicsContent: Component<DrawingEdgeGraphicsContentProps> = (
   onMount(() => {
     container.on("pointerup", onPointerUp);
     container.on("pointermove", onPointerMove);
-    container.addChild(graphics);
   });
 
   onCleanup(() => {
     container.off("pointerup", onPointerUp);
     container.off("pointermove", onPointerMove);
-    container.removeChild(graphics);
   });
 
   return null;
@@ -78,6 +77,7 @@ export const EdgeGraphics: Component<EdgeGraphicsProps> = (props) => {
   const isSelected = useIsSelected(() => props.edge.id);
 
   const graphics = new Graphics();
+  createMountAsChild(container, graphics);
 
   createEffect(() => {
     const isSelectedValue = isSelected();
@@ -101,12 +101,10 @@ export const EdgeGraphics: Component<EdgeGraphicsProps> = (props) => {
 
   onMount(() => {
     graphics.on("pointerdown", onPointerDown);
-    container.addChild(graphics);
   });
 
   onCleanup(() => {
     graphics.off("pointerdown", onPointerDown);
-    container.removeChild(graphics);
   });
 
   return null;
