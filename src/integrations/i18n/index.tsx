@@ -13,6 +13,7 @@ const enDict = {
   board: {
     axis: {
       insertAxis: "Add axis",
+      name: "Name",
     },
     tasks: {
       insertTask: "Add task",

@@ -27,10 +27,7 @@ export const DialogTrigger: Component<DialogTriggerProps> = (props) => {
 
   const onClick: ComponentProps<"button">["onClick"] = (event) => {
     props.onClick?.(event);
-    const id = `#${forValue.for}`;
-    const dialog = document.querySelector<HTMLDialogElement>(id);
-
-    dialog?.showModal();
+    openDialog(forValue.for);
   };
 
   return <Button {...withoutFor} onClick={onClick} type="button" />;
@@ -81,4 +78,10 @@ export const DialogActions: Component<DialogActionsProps> = (props) => {
 
 export const closeDialog = (dialogId: string) => {
   document.querySelector<HTMLDialogElement>(`#${dialogId}`)?.close();
+};
+
+export const openDialog = (dialogId: string) => {
+  const id = `#${dialogId}`;
+  const dialog = document.querySelector<HTMLDialogElement>(id);
+  dialog?.showModal();
 };

@@ -1,36 +1,142 @@
-import type { Component } from "solid-js";
+import { decode } from "decode-formdata";
+import { createUniqueId, type Component, type ComponentProps } from "solid-js";
+import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
+import { axisCollection } from "~/integrations/tanstack-db/collections";
+import { createId } from "~/integrations/tanstack-db/create-id";
+import type { AxisModel } from "~/integrations/tanstack-db/schema";
+import { Button } from "~/ui/button/button";
+import {
+  Dialog,
+  DialogActions,
+  DialogBackdrop,
+  DialogBox,
+  DialogTitle,
+  openDialog,
+} from "~/ui/dialog/dialog";
+import { Dropdown, DropdownContent } from "~/ui/dropdown/dropdown";
 import { FieldError } from "~/ui/field-error/field-error";
 import { Fieldset, FieldsetLabel, FieldsetLegend } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
 import { Input } from "~/ui/input/input";
-import { type FormIssues, getInvalidStateProps } from "~/ui/utils/forms";
+import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
+import { useBoardId } from "../contexts/board-context";
+
+type AxisDropdownProps = {
+  orientation: AxisModel["orientation"];
+};
+
+export const AxisDropdown: Component<AxisDropdownProps> = (props) => {
+  const { t } = useI18n();
+
+  const dialogId = createUniqueId();
+
+  const onInsertButtonClick = () => {
+    openDialog(dialogId);
+  };
+
+  return (
+    <>
+      <Dropdown>
+        <Button>Click</Button>
+        <DropdownContent>
+          <li>
+            <button type="button" onClick={onInsertButtonClick}>
+              {t("board.axis.insertAxis")}
+            </button>
+          </li>
+          <li>
+            <button>Item 2</button>
+          </li>
+        </DropdownContent>
+      </Dropdown>
+      <InsertAxisDialog dialogId={dialogId} orientation={props.orientation} />
+    </>
+  );
+};
+
+const AxisFieldsSchema = v.object({
+  name: v.string(),
+});
+
+type InsertAxisDialogProps = {
+  dialogId: string;
+  orientation: AxisModel["orientation"];
+};
+
+export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
+  const { t } = useI18n();
+
+  const boardId = useBoardId();
+  const formId = createUniqueId();
+  const dialogId = createUniqueId();
+
+  const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
+    const formData = new FormData(event.currentTarget);
+
+    const parsed = await v.safeParseAsync(AxisFieldsSchema, decode(formData));
+
+    if (!parsed.success) {
+      return;
+    }
+
+    const axisId = createId();
+    axisCollection.insert({
+      boardId: boardId(),
+      id: axisId,
+      name: parsed.output.name,
+      orientation: props.orientation,
+      size: 400,
+    });
+  };
+
+  return (
+    <Dialog id={dialogId} open>
+      <DialogBox>
+        <DialogTitle>{t("board.axis.insertAxis")}</DialogTitle>
+        <form id={formId} onSubmit={onSubmit}>
+          <AxisFields pending />
+        </form>
+        <DialogActions>
+          <Button color="primary" form={formId} type="submit">
+            {t("common.save")}
+          </Button>
+        </DialogActions>
+      </DialogBox>
+      <DialogBackdrop />
+    </Dialog>
+  );
+};
 
 type AxisFieldsProps = {
-  pending: boolean;
+  pending?: boolean;
   issues?: FormIssues;
+  initialValues?: Partial<AxisModel>;
 };
 
 const AxisFields: Component<AxisFieldsProps> = (props) => {
   const { t } = useI18n();
 
-  <Fieldset>
-    <FieldsetLegend>{t("join.title")}</FieldsetLegend>
+  return (
+    <Fieldset>
+      <FieldsetLegend>{t("board.axis.insertAxis")}</FieldsetLegend>
 
-    <FormError message={props.issues?.error} />
+      <FormError message={props.issues?.error} />
 
-    <FieldsetLabel for="name">{t("join.name")}</FieldsetLabel>
-    <Input
-      disabled={props.pending}
-      id="name"
-      name="name"
-      required={true}
-      width="full"
-      {...getInvalidStateProps({
-        errorMessageId: "name-error",
-        isInvalid: Boolean(props.issues?.errors?.name),
-      })}
-    />
-    <FieldError id="name-error" message={props.issues?.errors?.name} />
-  </Fieldset>;
+      <FieldsetLabel for="name">{t("board.axis.name")}</FieldsetLabel>
+      <Input
+        disabled={props.pending}
+        id="name"
+        name="name"
+        required={true}
+        width="full"
+        value={props.initialValues?.name}
+        {...getInvalidStateProps({
+          errorMessageId: "name-error",
+          isInvalid: Boolean(props.issues?.errors?.name),
+        })}
+      />
+      <FieldError id="name-error" message={props.issues?.errors?.name} />
+    </Fieldset>
+  );
 };
