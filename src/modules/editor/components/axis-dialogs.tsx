@@ -23,15 +23,16 @@ import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { useBoardId } from "../contexts/board-context";
 
 type AxisDropdownProps = {
-  orientation: AxisModel["orientation"];
+  axis: AxisModel;
 };
 
 export const AxisDropdown: Component<AxisDropdownProps> = (props) => {
   const { t } = useI18n();
 
-  const dialogId = createUniqueId();
+  const insertDialogId = createUniqueId();
+  const updateDialogId = createUniqueId();
 
-  const onInsertButtonClick = () => {
+  const onDialogTriggerFactory = (dialogId: string) => () => {
     openDialog(dialogId);
   };
 
@@ -41,16 +42,19 @@ export const AxisDropdown: Component<AxisDropdownProps> = (props) => {
         <Button>Click</Button>
         <DropdownContent>
           <li>
-            <button type="button" onClick={onInsertButtonClick}>
+            <button type="button" onClick={onDialogTriggerFactory(insertDialogId)}>
               {t("board.axis.insertAxis")}
             </button>
           </li>
           <li>
-            <button>Item 2</button>
+            <button type="button" onClick={onDialogTriggerFactory(updateDialogId)}>
+              {t("common.update")}
+            </button>
           </li>
         </DropdownContent>
       </Dropdown>
-      <InsertAxisDialog dialogId={dialogId} orientation={props.orientation} />
+      <InsertAxisDialog dialogId={insertDialogId} orientation={props.axis.orientation} />
+      <UpdateAxisDialog dialogId={updateDialogId} axis={props.axis} />
     </>
   );
 };
@@ -91,15 +95,58 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
   };
 
   return (
-    <Dialog id={dialogId} open>
+    <Dialog id={dialogId}>
       <DialogBox>
         <DialogTitle>{t("board.axis.insertAxis")}</DialogTitle>
         <form id={formId} onSubmit={onSubmit}>
-          <AxisFields pending />
+          <AxisFields />
         </form>
         <DialogActions>
           <Button color="primary" form={formId} type="submit">
             {t("common.save")}
+          </Button>
+        </DialogActions>
+      </DialogBox>
+      <DialogBackdrop />
+    </Dialog>
+  );
+};
+
+type UpdateAxisDialogProps = {
+  dialogId: string;
+  axis: AxisModel;
+};
+
+const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
+  const { t } = useI18n();
+
+  const formId = createUniqueId();
+  const dialogId = createUniqueId();
+
+  const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
+    const formData = new FormData(event.currentTarget);
+
+    const parsed = await v.safeParseAsync(AxisFieldsSchema, decode(formData));
+
+    if (!parsed.success) {
+      return;
+    }
+
+    axisCollection.update(props.axis.id, (draft) => {
+      draft.name = parsed.output.name;
+    });
+  };
+
+  return (
+    <Dialog id={dialogId}>
+      <DialogBox>
+        <DialogTitle>{t("common.update")}</DialogTitle>
+        <form id={formId} onSubmit={onSubmit}>
+          <AxisFields initialValues={props.axis} />
+        </form>
+        <DialogActions>
+          <Button color="primary" form={formId} type="submit">
+            {t("common.update")}
           </Button>
         </DialogActions>
       </DialogBox>
