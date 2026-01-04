@@ -5,6 +5,7 @@ import { useI18n } from "~/integrations/i18n";
 import { axisCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
+import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
   Dialog,
@@ -31,6 +32,7 @@ export const AxisDropdown: Component<AxisDropdownProps> = (props) => {
 
   const insertDialogId = createUniqueId();
   const updateDialogId = createUniqueId();
+  const deleteDialogId = createUniqueId();
 
   const onDialogTriggerFactory = (dialogId: string) => () => {
     openDialog(dialogId);
@@ -51,10 +53,16 @@ export const AxisDropdown: Component<AxisDropdownProps> = (props) => {
               {t("common.update")}
             </button>
           </li>
+          <li>
+            <button type="button" onClick={onDialogTriggerFactory(deleteDialogId)}>
+              {t("common.delete")}
+            </button>
+          </li>
         </DropdownContent>
       </Dropdown>
       <InsertAxisDialog dialogId={insertDialogId} orientation={props.axis.orientation} />
       <UpdateAxisDialog dialogId={updateDialogId} axis={props.axis} />
+      <DeleteAxisDialog axis={props.axis} dialogId={deleteDialogId} />
     </>
   );
 };
@@ -186,4 +194,17 @@ const AxisFields: Component<AxisFieldsProps> = (props) => {
       <FieldError id="name-error" message={props.issues?.errors?.name} />
     </Fieldset>
   );
+};
+
+type DeleteAxisDialogProps = {
+  axis: AxisModel;
+  dialogId: string;
+};
+
+const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
+  const onSave = () => {
+    axisCollection.delete(props.axis.id);
+  };
+
+  return <AlertDialog description="" dialogId={props.dialogId} onSave={onSave} title="" />;
 };
