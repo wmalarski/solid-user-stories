@@ -1,6 +1,7 @@
-import { Container, Graphics, Text, TextStyle } from "pixi.js";
+import { Container, DOMContainer, Graphics, Text, TextStyle } from "pixi.js";
 import { createEffect, For, type Component } from "solid-js";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
+import { AxisDropdown } from "../components/axis-dialogs";
 import { useBoardContext } from "../contexts/board-context";
 import { useTransformPoint, useTransformState } from "../contexts/transform-state";
 import { AXIS_CONTAINER_ZINDEX, AXIS_OFFSET } from "../utils/constants";
@@ -135,7 +136,12 @@ const AxisItemGraphics: Component<AxisItemGraphicsProps> = (props) => {
     }
   });
 
-  return <AxisNameText axis={props.axis} itemContainer={itemContainer} />;
+  return (
+    <>
+      <AxisNameText axis={props.axis} itemContainer={itemContainer} />
+      <AxisMenu axis={props.axis} itemContainer={itemContainer} />
+    </>
+  );
 };
 
 type AxisNameTextProps = {
@@ -152,6 +158,40 @@ const AxisNameText: Component<AxisNameTextProps> = (props) => {
   createEffect(() => {
     title.text = props.axis.name;
   });
+
+  return null;
+};
+
+type AxisMenuProps = {
+  axis: AxisModel;
+  itemContainer: Container;
+};
+
+const AxisMenu: Component<AxisMenuProps> = (props) => {
+  const transform = useTransformState();
+
+  const element = (
+    <div>
+      <AxisDropdown axis={props.axis} />
+    </div>
+  );
+
+  const domContainer = new DOMContainer({
+    anchor: { x: 1, y: 0 },
+    element: element as HTMLElement,
+    y: 0,
+  });
+
+  createEffect(() => {
+    const transformValue = transform();
+
+    domContainer.x =
+      props.axis.orientation === "horizontal"
+        ? props.axis.size * transformValue.scale()
+        : AXIS_OFFSET;
+  });
+
+  createMountAsChild(props.itemContainer, domContainer);
 
   return null;
 };
