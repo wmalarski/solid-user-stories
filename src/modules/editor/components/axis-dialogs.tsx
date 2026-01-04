@@ -84,6 +84,8 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
   const dialogId = createUniqueId();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
+    event.preventDefault();
+
     const formData = new FormData(event.currentTarget);
 
     const parsed = await v.safeParseAsync(AxisFieldsSchema, decode(formData));
@@ -132,6 +134,8 @@ const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
   const dialogId = createUniqueId();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
+    event.preventDefault();
+
     const formData = new FormData(event.currentTarget);
 
     const parsed = await v.safeParseAsync(AxisFieldsSchema, decode(formData));

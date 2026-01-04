@@ -8,6 +8,7 @@ import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
+  closeDialog,
   Dialog,
   DialogActions,
   DialogBackdrop,
@@ -22,6 +23,7 @@ import { FormError } from "~/ui/form-error/form-error";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { useBoardId } from "../contexts/board-context";
+import { useTransformPoint } from "../contexts/transform-state";
 import { createTaskInsertListener } from "../pixi/utils/create-task-insert-listener";
 import type { Point2D } from "../utils/types";
 
@@ -65,7 +67,7 @@ export const TaskDropdown: Component<TaskDropdownProps> = (props) => {
 const TaskFieldsSchema = v.object({
   description: v.string(),
   estimate: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(0)),
-  link: v.optional(v.pipe(v.string(), v.url())),
+  link: v.optional(v.string()),
   title: v.string(),
 });
 
@@ -76,9 +78,15 @@ export const InsertTaskDialog: Component = () => {
   const formId = createUniqueId();
   const dialogId = createUniqueId();
 
+  const transformPoint = useTransformPoint();
+
+  const [formRef, setFormRef] = createSignal<HTMLFormElement>();
+
   const [position, setPosition] = createSignal<Point2D | null>(null);
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
+    event.preventDefault();
+
     const formData = new FormData(event.currentTarget);
 
     const parsed = await v.safeParseAsync(TaskFieldsSchema, decode(formData));
@@ -88,7 +96,9 @@ export const InsertTaskDialog: Component = () => {
       return;
     }
 
+    const transformed = transformPoint(positionValue);
     const taskId = createId();
+
     taskCollection.insert({
       axisX: "",
       axisY: "",
@@ -97,15 +107,33 @@ export const InsertTaskDialog: Component = () => {
       estimate: parsed.output.estimate,
       id: taskId,
       link: parsed.output.link,
-      positionX: positionValue.x,
-      positionY: positionValue.y,
+      positionX: transformed.x,
+      positionY: transformed.y,
       title: parsed.output.title,
     });
+
+    closeDialog(dialogId);
+    formRef()?.reset();
   };
 
   createTaskInsertListener({
     onDoubleClick: (event) => {
-      setPosition({ x: event.x, y: event.y });
+      //   console.log({
+      //     clientX: event.clientX,
+      //     clientY: event.clientY,
+      //     globalX: event.globalX,
+      //     globalY: event.globalY,
+      //     pageX: event.pageX,
+      //     pageY: event.pageY,
+      //     screenX: event.screenX,
+      //     screenY: event.screenY,
+      //     t1: transformPoint({ x: event.x, y: event.y }),
+      //     t2: transformPoint({ x: event.x, y: event.y }, true),
+      //     x: event.x,
+      //     y: event.y,
+      //   });
+
+      setPosition(transformPoint({ x: event.x, y: event.y }, true));
       openDialog(dialogId);
     },
   });
@@ -114,7 +142,7 @@ export const InsertTaskDialog: Component = () => {
     <Dialog id={dialogId}>
       <DialogBox>
         <DialogTitle>{t("board.tasks.insertTask")}</DialogTitle>
-        <form id={formId} onSubmit={onSubmit}>
+        <form ref={setFormRef} id={formId} onSubmit={onSubmit}>
           <TaskFields />
         </form>
         <DialogActions>
@@ -140,6 +168,8 @@ const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
   const dialogId = createUniqueId();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
+    event.preventDefault();
+
     const formData = new FormData(event.currentTarget);
 
     const parsed = await v.safeParseAsync(TaskFieldsSchema, decode(formData));

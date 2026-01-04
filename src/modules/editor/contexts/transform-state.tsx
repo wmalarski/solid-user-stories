@@ -84,12 +84,17 @@ export const TransformStateProvider: Component<ParentProps> = (props) => {
 export const useTransformPoint = () => {
   const transform = useTransformState();
 
-  return (point: Point2D) => {
+  return (point: Point2D, reverse?: boolean) => {
     const value = transform();
     const scale = value.scale();
-    return {
-      x: point.x * scale + value.x(),
-      y: point.y * scale + value.y(),
-    };
+    return reverse
+      ? {
+          x: point.x / scale - value.x(),
+          y: point.y / scale - value.y(),
+        }
+      : {
+          x: point.x * scale + value.x(),
+          y: point.y * scale + value.y(),
+        };
   };
 };
