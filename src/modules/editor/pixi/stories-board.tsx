@@ -8,7 +8,7 @@ import { RIGHT_BUTTON } from "../utils/constants";
 import { AxisContainer } from "./axis-container";
 import { DrawingEdgeGraphics, EdgeGraphics } from "./edge-graphics";
 import { usePixiContainer } from "./pixi-app";
-import { TaskGraphics } from "./task-graphics";
+import { TaskContainer } from "./task-container";
 import { useStageTransform } from "./use-stage-transform";
 import { createPointerListeners } from "./utils/create-pointer-listeners";
 
@@ -33,7 +33,7 @@ const TaskGraphicsList: Component = () => {
     q.from({ tasks: taskCollection }).where(({ tasks }) => eq(tasks.boardId, boardId())),
   );
 
-  return <For each={collection.data}>{(task) => <TaskGraphics task={task} />}</For>;
+  return <For each={collection.data}>{(task) => <TaskContainer task={task} />}</For>;
 };
 
 const EdgeGraphicsList: Component = () => {

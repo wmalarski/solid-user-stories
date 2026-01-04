@@ -165,7 +165,6 @@ const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
   const { t } = useI18n();
 
   const formId = createUniqueId();
-  const dialogId = createUniqueId();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -184,10 +183,12 @@ const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
       draft.link = parsed.output.link;
       draft.title = parsed.output.title;
     });
+
+    closeDialog(props.dialogId);
   };
 
   return (
-    <Dialog id={dialogId}>
+    <Dialog id={props.dialogId}>
       <DialogBox>
         <DialogTitle>{t("common.update")}</DialogTitle>
         <form id={formId} onSubmit={onSubmit}>

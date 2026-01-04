@@ -1,8 +1,16 @@
-import { type FederatedMouseEvent, Container, Graphics, Text, TextStyle } from "pixi.js";
+import {
+  type FederatedMouseEvent,
+  Container,
+  DOMContainer,
+  Graphics,
+  Text,
+  TextStyle,
+} from "pixi.js";
 import { type Component, createEffect, createMemo, Show } from "solid-js";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
+import { TaskDropdown } from "../components/task-dialogs";
 import { useBoardId } from "../contexts/board-context";
 import {
   type DrawingState,
@@ -24,11 +32,11 @@ import { createPointerListeners } from "./utils/create-pointer-listeners";
 
 const TASK_TEXT_FONT_SIZE = 16;
 
-type TaskGraphicsProps = {
+type TaskContainerProps = {
   task: TaskModel;
 };
 
-export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
+export const TaskContainer: Component<TaskContainerProps> = (props) => {
   const theme = useBoardTheme();
 
   const container = usePixiContainer();
@@ -92,6 +100,7 @@ export const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
           <EdgeDrawingListener source={source()} task={props.task} taskContainer={taskContainer} />
         )}
       </Show>
+      <TaskMenu task={props.task} taskContainer={taskContainer} />
     </>
   );
 };
@@ -180,6 +189,29 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
       );
     },
   });
+
+  return null;
+};
+
+type TaskMenuProps = {
+  taskContainer: Container;
+  task: TaskModel;
+};
+
+const TaskMenu: Component<TaskMenuProps> = (props) => {
+  const element = (
+    <div>
+      <TaskDropdown task={props.task} />
+    </div>
+  );
+
+  const domContainer = new DOMContainer({
+    anchor: { x: 1, y: 0 },
+    element: element as HTMLElement,
+    x: TASK_GRPAHICS_WIDTH,
+    y: 0,
+  });
+  createMountAsChild(props.taskContainer, domContainer);
 
   return null;
 };
