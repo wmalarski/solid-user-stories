@@ -8,6 +8,7 @@ import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
+  closeDialog,
   Dialog,
   DialogActions,
   DialogBackdrop,
@@ -81,7 +82,6 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
 
   const boardId = useBoardId();
   const formId = createUniqueId();
-  const dialogId = createUniqueId();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -102,10 +102,12 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
       orientation: props.orientation,
       size: 400,
     });
+
+    closeDialog(props.dialogId);
   };
 
   return (
-    <Dialog id={dialogId}>
+    <Dialog id={props.dialogId}>
       <DialogBox>
         <DialogTitle>{t("board.axis.insertAxis")}</DialogTitle>
         <form id={formId} onSubmit={onSubmit}>
@@ -131,7 +133,6 @@ const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
   const formId = createUniqueId();
-  const dialogId = createUniqueId();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -147,10 +148,12 @@ const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
     axisCollection.update(props.axis.id, (draft) => {
       draft.name = parsed.output.name;
     });
+
+    closeDialog(props.dialogId);
   };
 
   return (
-    <Dialog id={dialogId}>
+    <Dialog id={props.dialogId}>
       <DialogBox>
         <DialogTitle>{t("common.update")}</DialogTitle>
         <form id={formId} onSubmit={onSubmit}>
