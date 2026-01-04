@@ -17,7 +17,7 @@ import {
 } from "~/ui/dialog/dialog";
 import { Dropdown, DropdownContent } from "~/ui/dropdown/dropdown";
 import { FieldError } from "~/ui/field-error/field-error";
-import { Fieldset, FieldsetLabel, FieldsetLegend } from "~/ui/fieldset/fieldset";
+import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
@@ -174,8 +174,6 @@ const AxisFields: Component<AxisFieldsProps> = (props) => {
 
   return (
     <Fieldset>
-      <FieldsetLegend>{t("board.axis.insertAxis")}</FieldsetLegend>
-
       <FormError message={props.issues?.error} />
 
       <FieldsetLabel for="name">{t("board.axis.name")}</FieldsetLabel>
@@ -202,9 +200,18 @@ type DeleteAxisDialogProps = {
 };
 
 const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
+  const { t } = useI18n();
+
   const onSave = () => {
     axisCollection.delete(props.axis.id);
   };
 
-  return <AlertDialog description="" dialogId={props.dialogId} onSave={onSave} title="" />;
+  return (
+    <AlertDialog
+      description={t("board.axis.confirmDelete")}
+      dialogId={props.dialogId}
+      onSave={onSave}
+      title={t("common.delete")}
+    />
+  );
 };

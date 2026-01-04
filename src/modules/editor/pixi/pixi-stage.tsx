@@ -1,4 +1,5 @@
 import type { Component } from "solid-js";
+import { InsertTaskDialog } from "../components/task-dialogs";
 import { ZoomBar } from "../components/zoom-bar";
 import { EdgeDrawingContextProvider } from "../contexts/edge-drawing-context";
 import { SelectionContextProvider } from "../contexts/selection-context";
@@ -22,6 +23,7 @@ export const PixiStage: Component<PixiStageProps> = (props) => {
             </EdgeDrawingContextProvider>
           </SelectionContextProvider>
           <ZoomBar />
+          <InsertTaskDialog />
         </TransformStateProvider>
       </PixiAppProvider>
     </BoardThemeProvider>

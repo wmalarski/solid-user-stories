@@ -12,11 +12,17 @@ import {
 const enDict = {
   board: {
     axis: {
+      confirmDelete: "Confirm delete task",
       insertAxis: "Add axis",
       name: "Name",
     },
     tasks: {
+      confirmDelete: "Confirm delete task",
+      description: "Description",
+      estimate: "Estimation",
       insertTask: "Add task",
+      link: "Link",
+      title: "Title",
     },
     zoom: {
       reset: "Reset zoom",
