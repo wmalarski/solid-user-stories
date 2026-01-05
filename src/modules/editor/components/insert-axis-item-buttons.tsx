@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
-import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
+import { axisCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { Button } from "~/ui/button/button";
@@ -44,31 +44,10 @@ const InsertAxisItemButton: Component<InsertAxisItemButtonProps> = (props) => {
     });
   };
 
-  const onAddTaskClick = () => {
-    const taskId = createId();
-    taskCollection.insert({
-      axisX: null,
-      axisY: null,
-      boardId: boardId(),
-      description: `Description:${taskId}`,
-      estimate: 1,
-      id: taskId,
-      positionX: 0,
-      positionY: 0,
-      title: `Title:${taskId}`,
-    });
-  };
-
   return (
-    <>
-      <Button onClick={onAddAxisClick} size="xs" variant="ghost">
-        <PlusIcon />
-        {t("board.axis.insertAxis")}
-      </Button>
-      <Button onClick={onAddTaskClick} size="xs" variant="ghost">
-        <PlusIcon />
-        {t("board.tasks.insertTask")}
-      </Button>
-    </>
+    <Button onClick={onAddAxisClick} size="xs" variant="ghost">
+      <PlusIcon />
+      {t("board.axis.insertAxis")}
+    </Button>
   );
 };

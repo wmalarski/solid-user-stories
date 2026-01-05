@@ -20,6 +20,7 @@ import { Dropdown, DropdownContent } from "~/ui/dropdown/dropdown";
 import { FieldError } from "~/ui/field-error/field-error";
 import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
+import { DotsHorizontalIcon } from "~/ui/icons/dots-horizontal-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { useBoardId } from "../contexts/board-context";
@@ -44,7 +45,9 @@ export const TaskDropdown: Component<TaskDropdownProps> = (props) => {
   return (
     <>
       <Dropdown>
-        <Button>Click</Button>
+        <Button size="xs" shape="circle" class="rotate-90" aria-label={t("common.openMenu")}>
+          <DotsHorizontalIcon class="size-4" />
+        </Button>
         <DropdownContent>
           <li>
             <button type="button" onClick={onDialogTriggerFactory(updateDialogId)}>

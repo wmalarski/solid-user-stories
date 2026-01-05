@@ -174,19 +174,15 @@ const AxisMenu: Component<AxisMenuProps> = (props) => {
     </div>
   );
 
-  const domContainer = new DOMContainer({
-    anchor: { x: 1, y: 0 },
-    element: element as HTMLElement,
-    y: 0,
-  });
+  const domContainer = new DOMContainer({ element: element as HTMLElement, x: 0, y: 4 });
 
   createEffect(() => {
     const transformValue = transform();
 
     domContainer.x =
       props.axis.orientation === "horizontal"
-        ? props.axis.size * transformValue.scale()
-        : AXIS_OFFSET;
+        ? props.axis.size * transformValue.scale() - 28
+        : AXIS_OFFSET - 28;
   });
 
   createMountAsChild(() => props.itemContainer, domContainer);

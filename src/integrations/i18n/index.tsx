@@ -36,6 +36,7 @@ const enDict = {
     closeDialog: "Close",
     delete: "Delete",
     edit: "Edit",
+    openMenu: "Open Menu",
     save: "Save",
     update: "Update",
   },

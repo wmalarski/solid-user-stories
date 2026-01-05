@@ -234,10 +234,9 @@ const TaskMenu: Component<TaskMenuProps> = (props) => {
   );
 
   const domContainer = new DOMContainer({
-    anchor: { x: 1, y: 0 },
     element: element as HTMLElement,
-    x: TASK_GRPAHICS_WIDTH,
-    y: 0,
+    x: TASK_GRPAHICS_WIDTH - 26,
+    y: 4,
   });
 
   createMountAsChild(() => props.taskContainer, domContainer);
