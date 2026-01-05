@@ -45,7 +45,7 @@ export const PixiAppProvider: Component<PixiAppProviderProps> = (props) => {
     },
   };
 
-  const container = new Container({ hitArea });
+  const container = new Container({ hitArea, x: 100, y: 100 });
   createMountAsChild(app.stage, container);
 
   const taskContainer = new Container({ hitArea, parent: container });

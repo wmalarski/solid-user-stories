@@ -36,42 +36,40 @@ const AxisContent: Component<AxisContentProps> = (props) => {
 
   return (
     <>
-      <AxisGrid orientation={props.orientation} />
-      <AxisGraphics axisContainer={props.axisContainer} orientation={props.orientation} />
+      <AxisGraphics orientation={props.orientation} />
       <For each={boardContext().axis[props.orientation].axis}>
         {(axis, index) => (
           <AxisItemGraphics
             position={boardContext().axis[props.orientation].positions.at(index())}
             axis={axis}
             orientation={props.orientation}
-            axisContainer={props.axisContainer}
           />
         )}
       </For>
+      <AxisGrid orientation={props.orientation} />
     </>
   );
 };
 
 type AxisGraphicsProps = {
-  axisContainer: Container;
   orientation: AxisModel["orientation"];
 };
 
 const AxisGraphics: Component<AxisGraphicsProps> = (props) => {
   const app = usePixiApp();
+  const container = usePixiContainer();
 
   const theme = useBoardTheme();
 
-  const graphics = new Graphics();
-  createMountAsChild(() => props.axisContainer, graphics);
+  const graphics = new Graphics({ parent: container });
 
   const drawGraphics = (screenWidth?: number, screenHeight?: number) => {
     graphics.clear();
 
     if (props.orientation === "vertical") {
-      graphics.rect(0, 0, AXIS_OFFSET, screenHeight ?? window.outerHeight);
+      graphics.rect(-AXIS_OFFSET, -AXIS_OFFSET, AXIS_OFFSET, screenHeight ?? window.outerHeight);
     } else {
-      graphics.rect(0, 0, screenWidth ?? window.outerWidth, AXIS_OFFSET);
+      graphics.rect(-AXIS_OFFSET, -AXIS_OFFSET, screenWidth ?? window.outerWidth, AXIS_OFFSET);
     }
 
     graphics.fill({ color: theme().axisBoackgroundColor });
@@ -95,7 +93,6 @@ const AxisGraphics: Component<AxisGraphicsProps> = (props) => {
 };
 
 type AxisItemGraphicsProps = {
-  axisContainer: Container;
   axis: AxisModel;
   position?: number;
   orientation: AxisModel["orientation"];
@@ -104,14 +101,13 @@ type AxisItemGraphicsProps = {
 const AxisItemGraphics: Component<AxisItemGraphicsProps> = (props) => {
   const theme = useBoardTheme();
 
+  const container = usePixiContainer();
+
   const transform = useTransformState();
   const transformPoint = useTransformPoint();
 
-  const itemContainer = new Container();
-  createMountAsChild(() => props.axisContainer, itemContainer);
-
-  const graphics = new Graphics();
-  createMountAsChild(itemContainer, graphics);
+  const itemContainer = new Container({ parent: container });
+  const graphics = new Graphics({ parent: itemContainer });
 
   createEffect(() => {
     const transformValue = transform();
@@ -127,15 +123,14 @@ const AxisItemGraphics: Component<AxisItemGraphicsProps> = (props) => {
   });
 
   createEffect(() => {
-    const point = transformPoint({
-      x: (props.position ?? 0) + AXIS_OFFSET,
-      y: (props.position ?? 0) + AXIS_OFFSET,
-    });
+    const point = transformPoint({ x: props.position ?? 0, y: props.position ?? 0 });
 
     if (props.orientation === "vertical") {
       itemContainer.y = point.y;
+      itemContainer.x = -AXIS_OFFSET;
     } else {
       itemContainer.x = point.x;
+      itemContainer.y = -AXIS_OFFSET;
     }
   });
 
@@ -243,8 +238,8 @@ const AxisGridItem: Component<AxisGridItemProps> = (props) => {
     graphics.clear();
 
     const position = transformPoint({
-      x: props.position + AXIS_OFFSET,
-      y: props.position + AXIS_OFFSET,
+      x: props.position,
+      y: props.position,
     });
 
     if (props.orientation === "vertical") {

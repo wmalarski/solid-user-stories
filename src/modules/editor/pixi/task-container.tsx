@@ -70,8 +70,8 @@ export const TaskContainer: Component<TaskContainerProps> = (props) => {
 
   return (
     <>
-      <TaskContentTexts task={props.task} taskContainer={taskContainer} />
       <TaskGraphics task={props.task} taskContainer={taskContainer} />
+      <TaskContentTexts task={props.task} taskContainer={taskContainer} />
       <TaskHandle task={props.task} handle="left" taskContainer={taskContainer} />
       <TaskHandle task={props.task} handle="right" taskContainer={taskContainer} />
       <Show when={edgeDrawing().source()}>
