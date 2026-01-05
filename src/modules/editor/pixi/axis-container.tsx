@@ -63,7 +63,7 @@ const AxisGraphics: Component<AxisGraphicsProps> = (props) => {
   const theme = useBoardTheme();
 
   const graphics = new Graphics();
-  createMountAsChild(props.axisContainer, graphics);
+  createMountAsChild(() => props.axisContainer, graphics);
 
   const drawGraphics = (screenWidth?: number, screenHeight?: number) => {
     graphics.clear();
@@ -108,7 +108,7 @@ const AxisItemGraphics: Component<AxisItemGraphicsProps> = (props) => {
   const transformPoint = useTransformPoint();
 
   const itemContainer = new Container();
-  createMountAsChild(props.axisContainer, itemContainer);
+  createMountAsChild(() => props.axisContainer, itemContainer);
 
   const graphics = new Graphics();
   createMountAsChild(itemContainer, graphics);
@@ -156,7 +156,7 @@ const AxisNameText: Component<AxisNameTextProps> = (props) => {
   const style = new TextStyle({ fontSize: 16 });
 
   const title = new Text({ style });
-  createMountAsChild(props.itemContainer, title);
+  createMountAsChild(() => props.itemContainer, title);
 
   createEffect(() => {
     title.text = props.axis.name;
@@ -194,7 +194,7 @@ const AxisMenu: Component<AxisMenuProps> = (props) => {
         : AXIS_OFFSET;
   });
 
-  createMountAsChild(props.itemContainer, domContainer);
+  createMountAsChild(() => props.itemContainer, domContainer);
 
   return null;
 };

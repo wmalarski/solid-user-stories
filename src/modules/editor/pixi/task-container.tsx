@@ -37,11 +37,8 @@ type TaskContainerProps = {
 };
 
 export const TaskContainer: Component<TaskContainerProps> = (props) => {
-  const theme = useBoardTheme();
-
   const container = usePixiContainer();
 
-  const isSelected = useIsSelected(() => props.task.id);
   const selection = useSelectionContext();
 
   const edgeDrawing = useEdgeDrawingContext();
@@ -49,34 +46,9 @@ export const TaskContainer: Component<TaskContainerProps> = (props) => {
   const taskContainer = new Container();
   createMountAsChild(container, taskContainer);
 
-  const graphics = new Graphics();
-  createMountAsChild(taskContainer, graphics);
-
-  const style = new TextStyle({ fontSize: TASK_TEXT_FONT_SIZE });
-  const title = new Text({ style });
-  createMountAsChild(taskContainer, title);
-
-  createEffect(() => {
-    const isSelectedValue = isSelected();
-    const themeValue = theme();
-
-    graphics.clear();
-    graphics
-      .rect(0, 0, TASK_GRPAHICS_WIDTH, TASK_GRPAHICS_HEIGHT)
-      .fill({ color: themeValue.taskBackgroundColor });
-
-    if (isSelectedValue) {
-      graphics.stroke({ color: themeValue.selectionColor, width: 2 });
-    }
-  });
-
   createEffect(() => {
     taskContainer.x = props.task.positionX;
     taskContainer.y = props.task.positionY;
-  });
-
-  createEffect(() => {
-    title.text = `${props.task.title}\n${props.task.description}\n${props.task.estimate}\nX:${props.task.axisX}\nY:${props.task.axisY}`;
   });
 
   createObjectDrag(taskContainer, {
@@ -93,6 +65,8 @@ export const TaskContainer: Component<TaskContainerProps> = (props) => {
 
   return (
     <>
+      <TaskContentTexts task={props.task} taskContainer={taskContainer} />
+      <TaskGraphics task={props.task} taskContainer={taskContainer} />
       <TaskHandle task={props.task} handle="left" taskContainer={taskContainer} />
       <TaskHandle task={props.task} handle="right" taskContainer={taskContainer} />
       <Show when={edgeDrawing().source()}>
@@ -103,6 +77,53 @@ export const TaskContainer: Component<TaskContainerProps> = (props) => {
       <TaskMenu task={props.task} taskContainer={taskContainer} />
     </>
   );
+};
+
+type TaskGraphicsProps = {
+  task: TaskModel;
+  taskContainer: Container;
+};
+
+const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
+  const theme = useBoardTheme();
+
+  const isSelected = useIsSelected(() => props.task.id);
+
+  const graphics = new Graphics();
+  createMountAsChild(() => props.taskContainer, graphics);
+
+  createEffect(() => {
+    const isSelectedValue = isSelected();
+    const themeValue = theme();
+
+    graphics.clear();
+    graphics
+      .rect(0, 0, TASK_GRPAHICS_WIDTH, TASK_GRPAHICS_HEIGHT)
+      .fill({ color: themeValue.taskBackgroundColor });
+
+    if (isSelectedValue) {
+      graphics.stroke({ color: themeValue.selectionColor, width: 2 });
+    }
+  });
+
+  return null;
+};
+
+type TaskContentTextsProps = {
+  task: TaskModel;
+  taskContainer: Container;
+};
+
+const TaskContentTexts: Component<TaskContentTextsProps> = (props) => {
+  const style = new TextStyle({ fontSize: TASK_TEXT_FONT_SIZE });
+  const title = new Text({ style });
+  createMountAsChild(() => props.taskContainer, title);
+
+  createEffect(() => {
+    title.text = `${props.task.title}\n${props.task.description}\n${props.task.estimate}\nX:${props.task.axisX}\nY:${props.task.axisY}`;
+  });
+
+  return null;
 };
 
 type EdgeDrawingListenerProps = {
@@ -147,7 +168,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   const edgeDrawing = useEdgeDrawingContext();
 
   const graphics = new Graphics();
-  createMountAsChild(props.taskContainer, graphics);
+  createMountAsChild(() => props.taskContainer, graphics);
 
   const localPosition = createMemo(() => {
     const handleX = props.handle === "left" ? 0 : TASK_GRPAHICS_WIDTH;
@@ -211,7 +232,8 @@ const TaskMenu: Component<TaskMenuProps> = (props) => {
     x: TASK_GRPAHICS_WIDTH,
     y: 0,
   });
-  createMountAsChild(props.taskContainer, domContainer);
+
+  createMountAsChild(() => props.taskContainer, domContainer);
 
   return null;
 };

@@ -1,12 +1,16 @@
 import type { Container } from "pixi.js";
-import { onCleanup, onMount } from "solid-js";
+import { createMemo, onCleanup, onMount, type Accessor } from "solid-js";
 
-export const createMountAsChild = (parent: Container, child: Container) => {
+export const createMountAsChild = (parent: Container | Accessor<Container>, child: Container) => {
+  const parentContainer = createMemo(() => {
+    return typeof parent === "function" ? parent() : parent;
+  });
+
   onMount(() => {
-    parent.addChild(child);
+    parentContainer().addChild(child);
   });
 
   onCleanup(() => {
-    parent.removeChild(child);
+    parentContainer().removeChild(child);
   });
 };
