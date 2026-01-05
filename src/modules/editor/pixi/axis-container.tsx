@@ -1,13 +1,16 @@
 import { Container, DOMContainer, Graphics, Text, TextStyle } from "pixi.js";
-import { createEffect, For, type Component } from "solid-js";
+import { createEffect, createMemo, For, type Component } from "solid-js";
+import { axisCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { AxisDropdown } from "../components/axis-dialogs";
 import { useBoardContext } from "../contexts/board-context";
 import { useTransformPoint, useTransformState } from "../contexts/transform-state";
 import { AXIS_CONTAINER_ZINDEX, AXIS_OFFSET } from "../utils/constants";
+import { subtractPoint } from "../utils/geometry";
 import { useBoardTheme } from "./board-theme";
 import { usePixiApp } from "./pixi-app";
 import { createMountAsChild } from "./utils/create-mount-as-child";
+import { createObjectDrag } from "./utils/create-object-drag";
 
 export const AxisContainer: Component = () => {
   const app = usePixiApp();
@@ -33,7 +36,7 @@ const AxisContent: Component<AxisContentProps> = (props) => {
 
   return (
     <>
-      <AxisGrid axisContainer={props.axisContainer} orientation={props.orientation} />
+      <AxisGrid orientation={props.orientation} />
       <AxisGraphics axisContainer={props.axisContainer} orientation={props.orientation} />
       <For each={boardContext().axis[props.orientation].axis}>
         {(axis, index) => (
@@ -197,18 +200,21 @@ const AxisMenu: Component<AxisMenuProps> = (props) => {
 };
 
 type AxisGridProps = {
-  axisContainer: Container;
   orientation: AxisModel["orientation"];
 };
 
 export const AxisGrid: Component<AxisGridProps> = (props) => {
   const boardContext = useBoardContext();
 
+  const config = createMemo(() => {
+    return boardContext().axis[props.orientation];
+  });
+
   return (
-    <For each={boardContext().axis[props.orientation].positions}>
-      {(position) => (
+    <For each={config().positions}>
+      {(position, index) => (
         <AxisGridItem
-          axisContainer={props.axisContainer}
+          axisId={config().axis[index() - 1]?.id}
           orientation={props.orientation}
           position={position}
         />
@@ -218,9 +224,9 @@ export const AxisGrid: Component<AxisGridProps> = (props) => {
 };
 
 type AxisGridItemProps = {
+  axisId: string;
   position: number;
   orientation: AxisModel["orientation"];
-  axisContainer: Container;
 };
 
 const AxisGridItem: Component<AxisGridItemProps> = (props) => {
@@ -228,8 +234,9 @@ const AxisGridItem: Component<AxisGridItemProps> = (props) => {
 
   const transformPoint = useTransformPoint();
 
+  const app = usePixiApp();
   const graphics = new Graphics();
-  createMountAsChild(props.axisContainer, graphics);
+  createMountAsChild(app.stage, graphics);
 
   createEffect(() => {
     graphics.clear();
@@ -245,7 +252,50 @@ const AxisGridItem: Component<AxisGridItemProps> = (props) => {
       graphics.moveTo(position.x, 0).lineTo(position.x, window.outerHeight);
     }
 
-    graphics.stroke({ color: theme().axisGridColor });
+    graphics.stroke({ color: theme().axisGridColor, width: 2 });
+  });
+
+  createEffect(() => {
+    if (props.position === 0) {
+      return;
+    }
+
+    createObjectDrag(graphics, {
+      dragConstraint: (args) => {
+        const other =
+          props.orientation === "vertical"
+            ? { x: args.eventPosition.x, y: args.shift.y }
+            : { x: args.shift.x, y: args.eventPosition.y };
+        return subtractPoint(args.eventPosition, other);
+      },
+      onDragEnd: (event) => {
+        // taskCollection.update(props.task.id, (draft) => {
+        //   draft.positionX = taskContainer.x;
+        //   draft.positionY = taskContainer.y;
+        // });
+        // const position = transformPoint(event);
+        const position2 = transformPoint(event, true);
+
+        const diff = position2.x - props.position - AXIS_OFFSET;
+
+        axisCollection.update(props.axisId, (draft) => {
+          draft.size += diff;
+        });
+
+        // console.log("[onDragEnd]", event, props.position, event.x, position2.x, diff);
+      },
+      // onDragStart: (event) => {
+      //   // taskCollection.update(props.task.id, (draft) => {
+      //   //   draft.positionX = taskContainer.x;
+      //   //   draft.positionY = taskContainer.y;
+      //   // });
+
+      //   const position = transformPoint(event);
+      //   const position2 = transformPoint(event, true);
+
+      //   console.log("[onDragStart]", event, props.position, event.x, position.x, position2.x);
+      // },
+    });
   });
 
   return null;
