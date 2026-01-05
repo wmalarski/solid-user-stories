@@ -8,15 +8,15 @@ import { useTransformPoint, useTransformState } from "../contexts/transform-stat
 import { AXIS_CONTAINER_ZINDEX, AXIS_OFFSET } from "../utils/constants";
 import { subtractPoint } from "../utils/geometry";
 import { useBoardTheme } from "./board-theme";
-import { usePixiApp } from "./pixi-app";
+import { usePixiApp, usePixiContainer } from "./pixi-app";
 import { createMountAsChild } from "./utils/create-mount-as-child";
 import { createObjectDrag } from "./utils/create-object-drag";
 
 export const AxisContainer: Component = () => {
-  const app = usePixiApp();
+  const container = usePixiContainer();
 
   const axisContainer = new Container({ zIndex: AXIS_CONTAINER_ZINDEX });
-  createMountAsChild(app.stage, axisContainer);
+  createMountAsChild(container, axisContainer);
 
   return (
     <>
@@ -234,9 +234,10 @@ const AxisGridItem: Component<AxisGridItemProps> = (props) => {
 
   const transformPoint = useTransformPoint();
 
-  const app = usePixiApp();
+  const container = usePixiContainer();
+
   const graphics = new Graphics();
-  createMountAsChild(app.stage, graphics);
+  createMountAsChild(container, graphics);
 
   createEffect(() => {
     graphics.clear();

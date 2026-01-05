@@ -7,7 +7,7 @@ import { useSelectionContext } from "../contexts/selection-context";
 import { RIGHT_BUTTON } from "../utils/constants";
 import { AxisContainer } from "./axis-container";
 import { DrawingEdgeGraphics, EdgeGraphics } from "./edge-graphics";
-import { usePixiContainer } from "./pixi-app";
+import { useTaskContainer } from "./pixi-app";
 import { TaskContainer } from "./task-container";
 import { useStageTransform } from "./use-stage-transform";
 import { createPointerListeners } from "./utils/create-pointer-listeners";
@@ -55,7 +55,7 @@ const EdgeGraphicsList: Component = () => {
 };
 
 const useStageDeselect = () => {
-  const container = usePixiContainer();
+  const container = useTaskContainer();
   const selection = useSelectionContext();
 
   createPointerListeners(container, {

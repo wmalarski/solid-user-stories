@@ -16,12 +16,18 @@ const PixiAppContext = createContext<Application>({} as unknown as Application);
 
 const ContainerContext = createContext<Container>({} as unknown as Container);
 
+const TaskContainerContext = createContext<Container>({} as unknown as Container);
+
 export const usePixiApp = () => {
   return useContext(PixiAppContext);
 };
 
 export const usePixiContainer = () => {
   return useContext(ContainerContext);
+};
+
+export const useTaskContainer = () => {
+  return useContext(TaskContainerContext);
 };
 
 type PixiAppProviderProps = ParentProps<{
@@ -41,6 +47,8 @@ export const PixiAppProvider: Component<PixiAppProviderProps> = (props) => {
 
   const container = new Container({ hitArea });
   createMountAsChild(app.stage, container);
+
+  const taskContainer = new Container({ hitArea, parent: container });
 
   createResource(async () => {
     await app.init({
@@ -70,7 +78,11 @@ export const PixiAppProvider: Component<PixiAppProviderProps> = (props) => {
 
   return (
     <PixiAppContext.Provider value={app}>
-      <ContainerContext.Provider value={container}>{props.children}</ContainerContext.Provider>
+      <ContainerContext.Provider value={container}>
+        <TaskContainerContext.Provider value={taskContainer}>
+          {props.children}
+        </TaskContainerContext.Provider>
+      </ContainerContext.Provider>
     </PixiAppContext.Provider>
   );
 };

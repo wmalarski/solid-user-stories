@@ -25,10 +25,11 @@ import {
   TASK_HANDLE_SIZE,
 } from "../utils/constants";
 import { useBoardTheme } from "./board-theme";
-import { usePixiContainer } from "./pixi-app";
+import { useTaskContainer } from "./pixi-app";
 import { createMountAsChild } from "./utils/create-mount-as-child";
 import { createObjectDrag } from "./utils/create-object-drag";
 import { createPointerListeners } from "./utils/create-pointer-listeners";
+import { useAxisPositionMapper } from "./utils/use-axis-position-mapper";
 
 const TASK_TEXT_FONT_SIZE = 16;
 
@@ -37,7 +38,7 @@ type TaskContainerProps = {
 };
 
 export const TaskContainer: Component<TaskContainerProps> = (props) => {
-  const container = usePixiContainer();
+  const container = useTaskContainer();
 
   const selection = useSelectionContext();
 
@@ -51,12 +52,16 @@ export const TaskContainer: Component<TaskContainerProps> = (props) => {
     taskContainer.y = props.task.positionY;
   });
 
+  const axisMapper = useAxisPositionMapper();
+
   createObjectDrag(taskContainer, {
     onDragEnd: () => {
       taskCollection.update(props.task.id, (draft) => {
         draft.positionX = taskContainer.x;
         draft.positionY = taskContainer.y;
       });
+
+      axisMapper(taskContainer);
     },
     onDragStart: () => {
       selection().setSelection([props.task.id]);

@@ -3,10 +3,10 @@ import type { FederatedPointerEvent, FederatedWheelEvent } from "pixi.js";
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 
 import { useTransformState } from "../contexts/transform-state";
-import { usePixiContainer } from "./pixi-app";
+import { useTaskContainer } from "./pixi-app";
 
 const useZoom = () => {
-  const container = usePixiContainer();
+  const container = useTaskContainer();
   const transform = useTransformState();
 
   createEffect(() => {
@@ -16,7 +16,7 @@ const useZoom = () => {
 };
 
 const usePane = () => {
-  const container = usePixiContainer();
+  const container = useTaskContainer();
   const transform = useTransformState();
 
   const [startX, setStartX] = createSignal<number>(0);
@@ -73,7 +73,7 @@ const usePane = () => {
 };
 
 const useWheel = () => {
-  const container = usePixiContainer();
+  const container = useTaskContainer();
   const transform = useTransformState();
 
   const onWheel = (event: FederatedWheelEvent) => {
