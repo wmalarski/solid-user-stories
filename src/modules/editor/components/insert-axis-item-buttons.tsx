@@ -47,8 +47,8 @@ const InsertAxisItemButton: Component<InsertAxisItemButtonProps> = (props) => {
   const onAddTaskClick = () => {
     const taskId = createId();
     taskCollection.insert({
-      axisX: "",
-      axisY: "",
+      axisX: null,
+      axisY: null,
       boardId: boardId(),
       description: `Description:${taskId}`,
       estimate: 1,

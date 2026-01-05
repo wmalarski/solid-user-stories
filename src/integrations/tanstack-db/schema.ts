@@ -1,8 +1,8 @@
 import * as v from "valibot";
 
 export const TaskSchema = v.object({
-  axisX: v.string(),
-  axisY: v.string(),
+  axisX: v.nullable(v.string()),
+  axisY: v.nullable(v.string()),
   boardId: v.string(),
   description: v.string(),
   estimate: v.number(),

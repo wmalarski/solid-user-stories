@@ -1,29 +1,21 @@
 import { useBoardContext } from "../../contexts/board-context";
 import type { Point2D } from "../../utils/types";
-import { useTaskContainer } from "../pixi-app";
 
 export const useAxisPositionMapper = () => {
   const boardContext = useBoardContext();
-  const taskContainer = useTaskContainer();
 
   return (point: Point2D) => {
-    // taskContainer.localTransform.applyInverse(point)
+    const boardContextValue = boardContext();
+    const horizontalIndex =
+      boardContextValue.axis.horizontal.positions.findIndex((value) => value > point.x) - 1;
+    const verticalIndex =
+      boardContextValue.axis.vertical.positions.findIndex((value) => value > point.y) - 1;
 
-    console.log("[createAxisPositionMap]", point.x, point.y);
+    const horizontalAxis =
+      horizontalIndex < 0 ? null : boardContextValue.axis.horizontal.axis[horizontalIndex]?.id;
+    const verticalAxis =
+      verticalIndex < 0 ? null : boardContextValue.axis.vertical.axis[verticalIndex]?.id;
 
-    console.log(
-      JSON.stringify(
-        {
-          "taskContainer.groupTransform.apply(point)": taskContainer.groupTransform.apply(point),
-          "taskContainer.groupTransform.applyInverse(point)":
-            taskContainer.groupTransform.applyInverse(point),
-          "taskContainer.localTransform.apply(point)": taskContainer.localTransform.apply(point),
-          "taskContainer.localTransform.applyInverse(point)":
-            taskContainer.localTransform.applyInverse(point),
-        },
-        null,
-        2,
-      ),
-    );
+    return { axisX: horizontalAxis, axisY: verticalAxis };
   };
 };

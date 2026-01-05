@@ -56,12 +56,14 @@ export const TaskContainer: Component<TaskContainerProps> = (props) => {
 
   createObjectDrag(taskContainer, {
     onDragEnd: () => {
+      const axis = axisMapper(taskContainer);
+
       taskCollection.update(props.task.id, (draft) => {
         draft.positionX = taskContainer.x;
         draft.positionY = taskContainer.y;
+        draft.axisX = axis.axisX;
+        draft.axisY = axis.axisY;
       });
-
-      axisMapper(taskContainer);
     },
     onDragStart: () => {
       selection().setSelection([props.task.id]);

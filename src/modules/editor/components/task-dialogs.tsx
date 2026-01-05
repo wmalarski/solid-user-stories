@@ -23,8 +23,8 @@ import { FormError } from "~/ui/form-error/form-error";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { useBoardId } from "../contexts/board-context";
-import { useTransformPoint } from "../contexts/transform-state";
 import { createTaskInsertListener } from "../pixi/utils/create-task-insert-listener";
+import { useAxisPositionMapper } from "../pixi/utils/use-axis-position-mapper";
 import type { Point2D } from "../utils/types";
 
 type TaskDropdownProps = {
@@ -78,11 +78,11 @@ export const InsertTaskDialog: Component = () => {
   const formId = createUniqueId();
   const dialogId = createUniqueId();
 
-  const transformPoint = useTransformPoint();
-
   const [formRef, setFormRef] = createSignal<HTMLFormElement>();
 
   const [position, setPosition] = createSignal<Point2D | null>(null);
+
+  const axisMapper = useAxisPositionMapper();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -96,19 +96,19 @@ export const InsertTaskDialog: Component = () => {
       return;
     }
 
-    const transformed = transformPoint(positionValue);
     const taskId = createId();
+    const axis = axisMapper(positionValue);
 
     taskCollection.insert({
-      axisX: "",
-      axisY: "",
+      axisX: axis.axisX,
+      axisY: axis.axisY,
       boardId: boardId(),
       description: parsed.output.description,
       estimate: parsed.output.estimate,
       id: taskId,
       link: parsed.output.link,
-      positionX: transformed.x,
-      positionY: transformed.y,
+      positionX: positionValue.x,
+      positionY: positionValue.y,
       title: parsed.output.title,
     });
 
@@ -118,22 +118,7 @@ export const InsertTaskDialog: Component = () => {
 
   createTaskInsertListener({
     onDoubleClick: (event) => {
-      //   console.log({
-      //     clientX: event.clientX,
-      //     clientY: event.clientY,
-      //     globalX: event.globalX,
-      //     globalY: event.globalY,
-      //     pageX: event.pageX,
-      //     pageY: event.pageY,
-      //     screenX: event.screenX,
-      //     screenY: event.screenY,
-      //     t1: transformPoint({ x: event.x, y: event.y }),
-      //     t2: transformPoint({ x: event.x, y: event.y }, true),
-      //     x: event.x,
-      //     y: event.y,
-      //   });
-
-      setPosition(transformPoint({ x: event.x, y: event.y }, true));
+      setPosition(event.target.worldTransform.applyInverse(event));
       openDialog(dialogId);
     },
   });
