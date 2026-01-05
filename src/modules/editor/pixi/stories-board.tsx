@@ -1,9 +1,10 @@
 import { eq, useLiveQuery } from "@tanstack/solid-db";
 import type { FederatedPointerEvent } from "pixi.js";
 import { For, type Component } from "solid-js";
-import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
+import { edgeCollection } from "~/integrations/tanstack-db/collections";
 import { useBoardId } from "../contexts/board-context";
 import { useSelectionContext } from "../contexts/selection-context";
+import { useTasksContext } from "../contexts/tasks-context";
 import { RIGHT_BUTTON } from "../utils/constants";
 import { AxisContainer } from "./axis-container";
 import { DrawingEdgeGraphics, EdgeContainer } from "./edge-graphics";
@@ -27,13 +28,9 @@ export const StoriesBoard: Component = () => {
 };
 
 const TaskGraphicsList: Component = () => {
-  const boardId = useBoardId();
+  const collection = useTasksContext();
 
-  const collection = useLiveQuery((q) =>
-    q.from({ tasks: taskCollection }).where(({ tasks }) => eq(tasks.boardId, boardId())),
-  );
-
-  return <For each={collection.data}>{(task) => <TaskContainer task={task} />}</For>;
+  return <For each={collection().data}>{(task) => <TaskContainer task={task} />}</For>;
 };
 
 const EdgeGraphicsList: Component = () => {

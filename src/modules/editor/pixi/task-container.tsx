@@ -55,7 +55,7 @@ export const TaskContainer: Component<TaskContainerProps> = (props) => {
   const axisMapper = useAxisPositionMapper();
 
   createObjectDrag(taskContainer, {
-    onDragEnd: () => {
+    onDragMove: () => {
       const axis = axisMapper(taskContainer);
 
       taskCollection.update(props.task.id, (draft) => {
