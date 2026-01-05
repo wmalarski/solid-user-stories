@@ -1,6 +1,7 @@
+import { eq, useLiveQuery } from "@tanstack/solid-db";
 import { Container, DOMContainer, Graphics, Text, TextStyle } from "pixi.js";
 import { createEffect, createMemo, For, type Component } from "solid-js";
-import { axisCollection } from "~/integrations/tanstack-db/collections";
+import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { AxisDropdown } from "../components/axis-dialogs";
 import { useBoardContext } from "../contexts/board-context";
@@ -138,6 +139,7 @@ const AxisItemGraphics: Component<AxisItemGraphicsProps> = (props) => {
     <>
       <AxisNameText axis={props.axis} itemContainer={itemContainer} />
       <AxisMenu axis={props.axis} itemContainer={itemContainer} />
+      <AxisSummaryText axis={props.axis} itemContainer={itemContainer} />
     </>
   );
 };
@@ -155,6 +157,38 @@ const AxisNameText: Component<AxisNameTextProps> = (props) => {
 
   createEffect(() => {
     title.text = props.axis.name;
+  });
+
+  return null;
+};
+
+type AxisSummaryTextProps = {
+  axis: AxisModel;
+  itemContainer: Container;
+};
+
+const AxisSummaryText: Component<AxisSummaryTextProps> = (props) => {
+  const style = new TextStyle({ fontSize: 16 });
+
+  const estimationText = new Text({ anchor: { x: 0, y: 0.5 }, style, y: 26 });
+  createMountAsChild(() => props.itemContainer, estimationText);
+
+  const collection = useLiveQuery((q) =>
+    q
+      .from({ tasks: taskCollection })
+      .where(({ tasks }) =>
+        props.axis.orientation === "horizontal"
+          ? eq(tasks.axisX, props.axis.id)
+          : eq(tasks.axisY, props.axis.id),
+      ),
+  );
+
+  const esitmationSum = createMemo(() => {
+    return collection.data.reduce((previous, current) => previous + current.estimate, 0);
+  });
+
+  createEffect(() => {
+    estimationText.text = String(esitmationSum());
   });
 
   return null;

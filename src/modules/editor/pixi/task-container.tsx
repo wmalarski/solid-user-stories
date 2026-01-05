@@ -127,7 +127,7 @@ const TaskContentTexts: Component<TaskContentTextsProps> = (props) => {
   createMountAsChild(() => props.taskContainer, title);
 
   createEffect(() => {
-    title.text = `${props.task.title}\n${props.task.description}\n${props.task.estimate}\nX:${props.task.axisX}\nY:${props.task.axisY}`;
+    title.text = `${props.task.title}\n${props.task.description}\n${props.task.estimate}`;
   });
 
   return null;
