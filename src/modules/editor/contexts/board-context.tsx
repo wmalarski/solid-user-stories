@@ -16,7 +16,7 @@ const createBoardContextState = (board: BoardModel, axisEntries: AxisModel[]) =>
 };
 
 const BoardContext = createContext<Accessor<ReturnType<typeof createBoardContextState>>>(() => {
-  throw new Error("TransformStateContext not defined");
+  throw new Error("BoardContext not defined");
 });
 
 export const useBoardContext = () => {

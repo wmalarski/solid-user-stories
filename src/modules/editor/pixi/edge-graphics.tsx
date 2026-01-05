@@ -1,5 +1,7 @@
+import { eq, useLiveQuery } from "@tanstack/solid-db";
 import { Graphics, type FederatedMouseEvent, type FederatedPointerEvent } from "pixi.js";
 import { createEffect, Show, type Component } from "solid-js";
+import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { useEdgeDrawingContext, type DrawingState } from "../contexts/edge-drawing-context";
 import { useIsSelected, useSelectionContext } from "../contexts/selection-context";
@@ -52,6 +54,29 @@ const DrawingEdgeGraphicsContent: Component<DrawingEdgeGraphicsContentProps> = (
   });
 
   return null;
+};
+
+type EdgeContainerProps = {
+  edgeId: string;
+};
+
+export const EdgeContainer: Component<EdgeContainerProps> = (props) => {
+  const collection = useLiveQuery((q) =>
+    q
+      .from({ edge: edgeCollection })
+      .where(({ edge }) => eq(edge.id, props.edgeId))
+      .innerJoin({ source: taskCollection }, ({ edge, source }) => eq(edge.source, source.id))
+      .innerJoin({ target: taskCollection }, ({ edge, target }) => eq(edge.target, target.id))
+      .findOne(),
+  );
+
+  return (
+    <Show when={collection.data.at(0)}>
+      {(value) => (
+        <EdgeGraphics edge={value().edge} source={value().source} target={value().target} />
+      )}
+    </Show>
+  );
 };
 
 type EdgeGraphicsProps = {

@@ -297,13 +297,11 @@ const AxisGridItem: Component<AxisGridItemProps> = (props) => {
             : { x: args.shift.x, y: args.eventPosition.y };
         return subtractPoint(args.eventPosition, other);
       },
-      onDragEnd: (event) => {
+      onDragEnd: () => {
         const diff = graphics.x - props.position;
         axisCollection.update(props.axisId, (draft) => {
           draft.size += diff;
         });
-
-        console.log("[onDragEnd]", event, props.position, event.x, graphics.x, diff);
       },
     });
   });

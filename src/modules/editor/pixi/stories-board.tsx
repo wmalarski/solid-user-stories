@@ -6,7 +6,7 @@ import { useBoardId } from "../contexts/board-context";
 import { useSelectionContext } from "../contexts/selection-context";
 import { RIGHT_BUTTON } from "../utils/constants";
 import { AxisContainer } from "./axis-container";
-import { DrawingEdgeGraphics, EdgeGraphics } from "./edge-graphics";
+import { DrawingEdgeGraphics, EdgeContainer } from "./edge-graphics";
 import { useTaskContainer } from "./pixi-app";
 import { TaskContainer } from "./task-container";
 import { useStageTransform } from "./use-stage-transform";
@@ -43,15 +43,10 @@ const EdgeGraphicsList: Component = () => {
     q
       .from({ edge: edgeCollection })
       .where(({ edge }) => eq(edge.boardId, boardId()))
-      .innerJoin({ source: taskCollection }, ({ edge, source }) => eq(edge.source, source.id))
-      .innerJoin({ target: taskCollection }, ({ edge, target }) => eq(edge.target, target.id)),
+      .select((columns) => ({ id: columns.edge.id })),
   );
 
-  return (
-    <For each={collection.data}>
-      {(entry) => <EdgeGraphics edge={entry.edge} source={entry.source} target={entry.target} />}
-    </For>
-  );
+  return <For each={collection.data}>{(entry) => <EdgeContainer edgeId={entry.id} />}</For>;
 };
 
 const useStageDeselect = () => {
