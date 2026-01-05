@@ -18,8 +18,8 @@ export const StoriesBoard: Component = () => {
 
   return (
     <>
-      <AxisContainer />
       <TaskGraphicsList />
+      <AxisContainer />
       <EdgeGraphicsList />
       <DrawingEdgeGraphics />
     </>

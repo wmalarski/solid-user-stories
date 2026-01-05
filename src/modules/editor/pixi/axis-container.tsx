@@ -9,7 +9,7 @@ import { useTransformPoint, useTransformState } from "../contexts/transform-stat
 import { AXIS_CONTAINER_ZINDEX, AXIS_OFFSET } from "../utils/constants";
 import { subtractPoint } from "../utils/geometry";
 import { useBoardTheme } from "./board-theme";
-import { usePixiApp, usePixiContainer } from "./pixi-app";
+import { usePixiApp, usePixiContainer, useTaskContainer } from "./pixi-app";
 import { createMountAsChild } from "./utils/create-mount-as-child";
 import { createObjectDrag } from "./utils/create-object-drag";
 
@@ -257,9 +257,7 @@ type AxisGridItemProps = {
 const AxisGridItem: Component<AxisGridItemProps> = (props) => {
   const theme = useBoardTheme();
 
-  const transformPoint = useTransformPoint();
-
-  const container = usePixiContainer();
+  const container = useTaskContainer();
 
   const graphics = new Graphics();
   createMountAsChild(container, graphics);
@@ -267,18 +265,23 @@ const AxisGridItem: Component<AxisGridItemProps> = (props) => {
   createEffect(() => {
     graphics.clear();
 
-    const position = transformPoint({
-      x: props.position,
-      y: props.position,
-    });
+    graphics.moveTo(0, 0);
 
     if (props.orientation === "vertical") {
-      graphics.moveTo(0, position.y).lineTo(window.outerWidth, position.y);
+      graphics.lineTo(window.outerWidth, 0);
     } else {
-      graphics.moveTo(position.x, 0).lineTo(position.x, window.outerHeight);
+      graphics.lineTo(0, window.outerHeight);
     }
 
     graphics.stroke({ color: theme().axisGridColor, width: 2 });
+  });
+
+  createEffect(() => {
+    if (props.orientation === "vertical") {
+      graphics.y = props.position;
+    } else {
+      graphics.x = props.position;
+    }
   });
 
   createEffect(() => {
@@ -295,32 +298,13 @@ const AxisGridItem: Component<AxisGridItemProps> = (props) => {
         return subtractPoint(args.eventPosition, other);
       },
       onDragEnd: (event) => {
-        // taskCollection.update(props.task.id, (draft) => {
-        //   draft.positionX = taskContainer.x;
-        //   draft.positionY = taskContainer.y;
-        // });
-        // const position = transformPoint(event);
-        const position2 = transformPoint(event, true);
-
-        const diff = position2.x - props.position - AXIS_OFFSET;
-
+        const diff = graphics.x - props.position;
         axisCollection.update(props.axisId, (draft) => {
           draft.size += diff;
         });
 
-        // console.log("[onDragEnd]", event, props.position, event.x, position2.x, diff);
+        console.log("[onDragEnd]", event, props.position, event.x, graphics.x, diff);
       },
-      // onDragStart: (event) => {
-      //   // taskCollection.update(props.task.id, (draft) => {
-      //   //   draft.positionX = taskContainer.x;
-      //   //   draft.positionY = taskContainer.y;
-      //   // });
-
-      //   const position = transformPoint(event);
-      //   const position2 = transformPoint(event, true);
-
-      //   console.log("[onDragStart]", event, props.position, event.x, position.x, position2.x);
-      // },
     });
   });
 
