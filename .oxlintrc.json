@@ -24,7 +24,8 @@
     "URL": "readonly",
     "console": "readonly",
     "window": "readonly",
-    "FormData": "readonly"
+    "FormData": "readonly",
+    "AbortController": "readonly"
   },
   "rules": {
     "eslint/arrow-body-style": "off",

@@ -1,12 +1,13 @@
 import { eq, useLiveQuery } from "@tanstack/solid-db";
 import { Graphics, type FederatedMouseEvent, type FederatedPointerEvent } from "pixi.js";
-import { createEffect, createMemo, Show, type Component } from "solid-js";
+import { createEffect, createMemo, onCleanup, Show, type Component } from "solid-js";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { useEdgeDrawingContext, type DrawingState } from "../contexts/edge-drawing-context";
 import { useIsSelected, useSelectionContext } from "../contexts/selection-context";
-import { useTransformPoint } from "../contexts/transform-state";
 import {
+  KEY_BACKSPACE,
+  KEY_DELETE,
   RIGHT_BUTTON,
   TASK_GRAPHICS_HEIGHT,
   TASK_GRAPHICS_HEIGHT_2,
@@ -37,7 +38,7 @@ const DrawingEdgeGraphicsContent: Component<DrawingEdgeGraphicsContentProps> = (
 
   const container = useTaskContainer();
 
-  const transformPoint = useTransformPoint();
+  // const transformPoint = useTransformPoint();
 
   const edgeDrawing = useEdgeDrawingContext();
 
@@ -46,18 +47,21 @@ const DrawingEdgeGraphicsContent: Component<DrawingEdgeGraphicsContentProps> = (
 
   createPointerListeners(container, {
     onPointerMove: (event: FederatedPointerEvent) => {
-      const eventPosition = transformPoint(event);
-
       graphics.clear();
       graphics
         .moveTo(props.source.positionX, props.source.positionY)
-        .lineTo(eventPosition.x, eventPosition.y)
+        .lineTo(event.x, event.y)
         .stroke({ color: theme().edgeDrawingColor });
     },
     onPointerUp: () => {
       edgeDrawing().setSource(null);
     },
   });
+
+  // createEffect(() => {
+  //   graphics.x = props.source.positionX;
+  //   graphics.y = props.source.positionY;
+  // });
 
   return null;
 };
@@ -133,6 +137,30 @@ const EdgeGraphics: Component<EdgeGraphicsProps> = (props) => {
 
       selection().setSelection([props.edge.id]);
     },
+  });
+
+  createEffect(() => {
+    const isSelectedValue = isSelected();
+
+    if (!isSelectedValue) {
+      return;
+    }
+
+    const abortController = new AbortController();
+
+    globalThis.addEventListener(
+      "keyup",
+      (event) => {
+        if (event.key === KEY_BACKSPACE || event.key === KEY_DELETE) {
+          edgeCollection.delete(props.edge.id);
+        }
+      },
+      { signal: abortController.signal },
+    );
+
+    onCleanup(() => {
+      abortController.abort();
+    });
   });
 
   return (

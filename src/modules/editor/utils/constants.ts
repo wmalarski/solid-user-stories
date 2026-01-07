@@ -5,3 +5,5 @@ export const TASK_GRAPHICS_HEIGHT_2 = TASK_GRAPHICS_HEIGHT / 2;
 export const TASK_HANDLE_SIZE = 10;
 export const AXIS_CONTAINER_ZINDEX = 5;
 export const AXIS_OFFSET = 100;
+export const KEY_BACKSPACE = "Backspace";
+export const KEY_DELETE = "Delete";
