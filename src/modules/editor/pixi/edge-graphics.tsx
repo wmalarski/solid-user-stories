@@ -38,8 +38,6 @@ const DrawingEdgeGraphicsContent: Component<DrawingEdgeGraphicsContentProps> = (
 
   const container = useTaskContainer();
 
-  // const transformPoint = useTransformPoint();
-
   const edgeDrawing = useEdgeDrawingContext();
 
   const graphics = new Graphics({ eventMode: "none" });
@@ -47,21 +45,22 @@ const DrawingEdgeGraphicsContent: Component<DrawingEdgeGraphicsContentProps> = (
 
   createPointerListeners(container, {
     onPointerMove: (event: FederatedPointerEvent) => {
+      const transformed = container.worldTransform.applyInverse(event);
+
+      const breakX = (props.source.positionX + transformed.x) / 2;
+
       graphics.clear();
       graphics
         .moveTo(props.source.positionX, props.source.positionY)
-        .lineTo(event.x, event.y)
+        .lineTo(breakX, props.source.positionY)
+        .lineTo(breakX, transformed.y)
+        .lineTo(transformed.x, transformed.y)
         .stroke({ color: theme().edgeDrawingColor });
     },
     onPointerUp: () => {
       edgeDrawing().setSource(null);
     },
   });
-
-  // createEffect(() => {
-  //   graphics.x = props.source.positionX;
-  //   graphics.y = props.source.positionY;
-  // });
 
   return null;
 };
