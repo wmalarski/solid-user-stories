@@ -20,8 +20,8 @@ import {
 import { useIsSelected, useSelectionContext } from "../contexts/selection-context";
 import {
   RIGHT_BUTTON,
-  TASK_GRPAHICS_HEIGHT,
-  TASK_GRPAHICS_WIDTH,
+  TASK_GRAPHICS_HEIGHT,
+  TASK_GRAPHICS_WIDTH,
   TASK_HANDLE_SIZE,
 } from "../utils/constants";
 import { useBoardTheme } from "./board-theme";
@@ -105,7 +105,7 @@ const TaskGraphics: Component<TaskGraphicsProps> = (props) => {
 
     graphics.clear();
     graphics
-      .rect(0, 0, TASK_GRPAHICS_WIDTH, TASK_GRPAHICS_HEIGHT)
+      .rect(0, 0, TASK_GRAPHICS_WIDTH, TASK_GRAPHICS_HEIGHT)
       .fill({ color: themeValue.taskBackgroundColor });
 
     if (isSelectedValue) {
@@ -178,10 +178,10 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   createMountAsChild(() => props.taskContainer, graphics);
 
   const localPosition = createMemo(() => {
-    const handleX = props.handle === "left" ? 0 : TASK_GRPAHICS_WIDTH;
+    const handleX = props.handle === "left" ? 0 : TASK_GRAPHICS_WIDTH;
     return {
       positionX: handleX,
-      positionY: TASK_GRPAHICS_HEIGHT / 2,
+      positionY: TASK_GRAPHICS_HEIGHT / 2,
     };
   });
 
@@ -235,7 +235,7 @@ const TaskMenu: Component<TaskMenuProps> = (props) => {
 
   const domContainer = new DOMContainer({
     element: element as HTMLElement,
-    x: TASK_GRPAHICS_WIDTH - 26,
+    x: TASK_GRAPHICS_WIDTH - 26,
     y: 4,
   });
 
