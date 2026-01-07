@@ -99,12 +99,20 @@ export const EdgeGraphics: Component<EdgeGraphicsProps> = (props) => {
   createEffect(() => {
     const isSelectedValue = isSelected();
     const themeValue = theme();
+
+    const startX = props.source.positionX + TASK_GRPAHICS_WIDTH;
+    const endX = props.target.positionX;
+
     const heightOffset = TASK_GRPAHICS_HEIGHT / 2;
+    const startY = props.source.positionY + heightOffset;
+    const endY = props.target.positionY + heightOffset;
 
     graphics.clear();
     graphics
-      .moveTo(props.source.positionX + TASK_GRPAHICS_WIDTH, props.source.positionY + heightOffset)
-      .lineTo(props.target.positionX, props.target.positionY + heightOffset)
+      .moveTo(startX, startY)
+      .lineTo(props.edge.breakX, startY)
+      .lineTo(props.edge.breakX, endY)
+      .lineTo(endX, endY)
       .stroke({ color: isSelectedValue ? themeValue.selectionColor : themeValue.edgeColor });
   });
 
