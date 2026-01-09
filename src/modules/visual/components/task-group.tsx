@@ -8,8 +8,6 @@ type TaskGroupProps = {
   x: number;
   y: number;
   index: number;
-  onDragStart: () => void;
-  onDragEnd: () => void;
 };
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {

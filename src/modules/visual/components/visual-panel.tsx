@@ -1,97 +1,13 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import * as d3 from "d3";
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  type Component,
-  type ComponentProps,
-} from "solid-js";
+import { createSignal, For, type Component } from "solid-js";
 import { createDrag } from "../utils/create-drag";
 import { createZoom } from "../utils/create-zoom";
+import { DragGroup } from "./drag-group";
 import { TaskGroup } from "./task-group";
 
 export const VisualPanel: Component = () => {
   return <DragAndDropExample />;
-};
-
-export const LinearPlotExample: Component = () => {
-  // oxlint-disable-next-line no-array-callback-reference
-  const [data, setData] = createSignal(d3.ticks(-2, 2, 200).map(Math.sin));
-
-  const onMouseMove: ComponentProps<"div">["onMouseMove"] = (event) => {
-    const [x, y] = d3.pointer(event);
-    setData([...data().slice(-200), Math.atan2(x, y)]);
-  };
-
-  return (
-    <div onMouseMove={onMouseMove}>
-      <LinePlot data={data()} />
-    </div>
-  );
-};
-
-type LinePlotProps = {
-  data: number[];
-};
-
-const LinePlot: Component<LinePlotProps> = (props) => {
-  const width = 640;
-  const height = 400;
-  const marginTop = 20;
-  const marginRight = 20;
-  const marginBottom = 30;
-  const marginLeft = 40;
-
-  const [gx, setGx] = createSignal<SVGGElement>();
-  const [gy, setGy] = createSignal<SVGGElement>();
-
-  const dataLength = createMemo(() => {
-    return props.data.length;
-  });
-
-  const x = createMemo(() => {
-    return d3.scaleLinear([0, dataLength() - 1], [marginLeft, width - marginRight]);
-  });
-
-  const y = createMemo(() => {
-    return d3.scaleLinear(d3.extent(props.data) as [number, number], [
-      height - marginBottom,
-      marginTop,
-    ]);
-  });
-
-  const line = createMemo(() => {
-    return d3.line((_d, i) => x()(i), y());
-  });
-
-  createEffect(() => {
-    const element = gx();
-    if (element) {
-      d3.select(element).call(d3.axisBottom(x()));
-    }
-  });
-
-  createEffect(() => {
-    const element = gy();
-    if (element) {
-      d3.select(element).call(d3.axisLeft(y()));
-    }
-  });
-
-  return (
-    <svg class="w-screen h-screen">
-      <g ref={setGx} transform={`translate(0,${height - marginBottom})`} />
-      <g ref={setGy} transform={`translate(${marginLeft},0)`} />
-      <path fill="none" stroke="currentColor" stroke-width="1.5" d={line()(props.data) as string} />
-      <g fill="white" stroke="currentColor" stroke-width="1.5">
-        <For each={props.data}>
-          {(d, index) => <circle cx={x()(index())} cy={y()(d)} r="2.5" />}
-        </For>
-      </g>
-    </svg>
-  );
 };
 
 const DragAndDropExample: Component = () => {
@@ -111,16 +27,7 @@ const DragAndDropExample: Component = () => {
   });
 
   const [svgRef, setSvgRef] = createSignal<SVGSVGElement>();
-  const [isDragging, setIsDragging] = createSignal(false);
   const [transform, setTransform] = createSignal<string>();
-
-  const onDragStart = () => {
-    setIsDragging(true);
-  };
-
-  const onDragEnd = () => {
-    setIsDragging(false);
-  };
 
   createZoom({
     height: () => height,
@@ -131,22 +38,13 @@ const DragAndDropExample: Component = () => {
 
   return (
     <svg ref={setSvgRef} class="w-screen h-screen">
-      <g transform={transform()} cursor={isDragging() ? "grabbing" : "grab"}>
+      <DragGroup transform={transform()}>
         <For each={data}>
-          {(point, index) => (
-            <Circle
-              onDragEnd={onDragEnd}
-              onDragStart={onDragStart}
-              radius={radius}
-              x={point.x}
-              y={point.y}
-              index={index()}
-            />
-          )}
+          {(point, index) => <Circle radius={radius} x={point.x} y={point.y} index={index()} />}
         </For>
         <rect x={100} y={150} width={200} height={100} fill="red" />
-        <TaskGroup index={240} onDragEnd={onDragEnd} onDragStart={onDragStart} x={123} y={456} />
-      </g>
+        <TaskGroup index={240} x={123} y={456} />
+      </DragGroup>
       <rect x={100} y={150} width={200} height={100} fill="blue" />
     </svg>
   );
@@ -157,8 +55,6 @@ type CircleProps = {
   y: number;
   index: number;
   radius: number;
-  onDragStart: () => void;
-  onDragEnd: () => void;
 };
 
 const Circle: Component<CircleProps> = (props) => {
