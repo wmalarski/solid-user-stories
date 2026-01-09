@@ -8,6 +8,8 @@ import {
   type Component,
   type ComponentProps,
 } from "solid-js";
+import { createDrag } from "../utils/create-drag";
+import { createZoom } from "../utils/create-zoom";
 
 export const VisualPanel: Component = () => {
   return <DragAndDropExample />;
@@ -92,50 +94,6 @@ const LinePlot: Component<LinePlotProps> = (props) => {
 };
 
 const DragAndDropExample: Component = () => {
-  // const svg = d3.create("svg").attr("viewBox", [0, 0, width, height]);
-
-  // const g = svg.append("g").attr("cursor", "grab");
-
-  // g.selectAll("circle")
-  //   .data(data)
-  //   .join("circle")
-  //   .attr("cx", ({ x }) => x)
-  //   .attr("cy", ({ y }) => y)
-  //   .attr("r", radius)
-  //   .attr("fill", (d, i) => d3.interpolateRainbow(i / 360))
-  //   .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
-
-  // svg.call(
-  //   d3
-  //     .zoom()
-  //     .extent([
-  //       [0, 0],
-  //       [width, height],
-  //     ])
-  //     .scaleExtent([1, 8])
-  //     .on("zoom", zoomed),
-  // );
-
-  // function dragstarted() {
-  //   d3.select(this).raise();
-  //   g.attr("cursor", "grabbing");
-  // }
-
-  // const dragged = (event, d) => {
-  //   d3.select(this)
-  //     .attr("cx", (d.x = event.x))
-  //     .attr("cy", (d.y = event.y));
-  // }
-
-  // const dragended = () => {
-  //   g.attr("cursor", "grab");
-  // }
-
-  // // oxlint-disable-next-line no-explicit-any
-  // const zoomed = ({ transform }: any) => {
-  //   g.attr("transform", transform);
-  // };
-
   const radius = 6;
   const step = radius * 2;
   const theta = Math.PI * (3 - Math.sqrt(5));
@@ -163,28 +121,11 @@ const DragAndDropExample: Component = () => {
     setIsDragging(false);
   };
 
-  const onZoomed = ({ transform }: { transform: string }) => {
-    setTransform(transform);
-  };
-
-  createEffect(() => {
-    const svgRefValue = svgRef();
-
-    if (!svgRefValue) {
-      return;
-    }
-
-    const plugin = d3
-      .zoom()
-      .extent([
-        [0, 0],
-        [width, height],
-      ])
-      .scaleExtent([1, 8])
-      .on("zoom", onZoomed);
-
-    // oxlint-disable-next-line no-explicit-any
-    d3.select(svgRefValue).call(plugin as any);
+  createZoom({
+    height: () => height,
+    onZoomed: setTransform,
+    ref: svgRef,
+    width: () => width,
   });
 
   return (
@@ -202,7 +143,9 @@ const DragAndDropExample: Component = () => {
             />
           )}
         </For>
+        <rect x={100} y={150} width={200} height={100} fill="red" />
       </g>
+      <rect x={100} y={150} width={200} height={100} fill="blue" />
     </svg>
   );
 };
@@ -222,37 +165,12 @@ const Circle: Component<CircleProps> = (props) => {
   const [x, setX] = createWritableMemo(() => props.x);
   const [y, setY] = createWritableMemo(() => props.y);
 
-  const onDragStarted = () => {
-    const circleRefValue = circleRef();
-    if (circleRefValue) {
-      d3.select(circleRefValue).raise();
-      props.onDragStart();
-    }
-  };
-
-  const onDragged = (event: { x: number; y: number }) => {
-    setX(event.x);
-    setY(event.y);
-  };
-
-  const onDragEnded = () => {
-    props.onDragEnd();
-  };
-
-  createEffect(() => {
-    const circleRefValue = circleRef();
-    if (!circleRefValue) {
-      return;
-    }
-
-    const plugin = d3
-      .drag()
-      .on("start", onDragStarted)
-      .on("drag", onDragged)
-      .on("end", onDragEnded);
-
-    // oxlint-disable-next-line no-explicit-any
-    d3.select(circleRefValue).call(plugin as any);
+  createDrag({
+    onDragged(point) {
+      setX(point.x);
+      setY(point.y);
+    },
+    ref: circleRef,
   });
 
   return (
