@@ -10,6 +10,7 @@ import {
 } from "solid-js";
 import { createDrag } from "../utils/create-drag";
 import { createZoom } from "../utils/create-zoom";
+import { TaskGroup } from "./task-group";
 
 export const VisualPanel: Component = () => {
   return <DragAndDropExample />;
@@ -144,6 +145,7 @@ const DragAndDropExample: Component = () => {
           )}
         </For>
         <rect x={100} y={150} width={200} height={100} fill="red" />
+        <TaskGroup index={240} onDragEnd={onDragEnd} onDragStart={onDragStart} x={123} y={456} />
       </g>
       <rect x={100} y={150} width={200} height={100} fill="blue" />
     </svg>
