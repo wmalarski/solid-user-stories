@@ -12,11 +12,11 @@ export const AxisGroup: Component = () => {
     <>
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
-      <For each={axisConfig().config.horizontal.axis}>
-        {(entry, index) => <HorizontalItemRect axis={entry} index={index()} />}
+      <For each={axisConfig().config.x}>
+        {(entry) => <HorizontalItemRect axis={entry.axis} position={entry.start} />}
       </For>
-      <For each={axisConfig().config.vertical.axis}>
-        {(entry, index) => <VerticalItemRect axis={entry} index={index()} />}
+      <For each={axisConfig().config.y}>
+        {(entry) => <VerticalItemRect axis={entry.axis} position={entry.start} />}
       </For>
     </>
   );
@@ -38,28 +38,26 @@ const VerticalBackgroundRect: Component = () => {
 
 type HorizontalItemRectProps = {
   axis: AxisModel;
-  index: number;
+  position: number;
 };
 
 const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
   const boardTheme = useBoardThemeContext();
-  const axisConfig = useAxisConfigContext();
 
   const boardTransform = useBoardTransformContext();
 
-  const position = createMemo(() => axisConfig().config.horizontal.positions[props.index]);
-  const transformed = createMemo(() => boardTransform().translateX(position()));
+  const transformed = createMemo(() => boardTransform().translateX(props.position + AXIS_OFFSET));
 
   return (
     <>
       <rect
         width={props.axis.size * boardTransform().transform().k}
-        x={transformed() + AXIS_OFFSET}
+        x={transformed()}
         y={0}
         height={AXIS_OFFSET}
         fill={boardTheme().axisItemBoackgroundColor}
       />
-      <text x={transformed() + AXIS_OFFSET} y={20}>
+      <text x={transformed()} y={20}>
         {props.axis.name}
       </text>
     </>
@@ -68,28 +66,26 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
 
 type VerticalItemRectProps = {
   axis: AxisModel;
-  index: number;
+  position: number;
 };
 
 const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
   const boardTheme = useBoardThemeContext();
-  const axisConfig = useAxisConfigContext();
 
   const boardTransform = useBoardTransformContext();
 
-  const position = createMemo(() => axisConfig().config.vertical.positions[props.index]);
-  const transformed = createMemo(() => boardTransform().translateY(position()));
+  const transformed = createMemo(() => boardTransform().translateY(props.position + AXIS_OFFSET));
 
   return (
     <>
       <rect
         height={props.axis.size * boardTransform().transform().k}
         x={0}
-        y={transformed() + AXIS_OFFSET}
+        y={transformed()}
         width={AXIS_OFFSET}
         fill={boardTheme().axisItemBoackgroundColor}
       />
-      <text y={transformed() + AXIS_OFFSET + 20} x={0}>
+      <text y={transformed() + 20} x={0}>
         {props.axis.name}
       </text>
     </>

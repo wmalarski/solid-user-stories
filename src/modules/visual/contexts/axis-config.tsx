@@ -68,13 +68,23 @@ const getAxisValues = (entries: AxisModel[]) => {
   const verticalPositions = getPositions(vertical);
 
   return {
-    horizontal: {
-      axis: horizontal,
-      positions: horizontalPositions,
-    },
-    vertical: {
-      axis: vertical,
-      positions: verticalPositions,
-    },
+    // horizontal: {
+    //   axis: horizontal,
+    //   positions: horizontalPositions,
+    // },
+    // vertical: {
+    //   axis: vertical,
+    //   positions: verticalPositions,
+    // },
+    x: horizontal.map((axis, index) => ({
+      axis,
+      end: horizontalPositions[index + 1],
+      start: horizontalPositions[index],
+    })),
+    y: vertical.map((axis, index) => ({
+      axis,
+      end: verticalPositions[index + 1],
+      start: verticalPositions[index],
+    })),
   } as const;
 };
