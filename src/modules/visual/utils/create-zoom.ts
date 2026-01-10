@@ -1,16 +1,22 @@
 import * as d3 from "d3";
 import { createEffect, type Accessor } from "solid-js";
 
+export type Transform = {
+  k: number;
+  x: number;
+  y: number;
+};
+
 type CreateZoomArgs = {
   ref: Accessor<SVGElement | undefined>;
-  onZoomed: (transform: string) => void;
+  onZoomed: (transform: Transform) => void;
   height: Accessor<number>;
   width: Accessor<number>;
 };
 
 export const createZoom = (args: CreateZoomArgs) => {
-  const onZoomed = ({ transform }: { transform: string }) => {
-    args.onZoomed(transform);
+  const onZoomed = (event: { transform: Transform }) => {
+    args.onZoomed(event.transform);
   };
 
   createEffect(() => {
