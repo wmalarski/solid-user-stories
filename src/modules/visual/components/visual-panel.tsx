@@ -1,9 +1,10 @@
-import { createSignal, type Component } from "solid-js";
+import { createSignal, For, type Component } from "solid-js";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AxisConfigProvider } from "../contexts/axis-config";
 import { BoardModelProvider } from "../contexts/board-model";
 import { BoardThemeProvider } from "../contexts/board-theme";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
+import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
 import { useZoomTransform } from "../utils/use-zoom-transform";
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
@@ -19,9 +20,11 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
     <BoardThemeProvider>
       <BoardTransformProvider>
         <BoardModelProvider board={props.board}>
-          <AxisConfigProvider>
-            <DragAndDropExample />
-          </AxisConfigProvider>
+          <TasksDataProvider>
+            <AxisConfigProvider>
+              <DragAndDropExample />
+            </AxisConfigProvider>
+          </TasksDataProvider>
         </BoardModelProvider>
       </BoardTransformProvider>
     </BoardThemeProvider>
@@ -34,12 +37,13 @@ const DragAndDropExample: Component = () => {
 
   useZoomTransform({ ref: svgRef });
 
+  const tasksData = useTasksDataContext();
+
   return (
     <svg ref={setSvgRef} class="w-screen h-screen">
       <AxisGridPaths />
       <DragGroup transform={boardTransformContext().transform() as unknown as string}>
-        <TaskGroup index={240} x={123} y={456} />
-        <TaskGroup index={340} x={0} y={0} />
+        <For each={tasksData().entries}>{(task) => <TaskGroup task={task} />}</For>
       </DragGroup>
       <AxisGroup />
     </svg>

@@ -1,6 +1,7 @@
-import { createWritableMemo } from "@solid-primitives/memo";
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Component } from "solid-js";
+import { taskCollection } from "~/integrations/tanstack-db/collections";
+import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import {
   TASK_HANDLE_SIZE,
   TASK_HANDLE_SIZE_HALF,
@@ -11,47 +12,52 @@ import {
 import { createDrag } from "../utils/create-drag";
 
 type TaskGroupProps = {
-  x: number;
-  y: number;
-  index: number;
+  task: TaskModel;
 };
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
-
-  const [x, setX] = createWritableMemo(() => props.x);
-  const [y, setY] = createWritableMemo(() => props.y);
 
   const [shiftX, setShiftX] = createSignal(0);
   const [shiftY, setShiftY] = createSignal(0);
 
   createDrag({
     onDragStarted(event) {
-      setShiftX(x() - event.x);
-      setShiftY(y() - event.y);
+      setShiftX(props.task.positionX - event.x);
+      setShiftY(props.task.positionY - event.y);
     },
     onDragged(event) {
-      setX(event.x + shiftX());
-      setY(event.y + shiftY());
+      const updatedX = event.x + shiftX();
+      const updatedY = event.y + shiftY();
+
+      taskCollection.update(props.task.id, (draft) => {
+        draft.positionX = updatedX;
+        draft.positionY = updatedY;
+
+        // draft.axisX = axis.axisX;
+        // draft.axisY = axis.axisY;
+      });
     },
     ref: rectRef,
   });
+
+  const fill = d3.interpolateRainbow(Math.random());
 
   return (
     <>
       <rect
         ref={setRectRef}
-        x={x()}
-        y={y()}
+        x={props.task.positionX}
+        y={props.task.positionY}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
-        fill={d3.interpolateRainbow(props.index / 360)}
+        fill={fill}
       />
-      <text x={x() + 10} y={y() + 10}>
-        Hello
+      <text x={props.task.positionX + 16} y={props.task.positionY + 16}>
+        {props.task.title}
       </text>
-      <TaskHandle kind="source" x={x()} y={y()} />
-      <TaskHandle kind="target" x={x()} y={y()} />
+      <TaskHandle kind="source" x={props.task.positionX} y={props.task.positionY} />
+      <TaskHandle kind="target" x={props.task.positionX} y={props.task.positionY} />
     </>
   );
 };

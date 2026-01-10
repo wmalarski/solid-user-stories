@@ -9,6 +9,7 @@ import {
 } from "solid-js";
 import { axisCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
+import type { Point2D } from "~/modules/editor/utils/types";
 import { useBoardId } from "./board-model";
 
 const createAxisConfigContext = (boardId: string) => {
@@ -16,13 +17,26 @@ const createAxisConfigContext = (boardId: string) => {
     q.from({ axis: axisCollection }).where(({ axis }) => eq(axis.boardId, boardId)),
   );
 
-  const axisValues = createMemo(() => getAxisValues(entries.data));
+  const config = createMemo(() => getAxisValues(entries.data));
+
+  const mapToAxis = (point: Point2D) => {
+    const configValue = config();
+
+    const horizontalIndex = configValue.x.findIndex((entry) => entry.start > point.x) - 1;
+    const verticalIndex = configValue.y.findIndex((entry) => entry.start > point.y) - 1;
+
+    const axisX = horizontalIndex < 0 ? null : configValue.x.at(horizontalIndex)?.axis.id;
+    const axisY = verticalIndex < 0 ? null : configValue.y.at(verticalIndex)?.axis.id;
+
+    return { axisX, axisY };
+  };
 
   return {
     get config() {
-      return axisValues();
+      return config();
     },
     entries,
+    mapToAxis,
   };
 };
 
@@ -68,14 +82,6 @@ const getAxisValues = (entries: AxisModel[]) => {
   const verticalPositions = getPositions(vertical);
 
   return {
-    // horizontal: {
-    //   axis: horizontal,
-    //   positions: horizontalPositions,
-    // },
-    // vertical: {
-    //   axis: vertical,
-    //   positions: verticalPositions,
-    // },
     x: horizontal.map((axis, index) => ({
       axis,
       end: horizontalPositions[index + 1],
