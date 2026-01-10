@@ -6,7 +6,7 @@ import { Head } from "./integrations/meta/head";
 import { ErrorFallback } from "./integrations/router/error-fallback";
 import { BoardRoute } from "./modules/board/board-route";
 import { HomeRoute } from "./modules/home/home-route";
-import { VisualPanel } from "./modules/visual/components/visual-panel";
+import { VisualRoute } from "./modules/visual/components/visual-route";
 
 export const App: Component = () => (
   <>
@@ -24,7 +24,7 @@ export const App: Component = () => (
     >
       <Route path="/" component={HomeRoute} />
       <Route path="/board/:boardId" component={BoardRoute} />
-      <Route path="/panel/:boardId" component={VisualPanel} />
+      <Route path="/panel/:boardId" component={VisualRoute} />
     </Router>
   </>
 );

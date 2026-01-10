@@ -1,15 +1,26 @@
 import { createSignal, type Component } from "solid-js";
+import type { BoardModel } from "~/integrations/tanstack-db/schema";
+import { AxisConfigProvider } from "../contexts/axis-config";
+import { BoardModelProvider } from "../contexts/board-model";
 import { BoardThemeProvider } from "../contexts/board-theme";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { useZoomTransform } from "../utils/use-zoom-transform";
 import { DragGroup } from "./drag-group";
 import { TaskGroup } from "./task-group";
 
-export const VisualPanel: Component = () => {
+type VisualPanelProps = {
+  board: BoardModel;
+};
+
+export const VisualPanel: Component<VisualPanelProps> = (props) => {
   return (
     <BoardThemeProvider>
       <BoardTransformProvider>
-        <DragAndDropExample />
+        <BoardModelProvider board={props.board}>
+          <AxisConfigProvider>
+            <DragAndDropExample />
+          </AxisConfigProvider>
+        </BoardModelProvider>
       </BoardTransformProvider>
     </BoardThemeProvider>
   );
