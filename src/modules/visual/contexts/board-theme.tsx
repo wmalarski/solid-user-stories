@@ -9,15 +9,15 @@ import {
 
 const createBoardThemeContext = () => {
   return {
-    axisBoackgroundColor: "0xaabbcc",
-    axisGridColor: "0x66bb44",
-    axisItemBoackgroundColor: "0xffeedd",
-    backgroundDarkColor: "0x1d1d21",
-    edgeColor: "0xee3322",
-    edgeDrawingColor: "0xee1122",
-    selectionColor: "0xeeff33",
-    taskBackgroundColor: "0x998877",
-    taskHandleBackgroundColor: "0x228877",
+    axisBoackgroundColor: "#aabbcc",
+    axisGridColor: "#66bb44",
+    axisItemBoackgroundColor: "#ffeedd",
+    backgroundDarkColor: "#1d1d21",
+    edgeColor: "#ee3322",
+    edgeDrawingColor: "#ee1122",
+    selectionColor: "#eeff33",
+    taskBackgroundColor: "#998877",
+    taskHandleBackgroundColor: "#228877",
   };
 };
 
@@ -33,6 +33,6 @@ export const BoardThemeProvider: Component<ParentProps> = (props) => {
   return <BoardThemeContext.Provider value={value}>{props.children}</BoardThemeContext.Provider>;
 };
 
-export const useBoardTheme = () => {
+export const useBoardThemeContext = () => {
   return useContext(BoardThemeContext);
 };

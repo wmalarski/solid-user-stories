@@ -5,6 +5,7 @@ import { BoardModelProvider } from "../contexts/board-model";
 import { BoardThemeProvider } from "../contexts/board-theme";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { useZoomTransform } from "../utils/use-zoom-transform";
+import { AxisGroup } from "./axis-group";
 import { DragGroup } from "./drag-group";
 import { TaskGroup } from "./task-group";
 
@@ -34,9 +35,11 @@ const DragAndDropExample: Component = () => {
 
   return (
     <svg ref={setSvgRef} class="w-screen h-screen">
-      <DragGroup transform={boardTransformContext().transform()}>
+      <DragGroup transform={boardTransformContext().transform() as unknown as string}>
         <TaskGroup index={240} x={123} y={456} />
+        <TaskGroup index={340} x={0} y={0} />
       </DragGroup>
+      <AxisGroup />
     </svg>
   );
 };

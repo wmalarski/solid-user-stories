@@ -12,8 +12,6 @@ import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { useBoardId } from "./board-model";
 
 const createAxisConfigContext = (boardId: string) => {
-  console.log("[createAxisConfigContext]");
-
   const entries = useLiveQuery((q) =>
     q.from({ axis: axisCollection }).where(({ axis }) => eq(axis.boardId, boardId)),
   );
