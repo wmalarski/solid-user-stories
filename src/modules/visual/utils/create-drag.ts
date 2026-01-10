@@ -13,12 +13,8 @@ export const createDrag = (args: CreateDragArgs) => {
   const dragContext = useDragContext();
 
   const onDragStarted = (event: DragEvent) => {
-    const refValue = args.ref();
-    if (refValue) {
-      d3.select(refValue).raise();
-      dragContext().onDragStart();
-      args.onDragStarted?.(event);
-    }
+    dragContext().onDragStart();
+    args.onDragStarted?.(event);
   };
 
   const onDragged = (event: DragEvent) => {

@@ -47,6 +47,9 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         height={TASK_RECT_HEIGHT}
         fill={d3.interpolateRainbow(props.index / 360)}
       />
+      <text x={x() + 10} y={y() + 10}>
+        Hello
+      </text>
       <TaskHandle kind="source" x={x()} y={y()} />
       <TaskHandle kind="target" x={x()} y={y()} />
     </>
