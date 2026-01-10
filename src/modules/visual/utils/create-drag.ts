@@ -1,34 +1,33 @@
 import * as d3 from "d3";
 import { createEffect, type Accessor } from "solid-js";
-import type { Point2D } from "~/modules/editor/utils/types";
 import { useDragContext } from "../components/drag-group";
 
 type CreateDragArgs = {
   ref: Accessor<SVGElement | undefined>;
-  onDragStarted?: () => void;
-  onDragged: (point: Point2D) => void;
-  onDragEnded?: () => void;
+  onDragStarted?: (event: DragEvent) => void;
+  onDragged: (event: DragEvent) => void;
+  onDragEnded?: (event: DragEvent) => void;
 };
 
 export const createDrag = (args: CreateDragArgs) => {
   const dragContext = useDragContext();
 
-  const onDragStarted = () => {
+  const onDragStarted = (event: DragEvent) => {
     const refValue = args.ref();
     if (refValue) {
       d3.select(refValue).raise();
       dragContext().onDragStart();
-      args.onDragStarted?.();
+      args.onDragStarted?.(event);
     }
   };
 
-  const onDragged = (event: { x: number; y: number }) => {
-    args.onDragged({ x: event.x, y: event.y });
+  const onDragged = (event: DragEvent) => {
+    args.onDragged(event);
   };
 
-  const onDragEnded = () => {
+  const onDragEnded = (event: DragEvent) => {
     dragContext().onDragEnd();
-    args.onDragEnded?.();
+    args.onDragEnded?.(event);
   };
 
   createEffect(() => {
