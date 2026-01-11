@@ -22,7 +22,7 @@ type TaskGroupProps = {
 };
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
-  const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
+  const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
   const boardTheme = useBoardThemeContext();
 

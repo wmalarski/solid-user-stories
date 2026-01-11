@@ -1,9 +1,16 @@
 import * as d3 from "d3";
-import { createMemo, type Component } from "solid-js";
+import { createMemo, createSignal, type Component } from "solid-js";
+import { edgeCollection } from "~/integrations/tanstack-db/collections";
 import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { useBoardThemeContext } from "../contexts/board-theme";
+import { useDrag } from "../contexts/drag-state";
 import { useIsEdgeSelected } from "../contexts/selection-state";
-import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "../utils/constants";
+import {
+  EDGE_HANDLE_SIZE,
+  EDGE_HANDLE_SIZE_HALF,
+  TASK_RECT_HEIGHT_HALF,
+  TASK_RECT_WIDTH,
+} from "../utils/constants";
 
 type EdgePathProps = {
   edge: EdgeModel;
@@ -20,9 +27,8 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
     const startX = props.source.positionX + TASK_RECT_WIDTH;
     const endX = props.target.positionX;
 
-    const heightOffset = TASK_RECT_HEIGHT / 2;
-    const startY = props.source.positionY + heightOffset;
-    const endY = props.target.positionY + heightOffset;
+    const startY = props.source.positionY + TASK_RECT_HEIGHT_HALF;
+    const endY = props.target.positionY + TASK_RECT_HEIGHT_HALF;
 
     const context = d3.path();
     context.moveTo(startX, startY);
@@ -33,11 +39,50 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
   });
 
   return (
-    <path
-      d={path()}
-      stroke-width={isSelected() ? 2 : 1}
-      stroke={isSelected() ? boardTheme().selectionColor : boardTheme().edgeColor}
-      fill="transparent"
+    <>
+      <path
+        d={path()}
+        stroke-width={isSelected() ? 3 : 2}
+        stroke={isSelected() ? boardTheme().selectionColor : boardTheme().edgeColor}
+        fill="transparent"
+      />
+      <EdgeHandle edge={props.edge} source={props.source} target={props.target} />
+    </>
+  );
+};
+
+type EdgeHandleProps = {
+  edge: EdgeModel;
+  source: TaskModel;
+  target: TaskModel;
+};
+
+const EdgeHandle: Component<EdgeHandleProps> = (props) => {
+  const boardTheme = useBoardThemeContext();
+
+  const [rectRef, setRectRef] = createSignal<SVGRectElement>();
+
+  useDrag({
+    onDragged(event) {
+      edgeCollection.update(props.edge.id, (draft) => {
+        draft.breakX = event.x;
+      });
+    },
+    ref: rectRef,
+  });
+
+  return (
+    <rect
+      ref={setRectRef}
+      x={props.edge.breakX - EDGE_HANDLE_SIZE_HALF}
+      y={
+        (props.source.positionY + props.target.positionY) / 2 +
+        TASK_RECT_HEIGHT_HALF -
+        EDGE_HANDLE_SIZE_HALF
+      }
+      width={EDGE_HANDLE_SIZE}
+      height={EDGE_HANDLE_SIZE}
+      fill={boardTheme().edgeHandleColor}
     />
   );
 };
