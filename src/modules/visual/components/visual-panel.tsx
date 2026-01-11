@@ -1,4 +1,4 @@
-import { createSignal, For, type Component } from "solid-js";
+import { createSignal, For, Show, type Component } from "solid-js";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AxisConfigProvider } from "../contexts/axis-config";
 import { BoardModelProvider } from "../contexts/board-model";
@@ -16,6 +16,7 @@ import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
 import { EdgePath } from "./edge-path";
 import { TaskContent, TaskGroup } from "./task-group";
+import { ZoomBar } from "./zoom-bar";
 
 type VisualPanelProps = {
   board: BoardModel;
@@ -56,25 +57,28 @@ const DragAndDropExample: Component = () => {
   useZoomTransform({ ref: svgRef });
 
   return (
-    <svg ref={setSvgRef} class="w-screen h-screen">
-      <AxisGridPaths />
-      <g
-        ref={setGroupRef}
-        cursor={dragState().isDragging() ? "grabbing" : "grab"}
-        transform={boardTransformContext().transform() as unknown as string}
-      >
-        <For each={edgesData().entries}>
-          {(entry) => <EdgePath edge={entry.edge} source={entry.source} target={entry.target} />}
-        </For>
-        <For each={tasksData().entries}>{(task) => <TaskGroup task={task} />}</For>
-      </g>
-      <g
-        cursor={dragState().isDragging() ? "grabbing" : "grab"}
-        transform={boardTransformContext().transform() as unknown as string}
-      >
-        <For each={tasksData().entries}>{(task) => <TaskContent task={task} />}</For>
-      </g>
-      <AxisGroup />
-    </svg>
+    <>
+      <svg ref={setSvgRef} class="w-screen h-screen">
+        <AxisGridPaths />
+        <g
+          ref={setGroupRef}
+          cursor={dragState().isDragging() ? "grabbing" : "grab"}
+          transform={boardTransformContext().transform() as unknown as string}
+        >
+          <For each={edgesData().entries}>
+            {(entry) => <EdgePath edge={entry.edge} source={entry.source} target={entry.target} />}
+          </For>
+          <For each={tasksData().entries}>{(task) => <TaskGroup task={task} />}</For>
+        </g>
+        <g
+          cursor={dragState().isDragging() ? "grabbing" : "grab"}
+          transform={boardTransformContext().transform() as unknown as string}
+        >
+          <For each={tasksData().entries}>{(task) => <TaskContent task={task} />}</For>
+        </g>
+        <AxisGroup />
+      </svg>
+      <Show when={svgRef()}>{(svgRef) => <ZoomBar svgRef={svgRef()} />}</Show>
+    </>
   );
 };

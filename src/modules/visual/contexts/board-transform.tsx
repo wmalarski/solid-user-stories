@@ -9,6 +9,7 @@ import {
   createSignal,
   useContext,
 } from "solid-js";
+import type { Point2D } from "~/modules/editor/utils/types";
 
 export type Transform = {
   k: number;
@@ -16,8 +17,34 @@ export type Transform = {
   y: number;
 };
 
+const SCALE_BY = 1.1;
+const WIDTH = 500;
+const HEIGHT = 500;
+
+const getNewZoomState = (newScale: number, point: Point2D, old: Transform): Transform => {
+  const { k: stageScale, x: stageX, y: stageY } = old;
+  const mouseX = point.x / stageScale - stageX / stageScale;
+  const mouseY = point.y / stageScale - stageY / stageScale;
+  const newStageX = -(mouseX - point.x / newScale) * newScale;
+  const newStageY = -(mouseY - point.y / newScale) * newScale;
+  return { ...old, k: newScale, x: newStageX, y: newStageY };
+};
+
 const createBoardTransformContext = () => {
   const [transform, setTransform] = createSignal<Transform>({ k: 1, x: 0, y: 0 });
+
+  const onZoomed = (event: { transform: Transform }) => {
+    setTransform(event.transform);
+  };
+
+  const plugin = d3
+    .zoom()
+    .extent([
+      [0, 0],
+      [WIDTH, HEIGHT],
+    ])
+    .scaleExtent([0.2, 8])
+    .on("zoom", onZoomed);
 
   const translateX = (x: number) => {
     const transformValue = transform();
@@ -29,7 +56,33 @@ const createBoardTransformContext = () => {
     return y * transformValue.k + transformValue.y;
   };
 
-  return { height: 500, setTransform, transform, translateX, translateY, width: 500 };
+  const reset = () => {
+    setTransform({
+      k: 1,
+      x: 0,
+      y: 0,
+    });
+  };
+
+  const zoomIn = (point: Point2D) => {
+    const state = transform();
+    setTransform(getNewZoomState(state.k * SCALE_BY, point, state));
+  };
+
+  const zoomOut = (point: Point2D) => {
+    const state = transform();
+    setTransform(getNewZoomState(state.k / SCALE_BY, point, state));
+  };
+
+  return {
+    plugin,
+    reset,
+    transform,
+    translateX,
+    translateY,
+    zoomIn,
+    zoomOut,
+  };
 };
 
 const BoardTransformContext = createContext<
@@ -57,30 +110,12 @@ type UseZoomTransformArgs = {
 export const useZoomTransform = (args: UseZoomTransformArgs) => {
   const boardTransform = useBoardTransformContext();
 
-  const onZoomed = (event: { transform: Transform }) => {
-    boardTransform().setTransform(event.transform);
-  };
-
-  const width = createMemo(() => boardTransform().width);
-  const height = createMemo(() => boardTransform().height);
-
   createEffect(() => {
     const refValue = args.ref();
 
-    if (!refValue) {
-      return;
+    if (refValue) {
+      // oxlint-disable-next-line no-explicit-any
+      d3.select(refValue).call(boardTransform().plugin as any);
     }
-
-    const plugin = d3
-      .zoom()
-      .extent([
-        [0, 0],
-        [width(), height()],
-      ])
-      .scaleExtent([0.2, 8])
-      .on("zoom", onZoomed);
-
-    // oxlint-disable-next-line no-explicit-any
-    d3.select(refValue).call(plugin as any);
   });
 };
