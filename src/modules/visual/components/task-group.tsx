@@ -3,6 +3,7 @@ import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { useAxisConfigContext } from "../contexts/axis-config";
+import { useDrag } from "../contexts/drag-state";
 import {
   TASK_HANDLE_SIZE,
   TASK_HANDLE_SIZE_HALF,
@@ -10,7 +11,6 @@ import {
   TASK_RECT_HEIGHT,
   TASK_RECT_WIDTH,
 } from "../utils/constants";
-import { createDrag } from "../utils/create-drag";
 
 type TaskGroupProps = {
   task: TaskModel;
@@ -24,7 +24,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
 
   const axisConfig = useAxisConfigContext();
 
-  createDrag({
+  useDrag({
     onDragStarted(event) {
       setShiftX(props.task.positionX - event.x);
       setShiftY(props.task.positionY - event.y);
@@ -93,7 +93,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   const [x, setX] = createSignal(0);
   const [y, setY] = createSignal(0);
 
-  createDrag({
+  useDrag({
     onDragEnded() {
       setIsDragging(false);
     },

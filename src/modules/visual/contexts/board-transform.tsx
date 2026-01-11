@@ -1,8 +1,10 @@
+import * as d3 from "d3";
 import {
   type Accessor,
   type Component,
   type ParentProps,
   createContext,
+  createEffect,
   createMemo,
   createSignal,
   useContext,
@@ -46,4 +48,39 @@ export const BoardTransformProvider: Component<ParentProps> = (props) => {
 
 export const useBoardTransformContext = () => {
   return useContext(BoardTransformContext);
+};
+
+type UseZoomTransformArgs = {
+  ref: Accessor<SVGElement | undefined>;
+};
+
+export const useZoomTransform = (args: UseZoomTransformArgs) => {
+  const boardTransformContext = useBoardTransformContext();
+
+  const onZoomed = (event: { transform: Transform }) => {
+    boardTransformContext().setTransform(event.transform);
+  };
+
+  const width = createMemo(() => boardTransformContext().width);
+  const height = createMemo(() => boardTransformContext().height);
+
+  createEffect(() => {
+    const refValue = args.ref();
+
+    if (!refValue) {
+      return;
+    }
+
+    const plugin = d3
+      .zoom()
+      .extent([
+        [0, 0],
+        [width(), height()],
+      ])
+      .scaleExtent([0.2, 8])
+      .on("zoom", onZoomed);
+
+    // oxlint-disable-next-line no-explicit-any
+    d3.select(refValue).call(plugin as any);
+  });
 };
