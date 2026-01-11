@@ -1,4 +1,6 @@
+import { eq, useLiveQuery } from "@tanstack/solid-db";
 import { createMemo, For, type Component } from "solid-js";
+import { taskCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardThemeContext } from "../contexts/board-theme";
@@ -63,6 +65,7 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
       <text x={transformed()} y={40}>
         {props.axis.id}
       </text>
+      <AxisSummaryText axis={props.axis} orientation="horizontal" x={transformed()} y={60} />
     </>
   );
 };
@@ -94,6 +97,35 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
       <text y={transformed() + 40} x={0}>
         {props.axis.id}
       </text>
+      <AxisSummaryText axis={props.axis} orientation="vertical" x={0} y={transformed() + 60} />
     </>
+  );
+};
+
+type AxisSummaryTextProps = {
+  axis: AxisModel;
+  x: number;
+  y: number;
+  orientation: "vertical" | "horizontal";
+};
+
+const AxisSummaryText: Component<AxisSummaryTextProps> = (props) => {
+  const collection = useLiveQuery((q) =>
+    q
+      .from({ tasks: taskCollection })
+      .where(({ tasks }) =>
+        props.axis.orientation === "horizontal"
+          ? eq(tasks.axisX, props.axis.id)
+          : eq(tasks.axisY, props.axis.id),
+      ),
+  );
+  const esitmationSum = createMemo(() => {
+    return collection.data.reduce((previous, current) => previous + current.estimate, 0);
+  });
+
+  return (
+    <text y={props.y} x={props.x}>
+      {esitmationSum()}
+    </text>
   );
 };

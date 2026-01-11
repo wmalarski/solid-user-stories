@@ -95,14 +95,17 @@ export const TaskContent: Component<TaskContentProps> = (props) => {
       <text x={props.task.positionX + 16} y={props.task.positionY + 16}>
         {props.task.title}
       </text>
-      <text x={props.task.positionX + 16} y={props.task.positionY + 36}>
+      <text x={props.task.positionX + 16} y={props.task.positionY + 34}>
         {props.task.description}
       </text>
-      <text x={props.task.positionX + 16} y={props.task.positionY + 56}>
+      <text x={props.task.positionX + 16} y={props.task.positionY + 52}>
         X:{props.task.axisX}
       </text>
-      <text x={props.task.positionX + 16} y={props.task.positionY + 76}>
+      <text x={props.task.positionX + 16} y={props.task.positionY + 70}>
         Y:{props.task.axisY}
+      </text>
+      <text x={props.task.positionX + 16} y={props.task.positionY + 88}>
+        Points:{props.task.estimate}
       </text>
     </>
   );
