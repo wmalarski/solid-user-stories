@@ -44,29 +44,43 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
   const transformed = createMemo(() => boardTransform().translateY(props.position + AXIS_OFFSET));
 
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
+  const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
   const [startPosition, setStartPosition] = createSignal<number>(0);
   const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
 
   useDrag({
     onDragStarted() {
-      const entries = tasksData()
-        .entries.filter((entry) => entry.positionY > props.position)
-        .map((task) => [task.id, task.positionY] as const);
+      let maxNotDraggedPosition = 0;
+      const draggedTasks = new Map<string, number>();
+      for (const entry of tasksData().entries) {
+        if (entry.positionY > props.position + AXIS_OFFSET) {
+          draggedTasks.set(entry.id, entry.positionY);
+        } else {
+          maxNotDraggedPosition = Math.max(
+            maxNotDraggedPosition,
+            entry.positionY - AXIS_OFFSET + 10,
+          );
+        }
+      }
 
-      setDraggedTasks(new Map(entries));
+      setMaxNotDraggedPosition(maxNotDraggedPosition);
       setStartPosition(props.position);
+      setDraggedTasks(draggedTasks);
     },
     onDragged(event) {
       if (props.axisId) {
         const transform = boardTransform().transform();
         const updatedY = (event.y - transform.y) / transform.k - AXIS_OFFSET;
-        const size = updatedY - props.start;
+        const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
+        const size = withLimit - props.start;
+
         axisCollection.update(props.axisId, (draft) => {
           draft.size = size;
         });
 
-        const shift = updatedY - startPosition();
+        const shift = withLimit - startPosition();
         const draggedTasksValue = draggedTasks();
+
         taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
           for (const draft of drafts) {
             const position = draggedTasksValue.get(draft.id) ?? draft.positionY;
@@ -106,29 +120,43 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
   const transformed = createMemo(() => boardTransform().translateX(props.position + AXIS_OFFSET));
 
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
+  const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
   const [startPosition, setStartPosition] = createSignal<number>(0);
   const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
 
   useDrag({
     onDragStarted() {
-      const entries = tasksData()
-        .entries.filter((entry) => entry.positionX > props.position)
-        .map((task) => [task.id, task.positionX] as const);
+      let maxNotDraggedPosition = 0;
+      const draggedTasks = new Map<string, number>();
+      for (const entry of tasksData().entries) {
+        if (entry.positionX > props.position + AXIS_OFFSET) {
+          draggedTasks.set(entry.id, entry.positionX);
+        } else {
+          maxNotDraggedPosition = Math.max(
+            maxNotDraggedPosition,
+            entry.positionX - AXIS_OFFSET + 10,
+          );
+        }
+      }
 
-      setDraggedTasks(new Map(entries));
+      setMaxNotDraggedPosition(maxNotDraggedPosition);
       setStartPosition(props.position);
+      setDraggedTasks(draggedTasks);
     },
     onDragged(event) {
       if (props.axisId) {
         const transform = boardTransform().transform();
         const updatedX = (event.x - transform.x) / transform.k - AXIS_OFFSET;
-        const size = updatedX - props.start;
+        const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
+        const size = withLimit - props.start;
+
         axisCollection.update(props.axisId, (draft) => {
           draft.size = size;
         });
 
-        const shift = updatedX - startPosition();
+        const shift = withLimit - startPosition();
         const draggedTasksValue = draggedTasks();
+
         taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
           for (const draft of drafts) {
             const position = draggedTasksValue.get(draft.id) ?? draft.positionX;
