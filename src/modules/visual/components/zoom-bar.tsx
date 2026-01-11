@@ -1,4 +1,3 @@
-import * as d3 from "d3";
 import type { Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
 import { Button } from "~/ui/button/button";
@@ -8,36 +7,21 @@ import { Tooltip } from "~/ui/tooltip/tooltip";
 import { useBoardTransformContext } from "../contexts/board-transform";
 import { ToolContainer } from "./tool-container";
 
-type ZoomBarProps = {
-  svgRef: SVGSVGElement;
+const center = () => {
+  return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 };
 
-export const ZoomBar: Component<ZoomBarProps> = (props) => {
+export const ZoomBar: Component = () => {
   const { t } = useI18n();
 
   const transform = useBoardTransformContext();
 
-  // oxlint-disable-next-line consistent-function-scoping
-  const center = () => {
-    return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-  };
-
   const onZoomInClick = () => {
-    // d3.select(props.svgRef);
-    const transformValue = transform();
-    const k = transformValue.transform().k;
-    // oxlint-disable-next-line no-explicit-any
-    const selection = d3.select(props.svgRef) as any;
-    transformValue.plugin.scaleTo(selection, k + 0.1, [center().x, center().y]);
-    // transform().zoomIn(center());
+    transform().zoomIn(center());
   };
 
   const onZoomOutClick = () => {
-    const transformValue = transform();
-    const k = transformValue.transform().k;
-    // oxlint-disable-next-line no-explicit-any
-    const selection = d3.select(props.svgRef) as any;
-    transformValue.plugin.scaleTo(selection, k - 0.1, [center().x, center().y]);
+    transform().zoomOut(center());
   };
 
   const onZoomResetClick = () => {

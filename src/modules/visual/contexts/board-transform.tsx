@@ -21,17 +21,11 @@ const SCALE_BY = 1.1;
 const WIDTH = 500;
 const HEIGHT = 500;
 
-const getNewZoomState = (newScale: number, point: Point2D, old: Transform): Transform => {
-  const { k: stageScale, x: stageX, y: stageY } = old;
-  const mouseX = point.x / stageScale - stageX / stageScale;
-  const mouseY = point.y / stageScale - stageY / stageScale;
-  const newStageX = -(mouseX - point.x / newScale) * newScale;
-  const newStageY = -(mouseY - point.y / newScale) * newScale;
-  return { ...old, k: newScale, x: newStageX, y: newStageY };
-};
-
-const createBoardTransformContext = () => {
+const createBoardTransformContext = (svg: SVGSVGElement | undefined) => {
   const [transform, setTransform] = createSignal<Transform>({ k: 1, x: 0, y: 0 });
+
+  // oxlint-disable-next-line no-explicit-any
+  const selection = () => svg && (d3.select(svg) as any);
 
   const onZoomed = (event: { transform: Transform }) => {
     setTransform(event.transform);
@@ -66,12 +60,12 @@ const createBoardTransformContext = () => {
 
   const zoomIn = (point: Point2D) => {
     const state = transform();
-    setTransform(getNewZoomState(state.k * SCALE_BY, point, state));
+    plugin.scaleTo(selection(), state.k * SCALE_BY, [point.x, point.y]);
   };
 
   const zoomOut = (point: Point2D) => {
     const state = transform();
-    setTransform(getNewZoomState(state.k / SCALE_BY, point, state));
+    plugin.scaleTo(selection(), state.k / SCALE_BY, [point.x, point.y]);
   };
 
   return {
@@ -91,8 +85,21 @@ const BoardTransformContext = createContext<
   throw new Error("BoardTransformContext is not defined");
 });
 
-export const BoardTransformProvider: Component<ParentProps> = (props) => {
-  const value = createMemo(() => createBoardTransformContext());
+type BoardTransformProviderProps = ParentProps<{
+  svg: SVGSVGElement | undefined;
+}>;
+
+export const BoardTransformProvider: Component<BoardTransformProviderProps> = (props) => {
+  const value = createMemo(() => createBoardTransformContext(props.svg));
+
+  createEffect(() => {
+    const svg = props.svg;
+
+    if (svg) {
+      // oxlint-disable-next-line no-explicit-any
+      d3.select(svg).call(value().plugin as any);
+    }
+  });
 
   return (
     <BoardTransformContext.Provider value={value}>{props.children}</BoardTransformContext.Provider>
@@ -101,21 +108,4 @@ export const BoardTransformProvider: Component<ParentProps> = (props) => {
 
 export const useBoardTransformContext = () => {
   return useContext(BoardTransformContext);
-};
-
-type UseZoomTransformArgs = {
-  ref: Accessor<SVGElement | undefined>;
-};
-
-export const useZoomTransform = (args: UseZoomTransformArgs) => {
-  const boardTransform = useBoardTransformContext();
-
-  createEffect(() => {
-    const refValue = args.ref();
-
-    if (refValue) {
-      // oxlint-disable-next-line no-explicit-any
-      d3.select(refValue).call(boardTransform().plugin as any);
-    }
-  });
 };
