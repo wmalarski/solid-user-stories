@@ -3,7 +3,9 @@ import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { useAxisConfigContext } from "../contexts/axis-config";
+import { useBoardThemeContext } from "../contexts/board-theme";
 import { useDrag } from "../contexts/drag-state";
+import { useIsTaskSelected } from "../contexts/selection-state";
 import {
   TASK_HANDLE_SIZE,
   TASK_HANDLE_SIZE_HALF,
@@ -18,6 +20,8 @@ type TaskGroupProps = {
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
+
+  const boardTheme = useBoardThemeContext();
 
   const [shiftX, setShiftX] = createSignal(0);
   const [shiftY, setShiftY] = createSignal(0);
@@ -48,6 +52,8 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
 
   const fill = d3.interpolateRainbow(Math.random());
 
+  const isSelected = useIsTaskSelected(() => props.task.id);
+
   return (
     <>
       <rect
@@ -56,8 +62,23 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         y={props.task.positionY}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
+        stroke={isSelected() ? boardTheme().selectionColor : undefined}
+        stroke-width={2}
         fill={fill}
       />
+      <TaskHandle kind="source" x={props.task.positionX} y={props.task.positionY} />
+      <TaskHandle kind="target" x={props.task.positionX} y={props.task.positionY} />
+    </>
+  );
+};
+
+type TaskContentProps = {
+  task: TaskModel;
+};
+
+export const TaskContent: Component<TaskContentProps> = (props) => {
+  return (
+    <>
       <text x={props.task.positionX + 16} y={props.task.positionY + 16}>
         {props.task.title}
       </text>
@@ -70,8 +91,6 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       <text x={props.task.positionX + 16} y={props.task.positionY + 76}>
         Y:{props.task.axisY}
       </text>
-      <TaskHandle kind="source" x={props.task.positionX} y={props.task.positionY} />
-      <TaskHandle kind="target" x={props.task.positionX} y={props.task.positionY} />
     </>
   );
 };

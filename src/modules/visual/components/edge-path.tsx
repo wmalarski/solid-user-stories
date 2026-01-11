@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import { createMemo, type Component } from "solid-js";
 import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { useBoardThemeContext } from "../contexts/board-theme";
+import { useIsEdgeSelected } from "../contexts/selection-state";
 import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "../utils/constants";
 
 type EdgePathProps = {
@@ -12,6 +13,8 @@ type EdgePathProps = {
 
 export const EdgePath: Component<EdgePathProps> = (props) => {
   const boardTheme = useBoardThemeContext();
+
+  const isSelected = useIsEdgeSelected(() => props.edge.id);
 
   const path = createMemo(() => {
     const startX = props.source.positionX + TASK_RECT_WIDTH;
@@ -29,5 +32,12 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
     return context.toString();
   });
 
-  return <path d={path()} stroke-width={1} stroke={boardTheme().edgeColor} fill="transparent" />;
+  return (
+    <path
+      d={path()}
+      stroke-width={isSelected() ? 2 : 1}
+      stroke={isSelected() ? boardTheme().selectionColor : boardTheme().edgeColor}
+      fill="transparent"
+    />
+  );
 };
