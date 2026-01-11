@@ -1,9 +1,10 @@
 import { createMemo, createSignal, For, type Component } from "solid-js";
-import { axisCollection } from "~/integrations/tanstack-db/collections";
+import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardThemeContext } from "../contexts/board-theme";
 import { useBoardTransformContext } from "../contexts/board-transform";
 import { useDrag } from "../contexts/drag-state";
+import { useTasksDataContext } from "../contexts/tasks-data";
 import { AXIS_OFFSET } from "../utils/constants";
 
 export const AxisGridPaths: Component = () => {
@@ -34,21 +35,43 @@ type HorizontalPathProps = {
 };
 
 const HorizontalPath: Component<HorizontalPathProps> = (props) => {
-  const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
-
   const boardTheme = useBoardThemeContext();
+
+  const tasksData = useTasksDataContext();
 
   const boardTransform = useBoardTransformContext();
 
   const transformed = createMemo(() => boardTransform().translateY(props.position + AXIS_OFFSET));
 
+  const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
+  const [startPosition, setStartPosition] = createSignal<number>(0);
+  const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
+
   useDrag({
+    onDragStarted() {
+      const entries = tasksData()
+        .entries.filter((entry) => entry.positionY > props.position)
+        .map((task) => [task.id, task.positionY] as const);
+
+      setDraggedTasks(new Map(entries));
+      setStartPosition(props.position);
+    },
     onDragged(event) {
       if (props.axisId) {
         const transform = boardTransform().transform();
-        const size = (event.y - transform.y) / transform.k - AXIS_OFFSET - props.start;
+        const updatedY = (event.y - transform.y) / transform.k - AXIS_OFFSET;
+        const size = updatedY - props.start;
         axisCollection.update(props.axisId, (draft) => {
           draft.size = size;
+        });
+
+        const shift = updatedY - startPosition();
+        const draggedTasksValue = draggedTasks();
+        taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
+          for (const draft of drafts) {
+            const position = draggedTasksValue.get(draft.id) ?? draft.positionY;
+            draft.positionY = position + shift;
+          }
         });
       }
     },
@@ -74,21 +97,43 @@ type VerticalPathProps = {
 };
 
 const VerticalPath: Component<VerticalPathProps> = (props) => {
-  const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
-
   const boardTheme = useBoardThemeContext();
+
+  const tasksData = useTasksDataContext();
 
   const boardTransform = useBoardTransformContext();
 
   const transformed = createMemo(() => boardTransform().translateX(props.position + AXIS_OFFSET));
 
+  const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
+  const [startPosition, setStartPosition] = createSignal<number>(0);
+  const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
+
   useDrag({
+    onDragStarted() {
+      const entries = tasksData()
+        .entries.filter((entry) => entry.positionX > props.position)
+        .map((task) => [task.id, task.positionX] as const);
+
+      setDraggedTasks(new Map(entries));
+      setStartPosition(props.position);
+    },
     onDragged(event) {
       if (props.axisId) {
         const transform = boardTransform().transform();
-        const size = (event.x - transform.x) / transform.k - AXIS_OFFSET - props.start;
+        const updatedX = (event.x - transform.x) / transform.k - AXIS_OFFSET;
+        const size = updatedX - props.start;
         axisCollection.update(props.axisId, (draft) => {
           draft.size = size;
+        });
+
+        const shift = updatedX - startPosition();
+        const draggedTasksValue = draggedTasks();
+        taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
+          for (const draft of drafts) {
+            const position = draggedTasksValue.get(draft.id) ?? draft.positionX;
+            draft.positionX = position + shift;
+          }
         });
       }
     },
