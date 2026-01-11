@@ -60,6 +60,9 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
       <text x={transformed()} y={20}>
         {props.axis.name}
       </text>
+      <text x={transformed()} y={40}>
+        {props.axis.id}
+      </text>
     </>
   );
 };
@@ -87,6 +90,9 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
       />
       <text y={transformed() + 20} x={0}>
         {props.axis.name}
+      </text>
+      <text y={transformed() + 40} x={0}>
+        {props.axis.id}
       </text>
     </>
   );

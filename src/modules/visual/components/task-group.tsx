@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
+import { useAxisConfigContext } from "../contexts/axis-config";
 import {
   TASK_HANDLE_SIZE,
   TASK_HANDLE_SIZE_HALF,
@@ -21,6 +22,8 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const [shiftX, setShiftX] = createSignal(0);
   const [shiftY, setShiftY] = createSignal(0);
 
+  const axisConfig = useAxisConfigContext();
+
   createDrag({
     onDragStarted(event) {
       setShiftX(props.task.positionX - event.x);
@@ -30,12 +33,14 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       const updatedX = event.x + shiftX();
       const updatedY = event.y + shiftY();
 
+      const axis = axisConfig().mapToAxis({ x: updatedX, y: updatedY });
+
       taskCollection.update(props.task.id, (draft) => {
         draft.positionX = updatedX;
         draft.positionY = updatedY;
 
-        // draft.axisX = axis.axisX;
-        // draft.axisY = axis.axisY;
+        draft.axisX = axis.axisX;
+        draft.axisY = axis.axisY;
       });
     },
     ref: rectRef,
@@ -55,6 +60,15 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       />
       <text x={props.task.positionX + 16} y={props.task.positionY + 16}>
         {props.task.title}
+      </text>
+      <text x={props.task.positionX + 16} y={props.task.positionY + 36}>
+        {props.task.description}
+      </text>
+      <text x={props.task.positionX + 16} y={props.task.positionY + 56}>
+        X:{props.task.axisX}
+      </text>
+      <text x={props.task.positionX + 16} y={props.task.positionY + 76}>
+        Y:{props.task.axisY}
       </text>
       <TaskHandle kind="source" x={props.task.positionX} y={props.task.positionY} />
       <TaskHandle kind="target" x={props.task.positionX} y={props.task.positionY} />

@@ -10,6 +10,7 @@ import {
 import { axisCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import type { Point2D } from "~/modules/editor/utils/types";
+import { AXIS_OFFSET } from "../utils/constants";
 import { useBoardId } from "./board-model";
 
 const createAxisConfigContext = (boardId: string) => {
@@ -22,13 +23,13 @@ const createAxisConfigContext = (boardId: string) => {
   const mapToAxis = (point: Point2D) => {
     const configValue = config();
 
-    const horizontalIndex = configValue.x.findIndex((entry) => entry.start > point.x) - 1;
-    const verticalIndex = configValue.y.findIndex((entry) => entry.start > point.y) - 1;
+    const x = point.x - AXIS_OFFSET;
+    const y = point.y - AXIS_OFFSET;
 
-    const axisX = horizontalIndex < 0 ? null : configValue.x.at(horizontalIndex)?.axis.id;
-    const axisY = verticalIndex < 0 ? null : configValue.y.at(verticalIndex)?.axis.id;
+    const axisX = configValue.x.find((entry) => entry.start <= x && x < entry.end);
+    const axisY = configValue.y.find((entry) => entry.start <= y && y < entry.end);
 
-    return { axisX, axisY };
+    return { axisX: axisX?.axis.id ?? null, axisY: axisY?.axis.id ?? null };
   };
 
   return {
