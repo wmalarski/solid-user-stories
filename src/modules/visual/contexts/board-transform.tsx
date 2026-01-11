@@ -55,14 +55,14 @@ type UseZoomTransformArgs = {
 };
 
 export const useZoomTransform = (args: UseZoomTransformArgs) => {
-  const boardTransformContext = useBoardTransformContext();
+  const boardTransform = useBoardTransformContext();
 
   const onZoomed = (event: { transform: Transform }) => {
-    boardTransformContext().setTransform(event.transform);
+    boardTransform().setTransform(event.transform);
   };
 
-  const width = createMemo(() => boardTransformContext().width);
-  const height = createMemo(() => boardTransformContext().height);
+  const width = createMemo(() => boardTransform().width);
+  const height = createMemo(() => boardTransform().height);
 
   createEffect(() => {
     const refValue = args.ref();
