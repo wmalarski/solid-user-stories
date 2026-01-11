@@ -102,6 +102,8 @@ type TaskHandleProps = {
 };
 
 const TaskHandle: Component<TaskHandleProps> = (props) => {
+  const boardTheme = useBoardThemeContext();
+
   const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
 
   const xShift = createMemo(
@@ -109,12 +111,15 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   );
 
   const [isDragging, setIsDragging] = createSignal(false);
+  const [hasPosition, setHasPosition] = createSignal(false);
+
   const [x, setX] = createSignal(0);
   const [y, setY] = createSignal(0);
 
   useDrag({
     onDragEnded() {
       setIsDragging(false);
+      setHasPosition(false);
     },
     onDragStarted() {
       setIsDragging(true);
@@ -122,14 +127,28 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
     onDragged(event) {
       setX(event.x);
       setY(event.y);
+      setHasPosition(true);
     },
     ref: rectRef,
   });
 
   const path = createMemo(() => {
+    const xValue = x();
+    const yValue = y();
+
+    if (!hasPosition()) {
+      return;
+    }
+
+    const startX = props.x + xShift() + TASK_HANDLE_SIZE_HALF;
+    const startY = props.y + TASK_HANDLE_Y_SHIFT + TASK_HANDLE_SIZE_HALF;
+    const breakX = (startX + xValue) / 2;
+
     const context = d3.path();
-    context.moveTo(props.x + xShift(), props.y + TASK_HANDLE_Y_SHIFT);
-    context.lineTo(x(), y());
+    context.moveTo(startX, startY);
+    context.lineTo(breakX, startY);
+    context.lineTo(breakX, yValue);
+    context.lineTo(xValue, yValue);
     return context.toString();
   });
 
@@ -141,10 +160,10 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
         y={props.y + TASK_HANDLE_Y_SHIFT}
         width={TASK_HANDLE_SIZE}
         height={TASK_HANDLE_SIZE}
-        fill="blue"
+        fill={boardTheme().taskHandleBackgroundColor}
       />
       <Show when={isDragging()}>
-        <path d={path()} stroke="red" />
+        <path d={path()} stroke={boardTheme().edgeDrawingColor} fill="transparent" />
       </Show>
     </>
   );

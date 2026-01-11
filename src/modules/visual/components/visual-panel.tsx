@@ -3,10 +3,14 @@ import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AxisConfigProvider } from "../contexts/axis-config";
 import { BoardModelProvider } from "../contexts/board-model";
 import { BoardThemeProvider } from "../contexts/board-theme";
-import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
+import {
+  BoardTransformProvider,
+  useBoardTransformContext,
+  useZoomTransform,
+} from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgesDataProvider, useEdgesDataContext } from "../contexts/edges-data";
-import { SelectionStateProvider, useSelection } from "../contexts/selection-state";
+import { SelectionStateProvider } from "../contexts/selection-state";
 import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
@@ -48,8 +52,8 @@ const DragAndDropExample: Component = () => {
   const edgesData = useEdgesDataContext();
   const dragState = useDragStateContext();
 
-  useSelection({ ref: groupRef });
-  // useZoomTransform({ ref: svgRef });
+  // useSelection({ ref: groupRef });
+  useZoomTransform({ ref: svgRef });
 
   return (
     <svg ref={setSvgRef} class="w-screen h-screen">
