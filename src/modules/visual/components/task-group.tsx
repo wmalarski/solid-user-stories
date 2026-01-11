@@ -1,11 +1,14 @@
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Component } from "solid-js";
-import { taskCollection } from "~/integrations/tanstack-db/collections";
+import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
+import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { useAxisConfigContext } from "../contexts/axis-config";
+import { useBoardId } from "../contexts/board-model";
 import { useBoardThemeContext } from "../contexts/board-theme";
 import { useDrag } from "../contexts/drag-state";
 import { useIsTaskSelected } from "../contexts/selection-state";
+import { useTasksDataContext } from "../contexts/tasks-data";
 import {
   TASK_HANDLE_SIZE,
   TASK_HANDLE_SIZE_HALF,
@@ -66,8 +69,18 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         stroke-width={2}
         fill={fill}
       />
-      <TaskHandle kind="source" x={props.task.positionX} y={props.task.positionY} />
-      <TaskHandle kind="target" x={props.task.positionX} y={props.task.positionY} />
+      <TaskHandle
+        kind="source"
+        x={props.task.positionX}
+        y={props.task.positionY}
+        taskId={props.task.id}
+      />
+      <TaskHandle
+        kind="target"
+        x={props.task.positionX}
+        y={props.task.positionY}
+        taskId={props.task.id}
+      />
     </>
   );
 };
@@ -99,10 +112,15 @@ type TaskHandleProps = {
   x: number;
   y: number;
   kind: "source" | "target";
+  taskId: string;
 };
 
 const TaskHandle: Component<TaskHandleProps> = (props) => {
   const boardTheme = useBoardThemeContext();
+
+  const boardId = useBoardId();
+
+  const tasksData = useTasksDataContext();
 
   const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
 
@@ -116,10 +134,36 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   const [x, setX] = createSignal(0);
   const [y, setY] = createSignal(0);
 
+  const startX = createMemo(() => props.x + xShift() + TASK_HANDLE_SIZE_HALF);
+  const breakX = createMemo(() => (startX() + x()) / 2);
+
   useDrag({
     onDragEnded() {
       setIsDragging(false);
       setHasPosition(false);
+
+      const xValue = x();
+      const yValue = y();
+
+      const task = tasksData().entries.find(
+        (task) =>
+          task.positionX < xValue &&
+          xValue < task.positionX + TASK_RECT_WIDTH &&
+          task.positionY < yValue &&
+          yValue < task.positionY + TASK_RECT_HEIGHT,
+      );
+
+      if (!task) {
+        return;
+      }
+
+      edgeCollection.insert({
+        boardId: boardId(),
+        breakX: breakX(),
+        id: createId(),
+        source: props.kind === "source" ? props.taskId : task.id,
+        target: props.kind === "source" ? task.id : props.taskId,
+      });
     },
     onDragStarted() {
       setIsDragging(true);
@@ -133,21 +177,19 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   });
 
   const path = createMemo(() => {
-    const xValue = x();
-    const yValue = y();
-
     if (!hasPosition()) {
       return;
     }
 
-    const startX = props.x + xShift() + TASK_HANDLE_SIZE_HALF;
+    const xValue = x();
+    const yValue = y();
     const startY = props.y + TASK_HANDLE_Y_SHIFT + TASK_HANDLE_SIZE_HALF;
-    const breakX = (startX + xValue) / 2;
+    const breakXValue = breakX();
 
     const context = d3.path();
-    context.moveTo(startX, startY);
-    context.lineTo(breakX, startY);
-    context.lineTo(breakX, yValue);
+    context.moveTo(startX(), startY);
+    context.lineTo(breakXValue, startY);
+    context.lineTo(breakXValue, yValue);
     context.lineTo(xValue, yValue);
     return context.toString();
   });
