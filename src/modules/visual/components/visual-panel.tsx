@@ -8,10 +8,12 @@ import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgesDataProvider, useEdgesDataContext } from "../contexts/edges-data";
 import { SelectionStateProvider } from "../contexts/selection-state";
 import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
+import { ToolsStateProvider } from "../contexts/tools-state";
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
 import { EdgePath } from "./edge-path";
 import { TaskContent, TaskGroup } from "./task-group";
+import { ToolsBar } from "./tools-bar";
 import { ZoomBar } from "./zoom-bar";
 
 type VisualPanelProps = {
@@ -42,15 +44,18 @@ const DragAndDropExample: Component = () => {
   const [svgRef, setSvgRef] = createSignal<SVGSVGElement>();
 
   return (
-    <BoardTransformProvider svg={svgRef()}>
-      <svg ref={setSvgRef} class="w-screen h-screen">
-        <AxisGridPaths />
-        <SelectableGroup />
-        <TaskContentGroup />
-        <AxisGroup />
-      </svg>
-      <ZoomBar />
-    </BoardTransformProvider>
+    <ToolsStateProvider>
+      <BoardTransformProvider svg={svgRef()}>
+        <svg ref={setSvgRef} class="w-screen h-screen">
+          <AxisGridPaths />
+          <SelectableGroup />
+          <TaskContentGroup />
+          <AxisGroup />
+        </svg>
+        <ToolsBar />
+        <ZoomBar />
+      </BoardTransformProvider>
+    </ToolsStateProvider>
   );
 };
 

@@ -24,6 +24,11 @@ const enDict = {
       link: "Link",
       title: "Title",
     },
+    tools: {
+      pane: "Hand (panning tool)",
+      selection: "Selection",
+      task: "Task",
+    },
     zoom: {
       reset: "Reset zoom",
       zoomIn: "Zoom in",

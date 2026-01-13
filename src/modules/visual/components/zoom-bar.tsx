@@ -29,7 +29,7 @@ export const ZoomBar: Component = () => {
   };
 
   return (
-    <ToolContainer class="bottom-2 right-6">
+    <ToolContainer class="absolute bottom-2 right-6">
       <Tooltip data-tip={t("board.zoom.zoomIn")}>
         <Button
           aria-label={t("board.zoom.zoomIn")}
