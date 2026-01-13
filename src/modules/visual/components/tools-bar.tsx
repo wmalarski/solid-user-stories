@@ -32,22 +32,21 @@ export const ToolsBar: Component = () => {
             aria-label={t("board.tools.pane")}
             onClick={onToolClickFactory("pane")}
             shape="circle"
-            size="xs"
-            variant="ghost"
+            size="sm"
+            color={toolsState().tool() === "pane" ? "primary" : undefined}
           >
-            <HandIcon />
+            <HandIcon class="size-5" />
           </Button>
         </Tooltip>
         <Tooltip data-tip={t("board.tools.selection")} placement="bottom">
           <Button
             aria-label={t("board.tools.selection")}
-            class="tabular-nums"
             onClick={onToolClickFactory("selector")}
             shape="circle"
-            size="xs"
-            variant="ghost"
+            size="sm"
+            color={toolsState().tool() === "selector" ? "primary" : undefined}
           >
-            <MousePointerIcon />
+            <MousePointerIcon class="size-5" />
           </Button>
         </Tooltip>
         <Tooltip data-tip={t("board.tools.task")} placement="bottom">
@@ -55,10 +54,10 @@ export const ToolsBar: Component = () => {
             aria-label={t("board.tools.task")}
             onClick={onToolClickFactory("create-task")}
             shape="circle"
-            size="xs"
-            variant="ghost"
+            size="sm"
+            color={toolsState().tool() === "create-task" ? "primary" : undefined}
           >
-            <SquareIcon />
+            <SquareIcon class="size-5" />
           </Button>
         </Tooltip>
       </ToolContainer>

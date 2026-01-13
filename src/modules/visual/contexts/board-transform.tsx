@@ -7,9 +7,11 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  onCleanup,
   useContext,
 } from "solid-js";
 import type { Point2D } from "~/modules/editor/utils/types";
+import { useToolsStateContext } from "./tools-state";
 
 export type Transform = {
   k: number;
@@ -92,13 +94,24 @@ type BoardTransformProviderProps = ParentProps<{
 export const BoardTransformProvider: Component<BoardTransformProviderProps> = (props) => {
   const value = createMemo(() => createBoardTransformContext(props.svg));
 
+  const toolsState = useToolsStateContext();
+
   createEffect(() => {
+    const isPane = toolsState().tool() === "pane";
     const svg = props.svg;
 
-    if (svg) {
-      // oxlint-disable-next-line no-explicit-any
-      d3.select(svg).call(value().plugin as any);
+    if (!isPane || !svg) {
+      return;
     }
+
+    const select = d3.select(svg);
+
+    // oxlint-disable-next-line no-explicit-any
+    select.call(value().plugin as any);
+
+    onCleanup(() => {
+      select.on(".zoom", null);
+    });
   });
 
   return (

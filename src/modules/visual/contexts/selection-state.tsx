@@ -1,4 +1,3 @@
-import * as d3 from "d3";
 import {
   type Accessor,
   type Component,
@@ -12,6 +11,7 @@ import {
 import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "../utils/constants";
 import { useEdgesDataContext } from "./edges-data";
 import { useTasksDataContext } from "./tasks-data";
+import { useToolsStateContext } from "./tools-state";
 
 const createSelectionStateContext = () => {
   const [taskSelection, setTaskSelection] = createSignal<string[]>([]);
@@ -26,8 +26,14 @@ const SelectionStateContext = createContext<
   throw new Error("SelectionStateContext is not defined");
 });
 
-export const SelectionStateProvider: Component<ParentProps> = (props) => {
+type SelectionStateProviderProps = ParentProps<{
+  svg: SVGSVGElement | undefined;
+}>;
+
+export const SelectionStateProvider: Component<SelectionStateProviderProps> = (props) => {
   const value = createMemo(() => createSelectionStateContext());
+
+  useSelection({ ref: () => props.svg });
 
   return (
     <SelectionStateContext.Provider value={value}>{props.children}</SelectionStateContext.Provider>
@@ -61,6 +67,7 @@ export const useSelection = (args: UseSelectionArgs) => {
 
   const tasksData = useTasksDataContext();
   const edgesData = useEdgesDataContext();
+  const toolsState = useToolsStateContext();
 
   const onSelection = (event: BrushEvent) => {
     const [[startX, startY], [endX, endY]] = event.selection;
@@ -97,15 +104,21 @@ export const useSelection = (args: UseSelectionArgs) => {
   };
 
   createEffect(() => {
+    const isSelector = toolsState().tool() === "selector";
     const refValue = args.ref();
 
-    if (!refValue) {
+    if (!isSelector || !refValue) {
       return;
     }
 
-    const plugin = d3.brush().on("brush", onSelection);
+    // const plugin = d3.brush().on("brush", onSelection);
+    // const select = d3.select(refValue);
 
     // oxlint-disable-next-line no-explicit-any
-    d3.select(refValue).call(plugin as any);
+    // select.call(plugin as any);
+
+    // onCleanup(() => {
+    //   select.on(".brush", null);
+    // });
   });
 };

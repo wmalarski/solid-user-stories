@@ -28,9 +28,7 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
           <EdgesDataProvider>
             <AxisConfigProvider>
               <DragStateProvider>
-                <SelectionStateProvider>
-                  <DragAndDropExample />
-                </SelectionStateProvider>
+                <DragAndDropExample />
               </DragStateProvider>
             </AxisConfigProvider>
           </EdgesDataProvider>
@@ -45,16 +43,18 @@ const DragAndDropExample: Component = () => {
 
   return (
     <ToolsStateProvider>
-      <BoardTransformProvider svg={svgRef()}>
-        <svg ref={setSvgRef} class="w-screen h-screen">
-          <AxisGridPaths />
-          <SelectableGroup />
-          <TaskContentGroup />
-          <AxisGroup />
-        </svg>
-        <ToolsBar />
-        <ZoomBar />
-      </BoardTransformProvider>
+      <SelectionStateProvider svg={svgRef()}>
+        <BoardTransformProvider svg={svgRef()}>
+          <svg ref={setSvgRef} class="w-screen h-screen">
+            <AxisGridPaths />
+            <SelectableGroup />
+            <TaskContentGroup />
+            <AxisGroup />
+          </svg>
+          <ToolsBar />
+          <ZoomBar />
+        </BoardTransformProvider>
+      </SelectionStateProvider>
     </ToolsStateProvider>
   );
 };
