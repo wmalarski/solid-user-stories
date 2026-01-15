@@ -1,5 +1,6 @@
 import * as d3 from "d3";
-import { createEffect, createSignal, For, onCleanup, type Component } from "solid-js";
+import { createEffect, For, onCleanup, type Component } from "solid-js";
+import { cx } from "tailwind-variants";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AxisConfigProvider } from "../contexts/axis-config";
 import { BoardModelProvider } from "../contexts/board-model";
@@ -10,12 +11,12 @@ import { EdgesDataProvider, useEdgesDataContext } from "../contexts/edges-data";
 import { SelectionStateProvider } from "../contexts/selection-state";
 import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
 import { ToolsStateProvider, useToolsStateContext } from "../contexts/tools-state";
+import { SELECTABLE_GROUP_CLASS, SVG_CLASS, SVG_SELECTOR } from "../utils/constants";
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
 import { EdgePath } from "./edge-path";
 import { TaskContent, TaskGroup } from "./task-group";
 import { ToolsBar } from "./tools-bar";
-import { ZoomBar } from "./zoom-bar";
 
 type VisualPanelProps = {
   board: BoardModel;
@@ -28,11 +29,11 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
         <TasksDataProvider>
           <EdgesDataProvider>
             <AxisConfigProvider>
-              <DragStateProvider>
-                <ToolsStateProvider>
+              <ToolsStateProvider>
+                <DragStateProvider>
                   <DragAndDropExample />
-                </ToolsStateProvider>
-              </DragStateProvider>
+                </DragStateProvider>
+              </ToolsStateProvider>
             </AxisConfigProvider>
           </EdgesDataProvider>
         </TasksDataProvider>
@@ -42,31 +43,24 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
 };
 
 const DragAndDropExample: Component = () => {
-  const [svgRef, setSvgRef] = createSignal<SVGSVGElement>();
-  const [selectableRef, setSelectableRef] = createSignal<SVGElement>();
-
   return (
-    <SelectionStateProvider ref={selectableRef()}>
-      <BoardTransformProvider svg={svgRef()}>
-        <svg ref={setSvgRef} class="w-screen h-screen z-10 isolate">
-          <CreateTaskTool svg={svgRef()} />
+    <SelectionStateProvider>
+      <BoardTransformProvider>
+        <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
+          <CreateTaskTool />
           <AxisGridPaths />
-          <SelectableGroup ref={setSelectableRef} />
+          <SelectableGroup />
           <TaskContentGroup />
           <AxisGroup />
         </svg>
         <ToolsBar />
-        <ZoomBar />
+        {/* <ZoomBar /> */}
       </BoardTransformProvider>
     </SelectionStateProvider>
   );
 };
 
-type SelectableGroupProps = {
-  ref: (element: SVGElement) => void;
-};
-
-const SelectableGroup: Component<SelectableGroupProps> = (props) => {
+const SelectableGroup: Component = () => {
   const boardTransformContext = useBoardTransformContext();
 
   const tasksData = useTasksDataContext();
@@ -75,7 +69,7 @@ const SelectableGroup: Component<SelectableGroupProps> = (props) => {
 
   return (
     <g
-      ref={props.ref}
+      class={SELECTABLE_GROUP_CLASS}
       cursor={dragState().isDragging() ? "grabbing" : "grab"}
       transform={boardTransformContext().transform() as unknown as string}
     >
@@ -103,24 +97,18 @@ const TaskContentGroup: Component = () => {
   );
 };
 
-type CreateTaskToolProps = {
-  svg: SVGElement | undefined;
-};
-
-const CreateTaskTool: Component<CreateTaskToolProps> = (props) => {
+const CreateTaskTool: Component = () => {
   const toolsState = useToolsStateContext();
 
   createEffect(() => {
     const isCreateTask = toolsState().tool() === "create-task";
-    const svg = props.svg;
 
-    if (!isCreateTask || !svg) {
+    if (!isCreateTask) {
       return;
     }
 
     const abortController = new AbortController();
-    const select = d3.select(svg);
-    select.on(
+    d3.select(SVG_SELECTOR).on(
       "click",
       (event) => {
         console.log("EVENT", event);

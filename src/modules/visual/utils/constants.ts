@@ -7,3 +7,7 @@ export const TASK_HANDLE_Y_SHIFT = TASK_RECT_HEIGHT_HALF - TASK_HANDLE_SIZE_HALF
 export const EDGE_HANDLE_SIZE = 16;
 export const EDGE_HANDLE_SIZE_HALF = EDGE_HANDLE_SIZE / 2;
 export const AXIS_OFFSET = 100;
+export const SVG_CLASS = "svg-select";
+export const SVG_SELECTOR = `.${SVG_CLASS}`;
+export const SELECTABLE_GROUP_CLASS = "selectable";
+export const SELECTABLE_GROUP_SELECTOR = `.${SELECTABLE_GROUP_CLASS}`;

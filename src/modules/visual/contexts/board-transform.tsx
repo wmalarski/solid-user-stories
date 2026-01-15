@@ -11,6 +11,7 @@ import {
   useContext,
 } from "solid-js";
 import type { Point2D } from "~/modules/editor/utils/types";
+import { SVG_SELECTOR } from "../utils/constants";
 import { useToolsStateContext } from "./tools-state";
 
 export type Transform = {
@@ -23,11 +24,11 @@ const SCALE_BY = 1.1;
 const WIDTH = 500;
 const HEIGHT = 500;
 
-const createBoardTransformContext = (svg: SVGSVGElement | undefined) => {
+const createBoardTransformContext = () => {
   const [transform, setTransform] = createSignal<Transform>({ k: 1, x: 0, y: 0 });
 
   // oxlint-disable-next-line no-explicit-any
-  const selection = () => svg && (d3.select(svg) as any);
+  const selection = () => d3.select(SVG_SELECTOR) as any;
 
   const onZoomed = (event: { transform: Transform }) => {
     setTransform(event.transform);
@@ -87,30 +88,22 @@ const BoardTransformContext = createContext<
   throw new Error("BoardTransformContext is not defined");
 });
 
-type BoardTransformProviderProps = ParentProps<{
-  svg: SVGSVGElement | undefined;
-}>;
-
-export const BoardTransformProvider: Component<BoardTransformProviderProps> = (props) => {
-  const value = createMemo(() => createBoardTransformContext(props.svg));
+export const BoardTransformProvider: Component<ParentProps> = (props) => {
+  const value = createMemo(() => createBoardTransformContext());
 
   const toolsState = useToolsStateContext();
 
   createEffect(() => {
     const isPane = toolsState().tool() === "pane";
-    const svg = props.svg;
 
-    if (!isPane || !svg) {
+    if (!isPane) {
       return;
     }
 
-    const select = d3.select(svg);
-
     // oxlint-disable-next-line no-explicit-any
-    select.call(value().plugin as any);
-
+    d3.select(SVG_SELECTOR).call(value().plugin as any);
     onCleanup(() => {
-      select.on(".zoom", null);
+      d3.select(SVG_SELECTOR).on(".zoom", null);
     });
   });
 

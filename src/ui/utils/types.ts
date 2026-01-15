@@ -3,8 +3,9 @@ import type { VariantProps } from "tailwind-variants";
 
 export type ComponentVariantProps<
   T extends ValidComponent,
-  // biome-ignore lint/suspicious/noExplicitAny: library code
+  // oxlint-disable-next-line typescript/no-explicit-any
   Component extends (...args: any) => any,
-  // biome-ignore lint/complexity/noBannedTypes: library code
+  // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
+  // oxlint-disable-next-line typescript/ban-types typescript/no-empty-object-type
   Rest = {},
 > = ComponentProps<T> & VariantProps<Component> & Rest;

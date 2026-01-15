@@ -4,13 +4,16 @@ import {
   type Component,
   type ParentProps,
   createContext,
+  createEffect,
   createMemo,
   createSignal,
+  onCleanup,
   useContext,
 } from "solid-js";
-import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "../utils/constants";
+import { SELECTABLE_GROUP_SELECTOR, TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "../utils/constants";
 import { useEdgesDataContext } from "./edges-data";
 import { useTasksDataContext } from "./tasks-data";
+import { useToolsStateContext } from "./tools-state";
 
 type BrushEvent = {
   selection: [[number, number], [number, number]];
@@ -59,7 +62,13 @@ const createSelectionStateContext = () => {
 
   const plugin = d3.brush().on("brush", onSelection);
 
-  return { edgeSelection, plugin, setEdgeSelection, setTaskSelection, taskSelection };
+  return {
+    edgeSelection,
+    plugin,
+    setEdgeSelection,
+    setTaskSelection,
+    taskSelection,
+  };
 };
 
 const SelectionStateContext = createContext<
@@ -68,35 +77,24 @@ const SelectionStateContext = createContext<
   throw new Error("SelectionStateContext is not defined");
 });
 
-type SelectionStateProviderProps = ParentProps<{
-  ref: SVGElement | undefined;
-}>;
-
-export const SelectionStateProvider: Component<SelectionStateProviderProps> = (props) => {
+export const SelectionStateProvider: Component<ParentProps> = (props) => {
   const value = createMemo(() => createSelectionStateContext());
 
-  // const toolsState = useToolsStateContext();
+  const toolsState = useToolsStateContext();
 
-  // createEffect(() => {
-  //   const isSelector = toolsState().tool() === "selector";
-  //   const ref = props.ref;
+  createEffect(() => {
+    const isSelector = toolsState().tool() === "selector";
+    if (!isSelector) {
+      return;
+    }
 
-  //   if (!isSelector || !ref) {
-  //     return;
-  //   }
+    // oxlint-disable-next-line no-explicit-any
+    d3.select(SELECTABLE_GROUP_SELECTOR).call(value().plugin as any);
 
-  //   const plugin = d3.brush().on("brush", () => {});
-  //   const select = d3.select(ref);
-
-  //   console.log("[value().plugin]", value().plugin);
-
-  //   // oxlint-disable-next-line no-explicit-any
-  //   // select.call(plugin as any);
-
-  //   // onCleanup(() => {
-  //   //   select.on(".brush", null);
-  //   // });
-  // });
+    onCleanup(() => {
+      d3.select(SELECTABLE_GROUP_SELECTOR).on(".brush", null);
+    });
+  });
 
   return (
     <SelectionStateContext.Provider value={value}>{props.children}</SelectionStateContext.Provider>

@@ -4,11 +4,13 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  onCleanup,
   useContext,
   type Accessor,
   type Component,
   type ParentProps,
 } from "solid-js";
+import { useToolsStateContext } from "./tools-state";
 
 const createDragStateContext = () => {
   const [isDragging, setIsDragging] = createSignal(false);
@@ -47,6 +49,7 @@ type CreateDragArgs = {
 
 export const useDrag = (args: CreateDragArgs) => {
   const dragContext = useDragStateContext();
+  const toolsState = useToolsStateContext();
 
   const onDragStarted = (event: DragEvent) => {
     dragContext().onDragStart();
@@ -62,19 +65,21 @@ export const useDrag = (args: CreateDragArgs) => {
     args.onDragEnded?.(event);
   };
 
+  const plugin = d3.drag().on("start", onDragStarted).on("drag", onDragged).on("end", onDragEnded);
+
   createEffect(() => {
     const refValue = args.ref();
-    if (!refValue) {
+    const toolsStateValue = toolsState();
+
+    if (!refValue || toolsStateValue.tool() !== "pane") {
       return;
     }
 
-    const plugin = d3
-      .drag()
-      .on("start", onDragStarted)
-      .on("drag", onDragged)
-      .on("end", onDragEnded);
-
     // oxlint-disable-next-line no-explicit-any
     d3.select(refValue).call(plugin as any);
+
+    onCleanup(() => {
+      d3.select(refValue).on(".start .drag .end", null);
+    });
   });
 };
