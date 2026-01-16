@@ -30,6 +30,7 @@
   "rules": {
     "eslint/arrow-body-style": "off",
     "eslint/capitalized-comments": "off",
+    "eslint/complexity": "off",
     "eslint/id-length": "off",
     "eslint/max-lines-per-function": "off",
     "eslint/max-lines": "off",

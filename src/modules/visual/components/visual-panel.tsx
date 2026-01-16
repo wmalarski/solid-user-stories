@@ -1,5 +1,4 @@
-import * as d3 from "d3";
-import { createEffect, For, onCleanup, type Component } from "solid-js";
+import { For, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AxisConfigProvider } from "../contexts/axis-config";
@@ -10,13 +9,15 @@ import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgesDataProvider, useEdgesDataContext } from "../contexts/edges-data";
 import { SelectionStateProvider } from "../contexts/selection-state";
 import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
-import { ToolsStateProvider, useToolsStateContext } from "../contexts/tools-state";
-import { SELECTABLE_GROUP_CLASS, SVG_CLASS, SVG_SELECTOR } from "../utils/constants";
+import { ToolsStateProvider } from "../contexts/tools-state";
+import { SELECTABLE_GROUP_CLASS, SVG_CLASS } from "../utils/constants";
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
 import { EdgePath } from "./edge-path";
+import { CreateTaskTool } from "./task-dialogs";
 import { TaskContent, TaskGroup } from "./task-group";
 import { ToolsBar } from "./tools-bar";
+import { ZoomBar } from "./zoom-bar";
 
 type VisualPanelProps = {
   board: BoardModel;
@@ -47,14 +48,14 @@ const DragAndDropExample: Component = () => {
     <SelectionStateProvider>
       <BoardTransformProvider>
         <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
-          <CreateTaskTool />
           <AxisGridPaths />
           <SelectableGroup />
           <TaskContentGroup />
           <AxisGroup />
         </svg>
         <ToolsBar />
-        {/* <ZoomBar /> */}
+        <ZoomBar />
+        <CreateTaskTool />
       </BoardTransformProvider>
     </SelectionStateProvider>
   );
@@ -95,31 +96,4 @@ const TaskContentGroup: Component = () => {
       <For each={tasksData().entries}>{(task) => <TaskContent task={task} />}</For>
     </g>
   );
-};
-
-const CreateTaskTool: Component = () => {
-  const toolsState = useToolsStateContext();
-
-  createEffect(() => {
-    const isCreateTask = toolsState().tool() === "create-task";
-
-    if (!isCreateTask) {
-      return;
-    }
-
-    const abortController = new AbortController();
-    d3.select(SVG_SELECTOR).on(
-      "click",
-      (event) => {
-        console.log("EVENT", event);
-      },
-      { signal: abortController.signal },
-    );
-
-    onCleanup(() => {
-      abortController.abort();
-    });
-  });
-
-  return null;
 };
