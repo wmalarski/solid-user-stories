@@ -102,9 +102,7 @@ export const CreateTaskTool: Component = () => {
         setPosition({ x: event.x, y: event.y });
         openDialog(dialogId);
       },
-      {
-        signal: abortController.signal,
-      },
+      { signal: abortController.signal },
     );
 
     onCleanup(() => {

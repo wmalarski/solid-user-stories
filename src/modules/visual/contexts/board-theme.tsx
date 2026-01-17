@@ -19,6 +19,7 @@ const createBoardThemeContext = () => {
     selectionColor: "#eeff33",
     taskBackgroundColor: "#998877",
     taskHandleBackgroundColor: "#228877",
+    taskMenuButtonBackgroundColor: "#228877",
   };
 };
 
