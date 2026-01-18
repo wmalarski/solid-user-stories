@@ -2,7 +2,7 @@ import { decode } from "decode-formdata";
 import { createUniqueId, Show, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import { axisCollection } from "~/integrations/tanstack-db/collections";
+import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
@@ -13,6 +13,7 @@ import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
+import { useAxisConfigContext } from "../contexts/axis-config";
 import {
   DELETE_AXIS_DIALOG_ID,
   INSERT_AXIS_DIALOG_ID,
@@ -20,6 +21,7 @@ import {
   useBoardDialogsContext,
 } from "../contexts/board-dialogs";
 import { useBoardId } from "../contexts/board-model";
+import { useTasksDataContext } from "../contexts/tasks-data";
 
 const AxisFieldsSchema = v.object({
   name: v.string(),
@@ -28,10 +30,40 @@ const AxisFieldsSchema = v.object({
 export const InsertAxisDialog: Component = () => {
   const { t } = useI18n();
 
+  const axisConfig = useAxisConfigContext();
+  const tasksData = useTasksDataContext();
+  const boardDialogs = useBoardDialogsContext();
+
   const boardId = useBoardId();
   const formId = createUniqueId();
 
-  const boardDialogs = useBoardDialogsContext();
+  const shiftHorizontalTasks = (index: number, shift: number) => {
+    const axisConfigValue = axisConfig();
+    const config = axisConfigValue.config.x[index];
+    const tasksToMove = tasksData()
+      .entries.filter((entry) => entry.positionX > config.end)
+      .map((entry) => entry.id);
+
+    taskCollection.update(tasksToMove, (drafts) => {
+      for (const draft of drafts) {
+        draft.positionX += shift;
+      }
+    });
+  };
+
+  const shiftVerticalTasks = (index: number, shift: number) => {
+    const axisConfigValue = axisConfig();
+    const config = axisConfigValue.config.y[index];
+    const tasksToMove = tasksData()
+      .entries.filter((entry) => entry.positionY > config.end)
+      .map((entry) => entry.id);
+
+    taskCollection.update(tasksToMove, (drafts) => {
+      for (const draft of drafts) {
+        draft.positionY += shift;
+      }
+    });
+  };
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -51,16 +83,23 @@ export const InsertAxisDialog: Component = () => {
       return;
     }
 
+    const size = 500;
     const axisId = createId();
     axisCollection.insert({
       boardId: boardId(),
       id: axisId,
       name: parsed.output.name,
       orientation: insertDataValue.orientation,
-      size: 400,
+      size,
     });
 
     boardDialogsValue.closeBoardDialog(INSERT_AXIS_DIALOG_ID);
+
+    if (insertDataValue.orientation === "horizontal") {
+      shiftHorizontalTasks(insertDataValue.index, size);
+    } else {
+      shiftVerticalTasks(insertDataValue.index, size);
+    }
   };
 
   return (
