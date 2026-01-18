@@ -24,6 +24,9 @@ const createAxisConfigContext = (boardId: string) => {
     get config() {
       return config();
     },
+    get entries() {
+      return entries();
+    },
   };
 };
 

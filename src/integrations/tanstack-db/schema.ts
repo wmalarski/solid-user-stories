@@ -30,6 +30,8 @@ export const AxisSchema = v.object({
 });
 
 export const BoardSchema = v.object({
+  axisXOrder: v.array(v.string()),
+  axisYOrder: v.array(v.string()),
   description: v.string(),
   id: v.string(),
   title: v.string(),

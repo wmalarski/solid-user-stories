@@ -12,6 +12,8 @@ export const HomeRoute: Component = () => {
   const onAddClick = async () => {
     const boardId = createId();
     const tx = boardsCollection.insert({
+      axisXOrder: [],
+      axisYOrder: [],
       description: "description",
       id: boardId,
       title: "Title1",
