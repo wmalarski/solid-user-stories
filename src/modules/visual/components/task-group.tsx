@@ -1,13 +1,5 @@
 import * as d3 from "d3";
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  createUniqueId,
-  onCleanup,
-  Show,
-  type Component,
-} from "solid-js";
+import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
@@ -25,6 +17,7 @@ import {
   TASK_MENU_BUTTON_SIZE,
   TASK_RECT_HEIGHT,
   TASK_RECT_WIDTH,
+  TASK_UPDATE_BUTTON_CLASS,
 } from "../utils/constants";
 
 type TaskGroupProps = {
@@ -240,26 +233,10 @@ type TaskMenuButtonProps = {
 const TaskMenuButton: Component<TaskMenuButtonProps> = (props) => {
   const boardTheme = useBoardThemeContext();
 
-  const taskMenuClass = createUniqueId();
-
-  createEffect(() => {
-    const abortController = new AbortController();
-    d3.select(`.${taskMenuClass}`).on(
-      "click",
-      (event) => {
-        console.log("CLICK", event.x, event.y);
-      },
-      { signal: abortController.signal },
-    );
-
-    onCleanup(() => {
-      abortController.abort();
-    });
-  });
-
   return (
     <rect
-      class={taskMenuClass}
+      data-taskId={props.taskId}
+      class={TASK_UPDATE_BUTTON_CLASS}
       x={props.x + TASK_RECT_WIDTH - TASK_MENU_BUTTON_PADDING - TASK_MENU_BUTTON_SIZE}
       y={props.y + TASK_MENU_BUTTON_PADDING}
       width={TASK_MENU_BUTTON_SIZE}

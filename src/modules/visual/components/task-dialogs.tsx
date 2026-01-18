@@ -31,8 +31,9 @@ import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
+import { useTasksDataContext } from "../contexts/tasks-data";
 import { useToolsStateContext } from "../contexts/tools-state";
-import { SVG_SELECTOR } from "../utils/constants";
+import { SVG_SELECTOR, TASK_UPDATE_BUTTON_SELECTOR } from "../utils/constants";
 
 const TaskFieldsSchema = v.object({
   description: v.string(),
@@ -41,7 +42,7 @@ const TaskFieldsSchema = v.object({
   title: v.string(),
 });
 
-export const CreateTaskTool: Component = () => {
+export const InsertTaskDialog: Component = () => {
   const { t } = useI18n();
 
   const boardId = useBoardId();
@@ -120,6 +121,77 @@ export const CreateTaskTool: Component = () => {
         <DialogActions>
           <Button color="primary" form={formId} type="submit">
             {t("common.save")}
+          </Button>
+        </DialogActions>
+      </DialogBox>
+      <DialogBackdrop />
+    </Dialog>
+  );
+};
+
+export const UpdateTaskDialog: Component = () => {
+  const { t } = useI18n();
+
+  const formId = createUniqueId();
+  const dialogId = createUniqueId();
+  const tasksData = useTasksDataContext();
+
+  const [task, setTask] = createSignal<TaskModel>();
+
+  const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+
+    const parsed = await v.safeParseAsync(TaskFieldsSchema, decode(formData));
+
+    if (!parsed.success) {
+      return;
+    }
+
+    taskCollection.update(task()?.id, (draft) => {
+      draft.description = parsed.output.description;
+      draft.estimate = parsed.output.estimate;
+      draft.link = parsed.output.link;
+      draft.title = parsed.output.title;
+    });
+
+    closeDialog(dialogId);
+  };
+
+  createEffect(() => {
+    const abortController = new AbortController();
+
+    d3.selectAll(TASK_UPDATE_BUTTON_SELECTOR).on(
+      "click",
+      (event) => {
+        const target: SVGRectElement = event.target;
+        const taskId = target.dataset.taskId;
+        const taskDataValue = tasksData();
+
+        const task = taskDataValue.entries.find((entry) => entry.id === taskId);
+        setTask(task);
+
+        openDialog(dialogId);
+      },
+      { signal: abortController.signal },
+    );
+
+    onCleanup(() => {
+      abortController.abort();
+    });
+  });
+
+  return (
+    <Dialog id={dialogId}>
+      <DialogBox>
+        <DialogTitle>{t("common.update")}</DialogTitle>
+        <form id={formId} onSubmit={onSubmit}>
+          <TaskFields initialValues={task()} />
+        </form>
+        <DialogActions>
+          <Button color="primary" form={formId} type="submit">
+            {t("common.update")}
           </Button>
         </DialogActions>
       </DialogBox>

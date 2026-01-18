@@ -14,7 +14,7 @@ import { SELECTABLE_GROUP_CLASS, SVG_CLASS } from "../utils/constants";
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
 import { EdgePath } from "./edge-path";
-import { CreateTaskTool } from "./task-dialogs";
+import { InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 import { TaskContent, TaskGroup } from "./task-group";
 import { ToolsBar } from "./tools-bar";
 import { ZoomBar } from "./zoom-bar";
@@ -55,7 +55,8 @@ const DragAndDropExample: Component = () => {
         </svg>
         <ToolsBar />
         <ZoomBar />
-        <CreateTaskTool />
+        <InsertTaskDialog />
+        <UpdateTaskDialog />
       </BoardTransformProvider>
     </SelectionStateProvider>
   );
