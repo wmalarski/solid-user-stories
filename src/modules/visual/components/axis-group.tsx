@@ -1,8 +1,8 @@
 import { eq, useLiveQuery } from "@tanstack/solid-db";
-import { createMemo, For, type Component } from "solid-js";
+import { createMemo, Index, type Component } from "solid-js";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
-import { useAxisConfigContext } from "../contexts/axis-config";
+import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import { useBoardThemeContext } from "../contexts/board-theme";
 import { useBoardTransformContext } from "../contexts/board-transform";
 import { AXIS_OFFSET } from "../utils/constants";
@@ -14,12 +14,10 @@ export const AxisGroup: Component = () => {
     <>
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
-      <For each={axisConfig().config.x}>
-        {(entry) => <HorizontalItemRect axis={entry.axis} position={entry.start} />}
-      </For>
-      <For each={axisConfig().config.y}>
-        {(entry) => <VerticalItemRect axis={entry.axis} position={entry.start} />}
-      </For>
+      <Index each={axisConfig().config.x}>
+        {(entry) => <HorizontalItemRect config={entry()} />}
+      </Index>
+      <Index each={axisConfig().config.y}>{(entry) => <VerticalItemRect config={entry()} />}</Index>
     </>
   );
 };
@@ -39,8 +37,7 @@ const VerticalBackgroundRect: Component = () => {
 };
 
 type HorizontalItemRectProps = {
-  axis: AxisModel;
-  position: number;
+  config: AxisConfig;
 };
 
 const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
@@ -48,31 +45,32 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
 
   const boardTransform = useBoardTransformContext();
 
-  const transformed = createMemo(() => boardTransform().translateX(props.position + AXIS_OFFSET));
+  const transformed = createMemo(() =>
+    boardTransform().translateX(props.config.start + AXIS_OFFSET),
+  );
 
   return (
     <>
       <rect
-        width={props.axis.size * boardTransform().transform().k}
+        width={props.config.axis.size * boardTransform().transform().k}
         x={transformed()}
         y={0}
         height={AXIS_OFFSET}
         fill={boardTheme().axisItemBoackgroundColor}
       />
       <text x={transformed()} y={20}>
-        {props.axis.name}
+        {props.config.axis.name}
       </text>
       <text x={transformed()} y={40}>
-        {props.axis.id}
+        {props.config.axis.id}
       </text>
-      <AxisSummaryText axis={props.axis} orientation="horizontal" x={transformed()} y={60} />
+      <AxisSummaryText axis={props.config.axis} orientation="horizontal" x={transformed()} y={60} />
     </>
   );
 };
 
 type VerticalItemRectProps = {
-  axis: AxisModel;
-  position: number;
+  config: AxisConfig;
 };
 
 const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
@@ -80,24 +78,31 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
 
   const boardTransform = useBoardTransformContext();
 
-  const transformed = createMemo(() => boardTransform().translateY(props.position + AXIS_OFFSET));
+  const transformed = createMemo(() =>
+    boardTransform().translateY(props.config.start + AXIS_OFFSET),
+  );
 
   return (
     <>
       <rect
-        height={props.axis.size * boardTransform().transform().k}
+        height={props.config.axis.size * boardTransform().transform().k}
         x={0}
         y={transformed()}
         width={AXIS_OFFSET}
         fill={boardTheme().axisItemBoackgroundColor}
       />
       <text y={transformed() + 20} x={0}>
-        {props.axis.name}
+        {props.config.axis.name}
       </text>
       <text y={transformed() + 40} x={0}>
-        {props.axis.id}
+        {props.config.axis.id}
       </text>
-      <AxisSummaryText axis={props.axis} orientation="vertical" x={0} y={transformed() + 60} />
+      <AxisSummaryText
+        axis={props.config.axis}
+        orientation="vertical"
+        x={0}
+        y={transformed() + 60}
+      />
     </>
   );
 };

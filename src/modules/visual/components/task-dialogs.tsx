@@ -29,7 +29,7 @@ import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
-import { useAxisConfigContext } from "../contexts/axis-config";
+import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
 import { useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
@@ -67,7 +67,7 @@ export const CreateTaskTool: Component = () => {
     }
 
     const taskId = createId();
-    const axis = axisConfig().mapToAxis(positionValue);
+    const axis = mapToAxis(axisConfig().config, positionValue);
 
     taskCollection.insert({
       axisX: axis.axisX,

@@ -18,12 +18,26 @@ const createAxisConfigContext = (boardId: string) => {
     q.from({ axis: axisCollection }).where(({ axis }) => eq(axis.boardId, boardId)),
   );
 
-  const config = createMemo(() => getAxisValues(entries()));
+  const config = createMemo(() => getAxisValues(entries.data));
+
+  const mapToAxis = (point: Point2D) => {
+    const configValue = config();
+
+    const x = point.x - AXIS_OFFSET;
+    const y = point.y - AXIS_OFFSET;
+
+    const axisX = configValue.x.find((entry) => entry.start <= x && x < entry.end);
+    const axisY = configValue.y.find((entry) => entry.start <= y && y < entry.end);
+
+    return { axisX: axisX?.axis.id ?? null, axisY: axisY?.axis.id ?? null };
+  };
 
   return {
     get config() {
       return config();
     },
+    entries,
+    mapToAxis,
   };
 };
 
@@ -81,15 +95,3 @@ const getAxisValues = (entries: AxisModel[]) => {
     })),
   } as const;
 };
-
-export const mapToAxis = (config: ReturnType<typeof getAxisValues>, point: Point2D) => {
-  const x = point.x - AXIS_OFFSET;
-  const y = point.y - AXIS_OFFSET;
-
-  const axisX = config.x.find((entry) => entry.start <= x && x < entry.end);
-  const axisY = config.y.find((entry) => entry.start <= y && y < entry.end);
-
-  return { axisX: axisX?.axis.id ?? null, axisY: axisY?.axis.id ?? null };
-};
-
-export type AxisConfig = ReturnType<typeof getAxisValues>["x"][0];

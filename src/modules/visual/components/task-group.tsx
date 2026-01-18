@@ -11,7 +11,7 @@ import {
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
-import { useAxisConfigContext } from "../contexts/axis-config";
+import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
 import { useBoardThemeContext } from "../contexts/board-theme";
 import { useDrag } from "../contexts/drag-state";
@@ -50,7 +50,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       const updatedX = event.x + shiftX();
       const updatedY = event.y + shiftY();
 
-      const axis = axisConfig().mapToAxis({ x: updatedX, y: updatedY });
+      const axis = mapToAxis(axisConfig().config, { x: updatedX, y: updatedY });
 
       taskCollection.update(props.task.id, (draft) => {
         draft.positionX = updatedX;

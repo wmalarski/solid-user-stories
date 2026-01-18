@@ -1,6 +1,6 @@
-import { createMemo, createSignal, For, type Component } from "solid-js";
+import { createMemo, createSignal, Index, type Component } from "solid-js";
 import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
-import { useAxisConfigContext } from "../contexts/axis-config";
+import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import { useBoardThemeContext } from "../contexts/board-theme";
 import { useBoardTransformContext } from "../contexts/board-transform";
 import { useDrag } from "../contexts/drag-state";
@@ -12,26 +12,48 @@ export const AxisGridPaths: Component = () => {
 
   return (
     <>
-      <HorizontalPath position={0} start={0} />
-      <VerticalPath position={0} start={0} />
-      <For each={axisConfig().config.y}>
-        {(entry) => (
-          <HorizontalPath axisId={entry.axis.id} start={entry.start} position={entry.end} />
-        )}
-      </For>
-      <For each={axisConfig().config.x}>
-        {(entry) => (
-          <VerticalPath axisId={entry.axis.id} start={entry.start} position={entry.end} />
-        )}
-      </For>
+      <HorizontalZeroPath />
+      <VerticalZeroPath />
+      <Index each={axisConfig().config.y}>{(entry) => <HorizontalPath config={entry()} />}</Index>
+      <Index each={axisConfig().config.x}>{(entry) => <VerticalPath config={entry()} />}</Index>
     </>
   );
 };
 
+const HorizontalZeroPath: Component = () => {
+  const boardTheme = useBoardThemeContext();
+
+  const boardTransform = useBoardTransformContext();
+
+  return (
+    <rect
+      x={0}
+      class="w-full"
+      y={boardTransform().translateY(AXIS_OFFSET)}
+      height={2}
+      fill={boardTheme().axisGridColor}
+    />
+  );
+};
+
+const VerticalZeroPath: Component = () => {
+  const boardTheme = useBoardThemeContext();
+
+  const boardTransform = useBoardTransformContext();
+
+  return (
+    <rect
+      y={0}
+      class="h-screen"
+      x={boardTransform().translateX(AXIS_OFFSET)}
+      width={2}
+      fill={boardTheme().axisGridColor}
+    />
+  );
+};
+
 type HorizontalPathProps = {
-  axisId?: string;
-  position: number;
-  start: number;
+  config: AxisConfig;
 };
 
 const HorizontalPath: Component<HorizontalPathProps> = (props) => {
@@ -41,7 +63,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
 
   const boardTransform = useBoardTransformContext();
 
-  const transformed = createMemo(() => boardTransform().translateY(props.position + AXIS_OFFSET));
+  const transformed = createMemo(() => boardTransform().translateY(props.config.end + AXIS_OFFSET));
 
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
   const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
@@ -53,7 +75,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       let maxNotDraggedPosition = 0;
       const draggedTasks = new Map<string, number>();
       for (const entry of tasksData().entries) {
-        if (entry.positionY > props.position + AXIS_OFFSET) {
+        if (entry.positionY > props.config.end + AXIS_OFFSET) {
           draggedTasks.set(entry.id, entry.positionY);
         } else {
           maxNotDraggedPosition = Math.max(
@@ -64,30 +86,28 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       }
 
       setMaxNotDraggedPosition(maxNotDraggedPosition);
-      setStartPosition(props.position);
+      setStartPosition(props.config.end);
       setDraggedTasks(draggedTasks);
     },
     onDragged(event) {
-      if (props.axisId) {
-        const transform = boardTransform().transform();
-        const updatedY = (event.y - transform.y) / transform.k - AXIS_OFFSET;
-        const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
-        const size = withLimit - props.start;
+      const transform = boardTransform().transform();
+      const updatedY = (event.y - transform.y) / transform.k - AXIS_OFFSET;
+      const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
+      const size = withLimit - props.config.start;
 
-        axisCollection.update(props.axisId, (draft) => {
-          draft.size = size;
-        });
+      axisCollection.update(props.config.axis.id, (draft) => {
+        draft.size = size;
+      });
 
-        const shift = withLimit - startPosition();
-        const draggedTasksValue = draggedTasks();
+      const shift = withLimit - startPosition();
+      const draggedTasksValue = draggedTasks();
 
-        taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
-          for (const draft of drafts) {
-            const position = draggedTasksValue.get(draft.id) ?? draft.positionY;
-            draft.positionY = position + shift;
-          }
-        });
-      }
+      taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
+        for (const draft of drafts) {
+          const position = draggedTasksValue.get(draft.id) ?? draft.positionY;
+          draft.positionY = position + shift;
+        }
+      });
     },
     ref: rectRef,
   });
@@ -105,9 +125,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
 };
 
 type VerticalPathProps = {
-  axisId?: string;
-  position: number;
-  start: number;
+  config: AxisConfig;
 };
 
 const VerticalPath: Component<VerticalPathProps> = (props) => {
@@ -117,7 +135,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
 
   const boardTransform = useBoardTransformContext();
 
-  const transformed = createMemo(() => boardTransform().translateX(props.position + AXIS_OFFSET));
+  const transformed = createMemo(() => boardTransform().translateX(props.config.end + AXIS_OFFSET));
 
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
   const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
@@ -129,7 +147,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       let maxNotDraggedPosition = 0;
       const draggedTasks = new Map<string, number>();
       for (const entry of tasksData().entries) {
-        if (entry.positionX > props.position + AXIS_OFFSET) {
+        if (entry.positionX > props.config.end + AXIS_OFFSET) {
           draggedTasks.set(entry.id, entry.positionX);
         } else {
           maxNotDraggedPosition = Math.max(
@@ -140,30 +158,28 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       }
 
       setMaxNotDraggedPosition(maxNotDraggedPosition);
-      setStartPosition(props.position);
+      setStartPosition(props.config.end);
       setDraggedTasks(draggedTasks);
     },
     onDragged(event) {
-      if (props.axisId) {
-        const transform = boardTransform().transform();
-        const updatedX = (event.x - transform.x) / transform.k - AXIS_OFFSET;
-        const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
-        const size = withLimit - props.start;
+      const transform = boardTransform().transform();
+      const updatedX = (event.x - transform.x) / transform.k - AXIS_OFFSET;
+      const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
+      const size = withLimit - props.config.start;
 
-        axisCollection.update(props.axisId, (draft) => {
-          draft.size = size;
-        });
+      axisCollection.update(props.config.axis.id, (draft) => {
+        draft.size = size;
+      });
 
-        const shift = withLimit - startPosition();
-        const draggedTasksValue = draggedTasks();
+      const shift = withLimit - startPosition();
+      const draggedTasksValue = draggedTasks();
 
-        taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
-          for (const draft of drafts) {
-            const position = draggedTasksValue.get(draft.id) ?? draft.positionX;
-            draft.positionX = position + shift;
-          }
-        });
-      }
+      taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
+        for (const draft of drafts) {
+          const position = draggedTasksValue.get(draft.id) ?? draft.positionX;
+          draft.positionX = position + shift;
+        }
+      });
     },
     ref: rectRef,
   });
