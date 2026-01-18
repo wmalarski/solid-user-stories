@@ -2,7 +2,11 @@ import { decode } from "decode-formdata";
 import { createUniqueId, Show, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
+import {
+  axisCollection,
+  boardsCollection,
+  taskCollection,
+} from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
@@ -37,9 +41,10 @@ export const InsertAxisDialog: Component = () => {
   const boardId = useBoardId();
   const formId = createUniqueId();
 
-  const shiftHorizontalTasks = (index: number, shift: number) => {
+  const shiftHorizontalTasks = (index: number, shift: number, newAxisId: string) => {
     const axisConfigValue = axisConfig();
-    const config = axisConfigValue.config.x[index];
+    const horizontalConfigs = axisConfigValue.config.x;
+    const config = horizontalConfigs[index];
     const tasksToMove = tasksData()
       .entries.filter((entry) => entry.positionX > config.end)
       .map((entry) => entry.id);
@@ -49,11 +54,18 @@ export const InsertAxisDialog: Component = () => {
         draft.positionX += shift;
       }
     });
+
+    const axisIds = horizontalConfigs.map((config) => config.axis.id);
+    axisIds.splice(index, 0, newAxisId);
+    boardsCollection.update(boardId(), (draft) => {
+      draft.axisXOrder = axisIds;
+    });
   };
 
-  const shiftVerticalTasks = (index: number, shift: number) => {
+  const shiftVerticalTasks = (index: number, shift: number, newAxisId: string) => {
     const axisConfigValue = axisConfig();
-    const config = axisConfigValue.config.y[index];
+    const verticalConfigs = axisConfigValue.config.y;
+    const config = verticalConfigs[index];
     const tasksToMove = tasksData()
       .entries.filter((entry) => entry.positionY > config.end)
       .map((entry) => entry.id);
@@ -62,6 +74,12 @@ export const InsertAxisDialog: Component = () => {
       for (const draft of drafts) {
         draft.positionY += shift;
       }
+    });
+
+    const axisIds = verticalConfigs.map((config) => config.axis.id);
+    axisIds.splice(index, 0, newAxisId);
+    boardsCollection.update(boardId(), (draft) => {
+      draft.axisYOrder = axisIds;
     });
   };
 
@@ -96,9 +114,9 @@ export const InsertAxisDialog: Component = () => {
     boardDialogsValue.closeBoardDialog(INSERT_AXIS_DIALOG_ID);
 
     if (insertDataValue.orientation === "horizontal") {
-      shiftHorizontalTasks(insertDataValue.index, size);
+      shiftHorizontalTasks(insertDataValue.index, size, axisId);
     } else {
-      shiftVerticalTasks(insertDataValue.index, size);
+      shiftVerticalTasks(insertDataValue.index, size, axisId);
     }
   };
 
