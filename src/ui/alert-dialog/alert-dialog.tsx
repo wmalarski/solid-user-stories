@@ -11,6 +11,7 @@ import {
 } from "../dialog/dialog";
 
 type AlertDialogProps = {
+  open?: boolean;
   dialogId: string;
   title: string;
   description: string;
@@ -21,7 +22,7 @@ export const AlertDialog: Component<AlertDialogProps> = (props) => {
   const { t } = useI18n();
 
   return (
-    <Dialog id={props.dialogId}>
+    <Dialog open={props.open} id={props.dialogId}>
       <DialogBox>
         <DialogTitle>{props.title}</DialogTitle>
         <DialogActions>

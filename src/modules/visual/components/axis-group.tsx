@@ -1,18 +1,18 @@
 import { eq, useLiveQuery } from "@tanstack/solid-db";
-import { createMemo, Index, type Component } from "solid-js";
+import * as d3 from "d3";
+import { createEffect, createMemo, createSignal, Index, onCleanup, type Component } from "solid-js";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
+import {
+  DELETE_AXIS_DIALOG_ID,
+  INSERT_AXIS_DIALOG_ID,
+  UPDATE_AXIS_DIALOG_ID,
+  useBoardDialogsContext,
+} from "../contexts/board-dialogs";
 import { useBoardThemeContext } from "../contexts/board-theme";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import {
-  AXIS_DELETE_BUTTON_CLASS,
-  AXIS_INSERT_BUTTON_CLASS,
-  AXIS_OFFSET,
-  AXIS_UPDATE_BUTTON_CLASS,
-  BUTTON_PADDING,
-  BUTTON_SIZE,
-} from "../utils/constants";
+import { AXIS_OFFSET, BUTTON_PADDING, BUTTON_SIZE } from "../utils/constants";
 
 export const AxisGroup: Component = () => {
   const axisConfig = useAxisConfigContext();
@@ -187,12 +187,37 @@ type AxisInsertButtonProps = {
 
 const AxisInsertButton: Component<AxisInsertButtonProps> = (props) => {
   const boardTheme = useBoardThemeContext();
+  const boardDialogs = useBoardDialogsContext();
+
+  const [ref, setRef] = createSignal<SVGRectElement>();
+
+  createEffect(() => {
+    const refValue = ref();
+
+    if (!refValue) {
+      return;
+    }
+
+    const abortController = new AbortController();
+
+    d3.select(refValue).on(
+      "click",
+      () =>
+        boardDialogs().openBoardDialog(INSERT_AXIS_DIALOG_ID, {
+          index: props.index,
+          orientation: props.orientation,
+        }),
+      { signal: abortController.signal },
+    );
+
+    onCleanup(() => {
+      abortController.abort();
+    });
+  });
 
   return (
     <rect
-      data-orientation={props.orientation}
-      data-index={props.index}
-      class={AXIS_INSERT_BUTTON_CLASS}
+      ref={setRef}
       x={props.x}
       y={props.y}
       width={BUTTON_SIZE}
@@ -210,11 +235,33 @@ type AxisUpdateButtonProps = {
 
 const AxisUpdateButton: Component<AxisUpdateButtonProps> = (props) => {
   const boardTheme = useBoardThemeContext();
+  const boardDialogs = useBoardDialogsContext();
+
+  const [ref, setRef] = createSignal<SVGRectElement>();
+
+  createEffect(() => {
+    const refValue = ref();
+
+    if (!refValue) {
+      return;
+    }
+
+    const abortController = new AbortController();
+
+    d3.select(refValue).on(
+      "click",
+      () => boardDialogs().openBoardDialog(UPDATE_AXIS_DIALOG_ID, { axis: props.axis }),
+      { signal: abortController.signal },
+    );
+
+    onCleanup(() => {
+      abortController.abort();
+    });
+  });
 
   return (
     <rect
-      data-axisId={props.axis.id}
-      class={AXIS_UPDATE_BUTTON_CLASS}
+      ref={setRef}
       x={props.x}
       y={props.y}
       width={BUTTON_SIZE}
@@ -232,11 +279,33 @@ type AxisDeleteButtonProps = {
 
 const AxisDeleteButton: Component<AxisDeleteButtonProps> = (props) => {
   const boardTheme = useBoardThemeContext();
+  const boardDialogs = useBoardDialogsContext();
+
+  const [ref, setRef] = createSignal<SVGRectElement>();
+
+  createEffect(() => {
+    const refValue = ref();
+
+    if (!refValue) {
+      return;
+    }
+
+    const abortController = new AbortController();
+
+    d3.select(refValue).on(
+      "click",
+      () => boardDialogs().openBoardDialog(DELETE_AXIS_DIALOG_ID, { axisId: props.axis.id }),
+      { signal: abortController.signal },
+    );
+
+    onCleanup(() => {
+      abortController.abort();
+    });
+  });
 
   return (
     <rect
-      data-axisId={props.axis.id}
-      class={AXIS_DELETE_BUTTON_CLASS}
+      ref={setRef}
       x={props.x}
       y={props.y}
       width={BUTTON_SIZE}

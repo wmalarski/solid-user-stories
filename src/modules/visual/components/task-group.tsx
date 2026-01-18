@@ -1,9 +1,10 @@
 import * as d3 from "d3";
-import { createMemo, createSignal, Show, type Component } from "solid-js";
+import { createEffect, createMemo, createSignal, onCleanup, Show, type Component } from "solid-js";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
+import { UPDATE_TASK_DIALOG_ID, useBoardDialogsContext } from "../contexts/board-dialogs";
 import { useBoardId } from "../contexts/board-model";
 import { useBoardThemeContext } from "../contexts/board-theme";
 import { useDrag } from "../contexts/drag-state";
@@ -17,7 +18,6 @@ import {
   TASK_HANDLE_Y_SHIFT,
   TASK_RECT_HEIGHT,
   TASK_RECT_WIDTH,
-  TASK_UPDATE_BUTTON_CLASS,
 } from "../utils/constants";
 
 type TaskGroupProps = {
@@ -84,7 +84,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         y={props.task.positionY}
         taskId={props.task.id}
       />
-      <TaskUpdateButton x={props.task.positionX} y={props.task.positionY} taskId={props.task.id} />
+      <TaskUpdateButton task={props.task} />
     </>
   );
 };
@@ -219,20 +219,40 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
 };
 
 type TaskUpdateButtonProps = {
-  x: number;
-  y: number;
-  taskId: string;
+  task: TaskModel;
 };
 
 const TaskUpdateButton: Component<TaskUpdateButtonProps> = (props) => {
   const boardTheme = useBoardThemeContext();
+  const boardDialogs = useBoardDialogsContext();
+
+  const [ref, setRef] = createSignal<SVGRectElement>();
+
+  createEffect(() => {
+    const refValue = ref();
+
+    if (!refValue) {
+      return;
+    }
+
+    const abortController = new AbortController();
+
+    d3.select(refValue).on(
+      "click",
+      () => boardDialogs().openBoardDialog(UPDATE_TASK_DIALOG_ID, { task: props.task }),
+      { signal: abortController.signal },
+    );
+
+    onCleanup(() => {
+      abortController.abort();
+    });
+  });
 
   return (
     <rect
-      data-taskId={props.taskId}
-      class={TASK_UPDATE_BUTTON_CLASS}
-      x={props.x + TASK_RECT_WIDTH - BUTTON_PADDING - BUTTON_SIZE}
-      y={props.y + BUTTON_PADDING}
+      ref={setRef}
+      x={props.task.positionX + TASK_RECT_WIDTH - BUTTON_PADDING - BUTTON_SIZE}
+      y={props.task.positionY + BUTTON_PADDING}
       width={BUTTON_SIZE}
       height={BUTTON_SIZE}
       fill={boardTheme().taskMenuButtonBackgroundColor}
