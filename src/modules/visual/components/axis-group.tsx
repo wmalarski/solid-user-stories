@@ -4,7 +4,7 @@ import { taskCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import { useBoardThemeContext } from "../contexts/board-theme";
-import { useBoardTransformContext } from "../contexts/board-transform";
+import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { AXIS_OFFSET } from "../utils/constants";
 
 export const AxisGroup: Component = () => {
@@ -46,13 +46,13 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
   const boardTransform = useBoardTransformContext();
 
   const transformed = createMemo(() =>
-    boardTransform().translateX(props.config.start + AXIS_OFFSET),
+    translateX(boardTransform().transform, props.config.start + AXIS_OFFSET),
   );
 
   return (
     <>
       <rect
-        width={props.config.axis.size * boardTransform().transform().k}
+        width={props.config.axis.size * boardTransform().transform.k}
         x={transformed()}
         y={0}
         height={AXIS_OFFSET}
@@ -79,13 +79,13 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
   const boardTransform = useBoardTransformContext();
 
   const transformed = createMemo(() =>
-    boardTransform().translateY(props.config.start + AXIS_OFFSET),
+    translateY(boardTransform().transform, props.config.start + AXIS_OFFSET),
   );
 
   return (
     <>
       <rect
-        height={props.config.axis.size * boardTransform().transform().k}
+        height={props.config.axis.size * boardTransform().transform.k}
         x={0}
         y={transformed()}
         width={AXIS_OFFSET}

@@ -72,7 +72,7 @@ const SelectableGroup: Component = () => {
     <g
       class={SELECTABLE_GROUP_CLASS}
       cursor={dragState().isDragging() ? "grabbing" : "grab"}
-      transform={boardTransformContext().transform() as unknown as string}
+      transform={boardTransformContext().transform as unknown as string}
     >
       <For each={edgesData().entries}>
         {(entry) => <EdgePath edge={entry.edge} source={entry.source} target={entry.target} />}
@@ -91,7 +91,7 @@ const TaskContentGroup: Component = () => {
   return (
     <g
       cursor={dragState().isDragging() ? "grabbing" : "grab"}
-      transform={boardTransformContext().transform() as unknown as string}
+      transform={boardTransformContext().transform as unknown as string}
     >
       <For each={tasksData().entries}>{(task) => <TaskContent task={task} />}</For>
     </g>

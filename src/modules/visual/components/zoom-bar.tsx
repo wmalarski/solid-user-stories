@@ -50,7 +50,7 @@ export const ZoomBar: Component = () => {
           size="sm"
           variant="ghost"
         >
-          {Math.round(transform().transform().k * 100)}%
+          {Math.round(transform().transform.k * 100)}%
         </Button>
       </Tooltip>
       <Tooltip data-tip={t("board.zoom.zoomOut")}>

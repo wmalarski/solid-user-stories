@@ -43,16 +43,6 @@ const createBoardTransformContext = () => {
     .scaleExtent([0.2, 8])
     .on("zoom", onZoomed);
 
-  const translateX = (x: number) => {
-    const transformValue = transform();
-    return x * transformValue.k + transformValue.x;
-  };
-
-  const translateY = (y: number) => {
-    const transformValue = transform();
-    return y * transformValue.k + transformValue.y;
-  };
-
   const reset = () => {
     setTransform({
       k: 1,
@@ -74,12 +64,22 @@ const createBoardTransformContext = () => {
   return {
     plugin,
     reset,
-    transform,
+    get transform() {
+      return transform();
+    },
     translateX,
     translateY,
     zoomIn,
     zoomOut,
   };
+};
+
+export const translateX = (transform: Transform, x: number) => {
+  return x * transform.k + transform.x;
+};
+
+export const translateY = (transform: Transform, y: number) => {
+  return y * transform.k + transform.y;
 };
 
 const BoardTransformContext = createContext<

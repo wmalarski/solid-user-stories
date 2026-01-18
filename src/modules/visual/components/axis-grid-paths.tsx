@@ -2,7 +2,7 @@ import { createMemo, createSignal, Index, type Component } from "solid-js";
 import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import { useBoardThemeContext } from "../contexts/board-theme";
-import { useBoardTransformContext } from "../contexts/board-transform";
+import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useDrag } from "../contexts/drag-state";
 import { useTasksDataContext } from "../contexts/tasks-data";
 import { AXIS_OFFSET } from "../utils/constants";
@@ -29,7 +29,7 @@ const HorizontalZeroPath: Component = () => {
     <rect
       x={0}
       class="w-full"
-      y={boardTransform().translateY(AXIS_OFFSET)}
+      y={translateY(boardTransform().transform, AXIS_OFFSET)}
       height={2}
       fill={boardTheme().axisGridColor}
     />
@@ -45,7 +45,7 @@ const VerticalZeroPath: Component = () => {
     <rect
       y={0}
       class="h-screen"
-      x={boardTransform().translateX(AXIS_OFFSET)}
+      x={translateX(boardTransform().transform, AXIS_OFFSET)}
       width={2}
       fill={boardTheme().axisGridColor}
     />
@@ -63,7 +63,9 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
 
   const boardTransform = useBoardTransformContext();
 
-  const transformed = createMemo(() => boardTransform().translateY(props.config.end + AXIS_OFFSET));
+  const transformed = createMemo(() =>
+    translateY(boardTransform().transform, props.config.end + AXIS_OFFSET),
+  );
 
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
   const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
@@ -90,7 +92,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       setDraggedTasks(draggedTasks);
     },
     onDragged(event) {
-      const transform = boardTransform().transform();
+      const transform = boardTransform().transform;
       const updatedY = (event.y - transform.y) / transform.k - AXIS_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
       const size = withLimit - props.config.start;
@@ -135,7 +137,9 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
 
   const boardTransform = useBoardTransformContext();
 
-  const transformed = createMemo(() => boardTransform().translateX(props.config.end + AXIS_OFFSET));
+  const transformed = createMemo(() =>
+    translateX(boardTransform().transform, props.config.end + AXIS_OFFSET),
+  );
 
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
   const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
@@ -162,7 +166,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       setDraggedTasks(draggedTasks);
     },
     onDragged(event) {
-      const transform = boardTransform().transform();
+      const transform = boardTransform().transform;
       const updatedX = (event.x - transform.x) / transform.k - AXIS_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
       const size = withLimit - props.config.start;
