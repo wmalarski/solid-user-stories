@@ -10,11 +10,11 @@ import { useDrag } from "../contexts/drag-state";
 import { useIsTaskSelected } from "../contexts/selection-state";
 import { useTasksDataContext } from "../contexts/tasks-data";
 import {
+  BUTTON_PADDING,
+  BUTTON_SIZE,
   TASK_HANDLE_SIZE,
   TASK_HANDLE_SIZE_HALF,
   TASK_HANDLE_Y_SHIFT,
-  TASK_MENU_BUTTON_PADDING,
-  TASK_MENU_BUTTON_SIZE,
   TASK_RECT_HEIGHT,
   TASK_RECT_WIDTH,
   TASK_UPDATE_BUTTON_CLASS,
@@ -84,12 +84,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         y={props.task.positionY}
         taskId={props.task.id}
       />
-      <TaskMenuButton
-        kind="target"
-        x={props.task.positionX}
-        y={props.task.positionY}
-        taskId={props.task.id}
-      />
+      <TaskUpdateButton x={props.task.positionX} y={props.task.positionY} taskId={props.task.id} />
     </>
   );
 };
@@ -223,24 +218,23 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   );
 };
 
-type TaskMenuButtonProps = {
+type TaskUpdateButtonProps = {
   x: number;
   y: number;
-  kind: "source" | "target";
   taskId: string;
 };
 
-const TaskMenuButton: Component<TaskMenuButtonProps> = (props) => {
+const TaskUpdateButton: Component<TaskUpdateButtonProps> = (props) => {
   const boardTheme = useBoardThemeContext();
 
   return (
     <rect
       data-taskId={props.taskId}
       class={TASK_UPDATE_BUTTON_CLASS}
-      x={props.x + TASK_RECT_WIDTH - TASK_MENU_BUTTON_PADDING - TASK_MENU_BUTTON_SIZE}
-      y={props.y + TASK_MENU_BUTTON_PADDING}
-      width={TASK_MENU_BUTTON_SIZE}
-      height={TASK_MENU_BUTTON_SIZE}
+      x={props.x + TASK_RECT_WIDTH - BUTTON_PADDING - BUTTON_SIZE}
+      y={props.y + BUTTON_PADDING}
+      width={BUTTON_SIZE}
+      height={BUTTON_SIZE}
       fill={boardTheme().taskMenuButtonBackgroundColor}
     />
   );

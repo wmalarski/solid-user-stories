@@ -31,7 +31,11 @@ import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
-import { AXIS_DELETE_BUTTON_SELECTOR, AXIS_UPDATE_BUTTON_SELECTOR } from "../utils/constants";
+import {
+  AXIS_DELETE_BUTTON_SELECTOR,
+  AXIS_INSERT_BUTTON_SELECTOR,
+  AXIS_UPDATE_BUTTON_SELECTOR,
+} from "../utils/constants";
 
 const AxisFieldsSchema = v.object({
   name: v.string(),
@@ -49,7 +53,7 @@ export const InsertAxisDialog: Component = () => {
   const formId = createUniqueId();
   const dialogId = createUniqueId();
 
-  const [insertData, _setInsertData] = createSignal<InsertData>();
+  const [insertData, setInsertData] = createSignal<InsertData>();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -79,6 +83,28 @@ export const InsertAxisDialog: Component = () => {
 
     closeDialog(dialogId);
   };
+
+  createEffect(() => {
+    const abortController = new AbortController();
+
+    d3.selectAll(AXIS_INSERT_BUTTON_SELECTOR).on(
+      "click",
+      (event) => {
+        const target: SVGRectElement = event.target;
+        setInsertData({
+          index: Number(target.dataset.index),
+          orientation: target.dataset.orientation as AxisModel["orientation"],
+        });
+
+        openDialog(dialogId);
+      },
+      { signal: abortController.signal },
+    );
+
+    onCleanup(() => {
+      abortController.abort();
+    });
+  });
 
   return (
     <Dialog id={dialogId}>

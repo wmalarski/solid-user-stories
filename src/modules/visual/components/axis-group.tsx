@@ -5,7 +5,14 @@ import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import { useBoardThemeContext } from "../contexts/board-theme";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { AXIS_OFFSET } from "../utils/constants";
+import {
+  AXIS_DELETE_BUTTON_CLASS,
+  AXIS_INSERT_BUTTON_CLASS,
+  AXIS_OFFSET,
+  AXIS_UPDATE_BUTTON_CLASS,
+  BUTTON_PADDING,
+  BUTTON_SIZE,
+} from "../utils/constants";
 
 export const AxisGroup: Component = () => {
   const axisConfig = useAxisConfigContext();
@@ -15,9 +22,11 @@ export const AxisGroup: Component = () => {
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
       <Index each={axisConfig().config.x}>
-        {(entry) => <HorizontalItemRect config={entry()} />}
+        {(entry, index) => <HorizontalItemRect config={entry()} index={index} />}
       </Index>
-      <Index each={axisConfig().config.y}>{(entry) => <VerticalItemRect config={entry()} />}</Index>
+      <Index each={axisConfig().config.y}>
+        {(entry, index) => <VerticalItemRect config={entry()} index={index} />}
+      </Index>
     </>
   );
 };
@@ -38,6 +47,7 @@ const VerticalBackgroundRect: Component = () => {
 
 type HorizontalItemRectProps = {
   config: AxisConfig;
+  index: number;
 };
 
 const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
@@ -49,10 +59,14 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
     translateX(boardTransform().transform, props.config.start + AXIS_OFFSET),
   );
 
+  const width = createMemo(() => props.config.axis.size * boardTransform().transform.k);
+
+  const endX = createMemo(() => transformed() + width());
+
   return (
     <>
       <rect
-        width={props.config.axis.size * boardTransform().transform.k}
+        width={width()}
         x={transformed()}
         y={0}
         height={AXIS_OFFSET}
@@ -64,13 +78,30 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
       <text x={transformed()} y={40}>
         {props.config.axis.id}
       </text>
-      <AxisSummaryText axis={props.config.axis} orientation="horizontal" x={transformed()} y={60} />
+      <AxisSummaryText axis={props.config.axis} x={transformed()} y={60} />
+      <AxisInsertButton
+        orientation={props.config.axis.orientation}
+        index={props.index}
+        x={endX() - BUTTON_SIZE - BUTTON_PADDING}
+        y={BUTTON_PADDING}
+      />
+      <AxisUpdateButton
+        axis={props.config.axis}
+        x={endX() - BUTTON_SIZE - BUTTON_PADDING}
+        y={BUTTON_PADDING + BUTTON_SIZE + BUTTON_PADDING}
+      />
+      <AxisDeleteButton
+        axis={props.config.axis}
+        x={endX() - BUTTON_SIZE - BUTTON_PADDING}
+        y={BUTTON_PADDING + 2 * (BUTTON_SIZE + BUTTON_PADDING)}
+      />
     </>
   );
 };
 
 type VerticalItemRectProps = {
   config: AxisConfig;
+  index: number;
 };
 
 const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
@@ -81,6 +112,8 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
   const transformed = createMemo(() =>
     translateY(boardTransform().transform, props.config.start + AXIS_OFFSET),
   );
+
+  const buttonX = AXIS_OFFSET - BUTTON_SIZE - BUTTON_PADDING;
 
   return (
     <>
@@ -97,11 +130,22 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
       <text y={transformed() + 40} x={0}>
         {props.config.axis.id}
       </text>
-      <AxisSummaryText
+      <AxisSummaryText axis={props.config.axis} x={0} y={transformed() + 60} />
+      <AxisInsertButton
+        orientation={props.config.axis.orientation}
+        index={props.index}
+        x={buttonX}
+        y={transformed() + BUTTON_PADDING}
+      />
+      <AxisUpdateButton
         axis={props.config.axis}
-        orientation="vertical"
-        x={0}
-        y={transformed() + 60}
+        x={buttonX}
+        y={transformed() + BUTTON_PADDING + BUTTON_SIZE + BUTTON_PADDING}
+      />
+      <AxisDeleteButton
+        axis={props.config.axis}
+        x={buttonX}
+        y={transformed() + BUTTON_PADDING + 2 * (BUTTON_SIZE + BUTTON_PADDING)}
       />
     </>
   );
@@ -111,7 +155,6 @@ type AxisSummaryTextProps = {
   axis: AxisModel;
   x: number;
   y: number;
-  orientation: "vertical" | "horizontal";
 };
 
 const AxisSummaryText: Component<AxisSummaryTextProps> = (props) => {
@@ -125,12 +168,80 @@ const AxisSummaryText: Component<AxisSummaryTextProps> = (props) => {
       ),
   );
   const esitmationSum = createMemo(() => {
-    return collection.data.reduce((previous, current) => previous + current.estimate, 0);
+    return collection().reduce((previous, current) => previous + current.estimate, 0);
   });
 
   return (
     <text y={props.y} x={props.x}>
       {esitmationSum()}
     </text>
+  );
+};
+
+type AxisInsertButtonProps = {
+  orientation: AxisModel["orientation"];
+  index: number;
+  x: number;
+  y: number;
+};
+
+const AxisInsertButton: Component<AxisInsertButtonProps> = (props) => {
+  const boardTheme = useBoardThemeContext();
+
+  return (
+    <rect
+      data-orientation={props.orientation}
+      data-index={props.index}
+      class={AXIS_INSERT_BUTTON_CLASS}
+      x={props.x}
+      y={props.y}
+      width={BUTTON_SIZE}
+      height={BUTTON_SIZE}
+      fill={boardTheme().taskMenuButtonBackgroundColor}
+    />
+  );
+};
+
+type AxisUpdateButtonProps = {
+  axis: AxisModel;
+  x: number;
+  y: number;
+};
+
+const AxisUpdateButton: Component<AxisUpdateButtonProps> = (props) => {
+  const boardTheme = useBoardThemeContext();
+
+  return (
+    <rect
+      data-axisId={props.axis.id}
+      class={AXIS_UPDATE_BUTTON_CLASS}
+      x={props.x}
+      y={props.y}
+      width={BUTTON_SIZE}
+      height={BUTTON_SIZE}
+      fill={boardTheme().taskMenuButtonBackgroundColor}
+    />
+  );
+};
+
+type AxisDeleteButtonProps = {
+  axis: AxisModel;
+  x: number;
+  y: number;
+};
+
+const AxisDeleteButton: Component<AxisDeleteButtonProps> = (props) => {
+  const boardTheme = useBoardThemeContext();
+
+  return (
+    <rect
+      data-axisId={props.axis.id}
+      class={AXIS_DELETE_BUTTON_CLASS}
+      x={props.x}
+      y={props.y}
+      width={BUTTON_SIZE}
+      height={BUTTON_SIZE}
+      fill={boardTheme().taskMenuButtonBackgroundColor}
+    />
   );
 };
