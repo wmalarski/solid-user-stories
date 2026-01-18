@@ -43,7 +43,7 @@ const EdgeGraphicsList: Component = () => {
       .select((columns) => ({ id: columns.edge.id })),
   );
 
-  return <For each={collection.data}>{(entry) => <EdgeContainer edgeId={entry.id} />}</For>;
+  return <For each={collection()}>{(entry) => <EdgeContainer edgeId={entry.id} />}</For>;
 };
 
 const useStageDeselect = () => {

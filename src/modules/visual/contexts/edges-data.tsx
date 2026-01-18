@@ -19,7 +19,11 @@ const createEdgesDataContext = (boardId: string) => {
       .innerJoin({ target: taskCollection }, ({ edge, target }) => eq(edge.target, target.id)),
   );
 
-  return { entries: edges.data };
+  return {
+    get entries() {
+      return edges();
+    },
+  };
 };
 
 const EdgesDataContext = createContext<Accessor<ReturnType<typeof createEdgesDataContext>>>(() => {

@@ -18,7 +18,7 @@ const createAxisConfigContext = (boardId: string) => {
     q.from({ axis: axisCollection }).where(({ axis }) => eq(axis.boardId, boardId)),
   );
 
-  const config = createMemo(() => getAxisValues(entries.data));
+  const config = createMemo(() => getAxisValues(entries()));
 
   const mapToAxis = (point: Point2D) => {
     const configValue = config();

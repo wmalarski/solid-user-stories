@@ -37,7 +37,7 @@ export const BoardContextProvider: Component<BoardContextProviderProps> = (props
     q.from({ axis: axisCollection }).where(({ axis }) => eq(axis.boardId, props.board.id)),
   );
 
-  const value = createMemo(() => createBoardContextState(props.board, axis.data));
+  const value = createMemo(() => createBoardContextState(props.board, axis()));
 
   return <BoardContext.Provider value={value}>{props.children}</BoardContext.Provider>;
 };

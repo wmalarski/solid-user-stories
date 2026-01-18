@@ -184,7 +184,7 @@ const AxisSummaryText: Component<AxisSummaryTextProps> = (props) => {
   );
 
   const esitmationSum = createMemo(() => {
-    return collection.data.reduce((previous, current) => previous + current.estimate, 0);
+    return collection().reduce((previous, current) => previous + current.estimate, 0);
   });
 
   createEffect(() => {

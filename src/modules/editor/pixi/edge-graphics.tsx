@@ -80,7 +80,7 @@ export const EdgeContainer: Component<EdgeContainerProps> = (props) => {
   );
 
   return (
-    <Show when={collection.data.at(0)}>
+    <Show when={collection().at(0)}>
       {(value) => (
         <EdgeGraphics edge={value().edge} source={value().source} target={value().target} />
       )}

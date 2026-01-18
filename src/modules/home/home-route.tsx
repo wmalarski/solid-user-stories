@@ -39,7 +39,7 @@ const BoardList: Component = () => {
   const boards = useLiveQuery((q) => q.from({ board: boardsCollection }));
 
   return (
-    <For each={boards.data}>
+    <For each={boards()}>
       {(board) => (
         <A href={createLink("/board/:boardId", { params: { boardId: board.id } })}>{board.title}</A>
       )}

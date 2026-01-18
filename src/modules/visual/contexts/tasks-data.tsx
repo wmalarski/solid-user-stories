@@ -15,7 +15,11 @@ const createTasksDataContext = (boardId: string) => {
     q.from({ tasks: taskCollection }).where(({ tasks }) => eq(tasks.boardId, boardId)),
   );
 
-  return { entries: tasks.data };
+  return {
+    get entries() {
+      return tasks();
+    },
+  };
 };
 
 const TasksDataContext = createContext<Accessor<ReturnType<typeof createTasksDataContext>>>(() => {
