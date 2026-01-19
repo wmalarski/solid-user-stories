@@ -1,26 +1,17 @@
 import { eq, useLiveQuery } from "@tanstack/solid-db";
-import * as d3 from "d3";
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  Index,
-  onCleanup,
-  Show,
-  type Component,
-} from "solid-js";
+import { createMemo, createUniqueId, Index, Show, type Component } from "solid-js";
+import { useI18n } from "~/integrations/i18n";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel, TaskModel } from "~/integrations/tanstack-db/schema";
+import { Button } from "~/ui/button/button";
+import { openDialog } from "~/ui/dialog/dialog";
+import { PencilIcon } from "~/ui/icons/pencil-icon";
+import { PlusIcon } from "~/ui/icons/plus-icon";
+import { TrashIcon } from "~/ui/icons/trash-icon";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
-import {
-  DELETE_AXIS_DIALOG_ID,
-  INSERT_AXIS_DIALOG_ID,
-  UPDATE_AXIS_DIALOG_ID,
-  useBoardDialogsContext,
-} from "../contexts/board-dialogs";
-import { useBoardThemeContext } from "../contexts/board-theme";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { AXIS_OFFSET, BUTTON_PADDING, BUTTON_SIZE } from "../utils/constants";
+import { DeleteAxisDialog, InsertAxisDialog, UpdateAxisDialog } from "./axis-dialogs";
 
 export const AxisGroup: Component = () => {
   const axisConfig = useAxisConfigContext();
@@ -28,23 +19,23 @@ export const AxisGroup: Component = () => {
   const xLength = createMemo(() => axisConfig().config.x.length);
   const yLength = createMemo(() => axisConfig().config.y.length);
 
-  const boardTransform = useBoardTransformContext();
+  // const boardTransform = useBoardTransformContext();
 
-  const insertX = createMemo(
-    () =>
-      translateX(
-        boardTransform().transform,
-        (axisConfig().config.x.at(-1)?.end ?? 0) + AXIS_OFFSET,
-      ) + BUTTON_PADDING,
-  );
+  // const insertX = createMemo(
+  //   () =>
+  //     translateX(
+  //       boardTransform().transform,
+  //       (axisConfig().config.x.at(-1)?.end ?? 0) + AXIS_OFFSET,
+  //     ) + BUTTON_PADDING,
+  // );
 
-  const insertY = createMemo(
-    () =>
-      translateY(
-        boardTransform().transform,
-        (axisConfig().config.y.at(-1)?.end ?? 0) + AXIS_OFFSET,
-      ) + BUTTON_PADDING,
-  );
+  // const insertY = createMemo(
+  //   () =>
+  //     translateY(
+  //       boardTransform().transform,
+  //       (axisConfig().config.y.at(-1)?.end ?? 0) + AXIS_OFFSET,
+  //     ) + BUTTON_PADDING,
+  // );
 
   return (
     <>
@@ -60,18 +51,14 @@ export const AxisGroup: Component = () => {
           <VerticalItemRect totalLength={yLength()} config={entry()} index={index} />
         )}
       </Index>
-      <AxisInsertButton
+      {/* <AxisInsertButton
         index={xLength() - 1}
         orientation="horizontal"
-        y={BUTTON_PADDING}
-        x={insertX()}
       />
       <AxisInsertButton
         index={yLength() - 1}
         orientation="vertical"
-        y={insertY()}
-        x={AXIS_OFFSET - BUTTON_SIZE - BUTTON_PADDING}
-      />
+      /> */}
     </>
   );
 };
@@ -107,32 +94,26 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
 
   return (
     <>
-      <rect class="fill-base-200" width={width()} x={transformed()} y={0} height={AXIS_OFFSET} />
-      <text class="fill-base-content" x={transformed()} y={20}>
-        {props.config.axis.name}
-      </text>
-      <text class="fill-base-content" x={transformed()} y={40}>
-        {props.config.axis.id}
-      </text>
-      <AxisSummaryText tasks={tasks()} axis={props.config.axis} x={transformed()} y={60} />
-      <AxisInsertButton
-        orientation={props.config.axis.orientation}
-        index={props.index}
-        x={endX() - BUTTON_SIZE - BUTTON_PADDING}
-        y={BUTTON_PADDING}
-      />
-      <AxisUpdateButton
-        axis={props.config.axis}
-        x={endX() - BUTTON_SIZE - BUTTON_PADDING}
-        y={BUTTON_PADDING + BUTTON_SIZE + BUTTON_PADDING}
-      />
-      <Show when={props.totalLength > 1 && tasks().length === 0}>
-        <AxisDeleteButton
-          axis={props.config.axis}
-          x={endX() - BUTTON_SIZE - BUTTON_PADDING}
-          y={BUTTON_PADDING + 2 * (BUTTON_SIZE + BUTTON_PADDING)}
-        />
-      </Show>
+      <foreignObject width={width()} x={transformed()} y={0} height={AXIS_OFFSET}>
+        <div class="bg-base-200 w-full h-full flex gap-1 px-3 py-1">
+          <div class="flex flex-col grow">
+            <span>{props.config.axis.name}</span>
+            <span>{props.config.axis.id}</span>
+            <AxisSummaryText tasks={tasks()} />
+          </div>
+          <div>
+            <AxisInsertButton orientation={props.config.axis.orientation} index={props.index} />
+            <AxisUpdateButton axis={props.config.axis} />
+            <Show when={props.totalLength > 1 && tasks().length === 0}>
+              <AxisDeleteButton
+                axis={props.config.axis}
+                x={endX() - BUTTON_SIZE - BUTTON_PADDING}
+                y={BUTTON_PADDING + 2 * (BUTTON_SIZE + BUTTON_PADDING)}
+              />
+            </Show>
+          </div>
+        </div>
+      </foreignObject>
     </>
   );
 };
@@ -158,46 +139,36 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
 
   return (
     <>
-      <rect
-        class="fill-base-200"
+      <foreignObject
         height={props.config.axis.size * boardTransform().transform.k}
         x={0}
         y={transformed()}
         width={AXIS_OFFSET}
-      />
-      <text class="fill-base-content" y={transformed() + 20} x={0}>
-        {props.config.axis.name}
-      </text>
-      <text class="fill-base-content" y={transformed() + 40} x={0}>
-        {props.config.axis.id}
-      </text>
-      <AxisSummaryText tasks={tasks()} axis={props.config.axis} x={0} y={transformed() + 60} />
-      <AxisInsertButton
-        orientation={props.config.axis.orientation}
-        index={props.index}
-        x={buttonX}
-        y={transformed() + BUTTON_PADDING}
-      />
-      <AxisUpdateButton
-        axis={props.config.axis}
-        x={buttonX}
-        y={transformed() + BUTTON_PADDING + BUTTON_SIZE + BUTTON_PADDING}
-      />
-      <Show when={props.totalLength > 1 && tasks().length === 0}>
-        <AxisDeleteButton
-          axis={props.config.axis}
-          x={buttonX}
-          y={transformed() + BUTTON_PADDING + 2 * (BUTTON_SIZE + BUTTON_PADDING)}
-        />
-      </Show>
+      >
+        <div class="bg-base-200 w-full h-full flex px-3 py-1 gap-1">
+          <div class="flex flex-col grow">
+            <span>{props.config.axis.name}</span>
+            <span>{props.config.axis.id}</span>
+            <AxisSummaryText tasks={tasks()} />
+          </div>
+          <div>
+            <AxisInsertButton orientation={props.config.axis.orientation} index={props.index} />
+            <AxisUpdateButton axis={props.config.axis} />
+            <Show when={props.totalLength > 1 && tasks().length === 0}>
+              <AxisDeleteButton
+                axis={props.config.axis}
+                x={buttonX}
+                y={transformed() + BUTTON_PADDING + 2 * (BUTTON_SIZE + BUTTON_PADDING)}
+              />
+            </Show>
+          </div>
+        </div>
+      </foreignObject>
     </>
   );
 };
 
 type AxisSummaryTextProps = {
-  axis: AxisModel;
-  x: number;
-  y: number;
   tasks: TaskModel[];
 };
 
@@ -206,103 +177,63 @@ const AxisSummaryText: Component<AxisSummaryTextProps> = (props) => {
     return props.tasks.reduce((previous, current) => previous + current.estimate, 0);
   });
 
-  return (
-    <text class="fill-base-content" y={props.y} x={props.x}>
-      {esitmationSum()}
-    </text>
-  );
+  return <span>{esitmationSum()}</span>;
 };
 
 type AxisInsertButtonProps = {
   orientation: AxisModel["orientation"];
   index: number;
-  x: number;
-  y: number;
 };
 
 const AxisInsertButton: Component<AxisInsertButtonProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
-  const boardDialogs = useBoardDialogsContext();
+  const { t } = useI18n();
 
-  const [ref, setRef] = createSignal<SVGRectElement>();
+  const dialogId = createUniqueId();
 
-  createEffect(() => {
-    const refValue = ref();
-
-    if (!refValue) {
-      return;
-    }
-
-    const abortController = new AbortController();
-
-    d3.select(refValue).on(
-      "click",
-      () =>
-        boardDialogs().openBoardDialog(INSERT_AXIS_DIALOG_ID, {
-          index: props.index,
-          orientation: props.orientation,
-        }),
-      { signal: abortController.signal },
-    );
-
-    onCleanup(() => {
-      abortController.abort();
-    });
-  });
+  const onButtonClick = () => {
+    openDialog(dialogId);
+  };
 
   return (
-    <rect
-      ref={setRef}
-      x={props.x}
-      y={props.y}
-      width={BUTTON_SIZE}
-      height={BUTTON_SIZE}
-      fill={boardTheme().taskMenuButtonBackgroundColor}
-    />
+    <>
+      <Button
+        aria-label={t("board.axis.insertAxis")}
+        shape="circle"
+        size="sm"
+        onClick={onButtonClick}
+      >
+        <PlusIcon class="size-4" />
+      </Button>
+      <InsertAxisDialog dialogId={dialogId} index={props.index} orientation={props.orientation} />
+    </>
   );
 };
 
 type AxisUpdateButtonProps = {
   axis: AxisModel;
-  x: number;
-  y: number;
 };
 
 const AxisUpdateButton: Component<AxisUpdateButtonProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
-  const boardDialogs = useBoardDialogsContext();
+  const { t } = useI18n();
 
-  const [ref, setRef] = createSignal<SVGRectElement>();
+  const dialogId = createUniqueId();
 
-  createEffect(() => {
-    const refValue = ref();
-
-    if (!refValue) {
-      return;
-    }
-
-    const abortController = new AbortController();
-
-    d3.select(refValue).on(
-      "click",
-      () => boardDialogs().openBoardDialog(UPDATE_AXIS_DIALOG_ID, { axis: props.axis }),
-      { signal: abortController.signal },
-    );
-
-    onCleanup(() => {
-      abortController.abort();
-    });
-  });
+  const onButtonClick = () => {
+    openDialog(dialogId);
+  };
 
   return (
-    <rect
-      ref={setRef}
-      x={props.x}
-      y={props.y}
-      width={BUTTON_SIZE}
-      height={BUTTON_SIZE}
-      fill={boardTheme().taskMenuButtonBackgroundColor}
-    />
+    <>
+      <Button
+        aria-label={t("board.axis.updateAxis")}
+        shape="circle"
+        size="sm"
+        onClick={onButtonClick}
+      >
+        <PencilIcon class="size-4" />
+      </Button>
+      <UpdateAxisDialog axis={props.axis} dialogId={dialogId} />
+    </>
   );
 };
 
@@ -313,40 +244,25 @@ type AxisDeleteButtonProps = {
 };
 
 const AxisDeleteButton: Component<AxisDeleteButtonProps> = (props) => {
-  const boardDialogs = useBoardDialogsContext();
+  const { t } = useI18n();
 
-  const [ref, setRef] = createSignal<SVGRectElement>();
+  const dialogId = createUniqueId();
 
-  createEffect(() => {
-    const refValue = ref();
-
-    if (!refValue) {
-      return;
-    }
-
-    const abortController = new AbortController();
-
-    d3.select(refValue).on(
-      "click",
-      () => boardDialogs().openBoardDialog(DELETE_AXIS_DIALOG_ID, { axisId: props.axis.id }),
-      { signal: abortController.signal },
-    );
-
-    onCleanup(() => {
-      abortController.abort();
-    });
-  });
+  const onButtonClick = () => {
+    openDialog(dialogId);
+  };
 
   return (
-    <rect
-      ref={setRef}
-      x={props.x}
-      y={props.y}
-      width={BUTTON_SIZE}
-      height={BUTTON_SIZE}
-      rx={6}
-      ry={6}
-      class="fill-base-300"
-    />
+    <>
+      <Button
+        aria-label={t("board.axis.deleteAxis")}
+        shape="circle"
+        size="sm"
+        onClick={onButtonClick}
+      >
+        <TrashIcon class="size-4" />
+      </Button>
+      <DeleteAxisDialog axisId={props.axis.id} dialogId={dialogId} />
+    </>
   );
 };

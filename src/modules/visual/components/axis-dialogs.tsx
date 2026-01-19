@@ -1,5 +1,5 @@
 import { decode } from "decode-formdata";
-import { createUniqueId, Show, type Component, type ComponentProps } from "solid-js";
+import { createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import {
@@ -11,19 +11,20 @@ import { createId } from "~/integrations/tanstack-db/create-id";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
-import { Dialog, DialogActions, DialogBackdrop, DialogBox, DialogTitle } from "~/ui/dialog/dialog";
+import {
+  closeDialog,
+  Dialog,
+  DialogActions,
+  DialogBackdrop,
+  DialogBox,
+  DialogTitle,
+} from "~/ui/dialog/dialog";
 import { FieldError } from "~/ui/field-error/field-error";
 import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { useAxisConfigContext } from "../contexts/axis-config";
-import {
-  DELETE_AXIS_DIALOG_ID,
-  INSERT_AXIS_DIALOG_ID,
-  UPDATE_AXIS_DIALOG_ID,
-  useBoardDialogsContext,
-} from "../contexts/board-dialogs";
 import { useBoardId } from "../contexts/board-model";
 import { useTasksDataContext } from "../contexts/tasks-data";
 
@@ -31,12 +32,17 @@ const AxisFieldsSchema = v.object({
   name: v.string(),
 });
 
-export const InsertAxisDialog: Component = () => {
+type InsertAxisDialogProps = {
+  dialogId: string;
+  orientation: AxisModel["orientation"];
+  index: number;
+};
+
+export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
   const axisConfig = useAxisConfigContext();
   const tasksData = useTasksDataContext();
-  const boardDialogs = useBoardDialogsContext();
 
   const boardId = useBoardId();
   const formId = createUniqueId();
@@ -86,13 +92,6 @@ export const InsertAxisDialog: Component = () => {
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
 
-    const boardDialogsValue = boardDialogs();
-    const insertDataValue = boardDialogsValue.context[INSERT_AXIS_DIALOG_ID];
-
-    if (!insertDataValue) {
-      return;
-    }
-
     const formData = new FormData(event.currentTarget);
 
     const parsed = await v.safeParseAsync(AxisFieldsSchema, decode(formData));
@@ -107,45 +106,46 @@ export const InsertAxisDialog: Component = () => {
       boardId: boardId(),
       id: axisId,
       name: parsed.output.name,
-      orientation: insertDataValue.orientation,
+      orientation: props.orientation,
       size,
     });
 
-    boardDialogsValue.closeBoardDialog(INSERT_AXIS_DIALOG_ID);
+    closeDialog(props.dialogId);
 
-    if (insertDataValue.orientation === "horizontal") {
-      shiftHorizontalTasks(insertDataValue.index, size, axisId);
+    if (props.orientation === "horizontal") {
+      shiftHorizontalTasks(props.index, size, axisId);
     } else {
-      shiftVerticalTasks(insertDataValue.index, size, axisId);
+      shiftVerticalTasks(props.index, size, axisId);
     }
   };
 
   return (
-    <Show when={boardDialogs().context[INSERT_AXIS_DIALOG_ID]}>
-      <Dialog id={INSERT_AXIS_DIALOG_ID}>
-        <DialogBox>
-          <DialogTitle>{t("board.axis.insertAxis")}</DialogTitle>
-          <form id={formId} onSubmit={onSubmit}>
-            <AxisFields />
-          </form>
-          <DialogActions>
-            <Button color="primary" form={formId} type="submit">
-              {t("common.save")}
-            </Button>
-          </DialogActions>
-        </DialogBox>
-        <DialogBackdrop />
-      </Dialog>
-    </Show>
+    <Dialog id={props.dialogId}>
+      <DialogBox>
+        <DialogTitle>{t("board.axis.insertAxis")}</DialogTitle>
+        <form id={formId} onSubmit={onSubmit}>
+          <AxisFields />
+        </form>
+        <DialogActions>
+          <Button color="primary" form={formId} type="submit">
+            {t("common.save")}
+          </Button>
+        </DialogActions>
+      </DialogBox>
+      <DialogBackdrop />
+    </Dialog>
   );
 };
 
-export const UpdateAxisDialog: Component = () => {
+type UpdateAxisDialogProps = {
+  dialogId: string;
+  axis: AxisModel;
+};
+
+export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
   const formId = createUniqueId();
-
-  const boardDialogs = useBoardDialogsContext();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -158,33 +158,28 @@ export const UpdateAxisDialog: Component = () => {
       return;
     }
 
-    const boardDialogsValue = boardDialogs();
-
-    const axisId = boardDialogsValue.context[UPDATE_AXIS_DIALOG_ID]?.axis.id;
-    axisCollection.update(axisId, (draft) => {
+    axisCollection.update(props.axis.id, (draft) => {
       draft.name = parsed.output.name;
     });
 
-    boardDialogsValue.closeBoardDialog(UPDATE_AXIS_DIALOG_ID);
+    closeDialog(props.dialogId);
   };
 
   return (
-    <Show when={boardDialogs().context[UPDATE_AXIS_DIALOG_ID]}>
-      <Dialog id={UPDATE_AXIS_DIALOG_ID}>
-        <DialogBox>
-          <DialogTitle>{t("common.update")}</DialogTitle>
-          <form id={formId} onSubmit={onSubmit}>
-            <AxisFields initialValues={boardDialogs().context[UPDATE_AXIS_DIALOG_ID]?.axis} />
-          </form>
-          <DialogActions>
-            <Button color="primary" form={formId} type="submit">
-              {t("common.update")}
-            </Button>
-          </DialogActions>
-        </DialogBox>
-        <DialogBackdrop />
-      </Dialog>
-    </Show>
+    <Dialog id={props.dialogId}>
+      <DialogBox>
+        <DialogTitle>{t("common.update")}</DialogTitle>
+        <form id={formId} onSubmit={onSubmit}>
+          <AxisFields initialValues={props.axis} />
+        </form>
+        <DialogActions>
+          <Button color="primary" form={formId} type="submit">
+            {t("common.update")}
+          </Button>
+        </DialogActions>
+      </DialogBox>
+      <DialogBackdrop />
+    </Dialog>
   );
 };
 
@@ -219,30 +214,26 @@ const AxisFields: Component<AxisFieldsProps> = (props) => {
   );
 };
 
-export const DeleteAxisDialog: Component = () => {
+type DeleteAxisDialogProps = {
+  axisId: string;
+  dialogId: string;
+};
+
+export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
-  const boardDialogs = useBoardDialogsContext();
-
   const onSave = () => {
-    const boardDialogsValue = boardDialogs();
+    axisCollection.delete(props.axisId);
 
-    const axisIdValue = boardDialogsValue.context[DELETE_AXIS_DIALOG_ID]?.axisId;
-    if (axisIdValue) {
-      axisCollection.delete(axisIdValue);
-    }
-
-    boardDialogsValue.closeBoardDialog(DELETE_AXIS_DIALOG_ID);
+    closeDialog(props.dialogId);
   };
 
   return (
-    <Show when={boardDialogs().context[DELETE_AXIS_DIALOG_ID]}>
-      <AlertDialog
-        description={t("board.axis.confirmDelete")}
-        dialogId={DELETE_AXIS_DIALOG_ID}
-        onSave={onSave}
-        title={t("common.delete")}
-      />
-    </Show>
+    <AlertDialog
+      description={t("board.axis.confirmDelete")}
+      dialogId={props.dialogId}
+      onSave={onSave}
+      title={t("common.delete")}
+    />
   );
 };

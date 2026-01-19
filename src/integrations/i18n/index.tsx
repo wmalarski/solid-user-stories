@@ -13,8 +13,10 @@ const enDict = {
   board: {
     axis: {
       confirmDelete: "Confirm delete task",
+      deleteAxis: "Delete axis",
       insertAxis: "Add axis",
       name: "Name",
+      updateAxis: "Update axis",
     },
     tasks: {
       confirmDelete: "Confirm delete task",

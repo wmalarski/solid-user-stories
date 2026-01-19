@@ -12,7 +12,6 @@ import { SelectionStateProvider } from "../contexts/selection-state";
 import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
 import { ToolsStateProvider } from "../contexts/tools-state";
 import { SELECTABLE_GROUP_CLASS, SVG_CLASS } from "../utils/constants";
-import { DeleteAxisDialog, InsertAxisDialog, UpdateAxisDialog } from "./axis-dialogs";
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
 import { EdgePath } from "./edge-path";
@@ -58,9 +57,6 @@ const DragAndDropExample: Component = () => {
           <ToolsBar />
           <ZoomBar />
           <InsertTaskDialog />
-          <InsertAxisDialog />
-          <UpdateAxisDialog />
-          <DeleteAxisDialog />
         </BoardDialogsProvider>
       </BoardTransformProvider>
     </SelectionStateProvider>
