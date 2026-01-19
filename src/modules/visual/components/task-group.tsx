@@ -1,10 +1,13 @@
 import * as d3 from "d3";
-import { createEffect, createMemo, createSignal, onCleanup, Show, type Component } from "solid-js";
+import { createMemo, createSignal, createUniqueId, Show, type Component } from "solid-js";
+import { useI18n } from "~/integrations/i18n";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
+import { Button } from "~/ui/button/button";
+import { openDialog } from "~/ui/dialog/dialog";
+import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
-import { UPDATE_TASK_DIALOG_ID, useBoardDialogsContext } from "../contexts/board-dialogs";
 import { useBoardId } from "../contexts/board-model";
 import { useBoardThemeContext } from "../contexts/board-theme";
 import { useDrag } from "../contexts/drag-state";
@@ -19,6 +22,7 @@ import {
   TASK_RECT_HEIGHT,
   TASK_RECT_WIDTH,
 } from "../utils/constants";
+import { UpdateTaskDialog } from "./task-dialogs";
 
 type TaskGroupProps = {
   task: TaskModel;
@@ -223,39 +227,30 @@ type TaskUpdateButtonProps = {
 };
 
 const TaskUpdateButton: Component<TaskUpdateButtonProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
-  const boardDialogs = useBoardDialogsContext();
+  const { t } = useI18n();
 
-  const [ref, setRef] = createSignal<SVGRectElement>();
+  const dialogId = createUniqueId();
 
-  createEffect(() => {
-    const refValue = ref();
-
-    if (!refValue) {
-      return;
-    }
-
-    const abortController = new AbortController();
-
-    d3.select(refValue).on(
-      "click",
-      () => boardDialogs().openBoardDialog(UPDATE_TASK_DIALOG_ID, { task: props.task }),
-      { signal: abortController.signal },
-    );
-
-    onCleanup(() => {
-      abortController.abort();
-    });
-  });
+  const onButtonClick = () => {
+    openDialog(dialogId);
+  };
 
   return (
-    <rect
-      ref={setRef}
+    <foreignObject
       x={props.task.positionX + TASK_RECT_WIDTH - BUTTON_PADDING - BUTTON_SIZE}
       y={props.task.positionY + BUTTON_PADDING}
-      width={BUTTON_SIZE}
-      height={BUTTON_SIZE}
-      fill={boardTheme().taskMenuButtonBackgroundColor}
-    />
+      width={50}
+      height={50}
+    >
+      <Button
+        aria-label={t("board.tasks.updateTask")}
+        shape="circle"
+        size="xs"
+        onClick={onButtonClick}
+      >
+        <PencilIcon class="size-4" />
+      </Button>
+      <UpdateTaskDialog dialogId={dialogId} task={props.task} />
+    </foreignObject>
   );
 };

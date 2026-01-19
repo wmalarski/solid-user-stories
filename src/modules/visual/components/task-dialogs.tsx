@@ -5,7 +5,6 @@ import {
   createSignal,
   createUniqueId,
   onCleanup,
-  Show,
   type Component,
   type ComponentProps,
 } from "solid-js";
@@ -31,7 +30,6 @@ import { FormError } from "~/ui/form-error/form-error";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
-import { UPDATE_TASK_DIALOG_ID, useBoardDialogsContext } from "../contexts/board-dialogs";
 import { useBoardId } from "../contexts/board-model";
 import { useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
@@ -130,12 +128,15 @@ export const InsertTaskDialog: Component = () => {
   );
 };
 
-export const UpdateTaskDialog: Component = () => {
+type UpdateTaskDialogProps = {
+  dialogId: string;
+  task: TaskModel;
+};
+
+export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
   const { t } = useI18n();
 
   const formId = createUniqueId();
-
-  const boardDialogs = useBoardDialogsContext();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -148,35 +149,31 @@ export const UpdateTaskDialog: Component = () => {
       return;
     }
 
-    const boardDialogsValue = boardDialogs();
-    const taskId = boardDialogsValue.context[UPDATE_TASK_DIALOG_ID]?.task.id;
-    taskCollection.update(taskId, (draft) => {
+    taskCollection.update(props.task.id, (draft) => {
       draft.description = parsed.output.description;
       draft.estimate = parsed.output.estimate;
       draft.link = parsed.output.link;
       draft.title = parsed.output.title;
     });
 
-    boardDialogsValue.closeBoardDialog(UPDATE_TASK_DIALOG_ID);
+    closeDialog(props.dialogId);
   };
 
   return (
-    <Show when={boardDialogs().context[UPDATE_TASK_DIALOG_ID]}>
-      <Dialog id={UPDATE_TASK_DIALOG_ID}>
-        <DialogBox>
-          <DialogTitle>{t("common.update")}</DialogTitle>
-          <form id={formId} onSubmit={onSubmit}>
-            <TaskFields initialValues={boardDialogs()?.context[UPDATE_TASK_DIALOG_ID]?.task} />
-          </form>
-          <DialogActions>
-            <Button color="primary" form={formId} type="submit">
-              {t("common.update")}
-            </Button>
-          </DialogActions>
-        </DialogBox>
-        <DialogBackdrop />
-      </Dialog>
-    </Show>
+    <Dialog id={props.dialogId}>
+      <DialogBox>
+        <DialogTitle>{t("common.update")}</DialogTitle>
+        <form id={formId} onSubmit={onSubmit}>
+          <TaskFields initialValues={props.task} />
+        </form>
+        <DialogActions>
+          <Button color="primary" form={formId} type="submit">
+            {t("common.update")}
+          </Button>
+        </DialogActions>
+      </DialogBox>
+      <DialogBackdrop />
+    </Dialog>
   );
 };
 

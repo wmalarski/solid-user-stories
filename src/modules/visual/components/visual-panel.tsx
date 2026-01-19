@@ -16,7 +16,7 @@ import { DeleteAxisDialog, InsertAxisDialog, UpdateAxisDialog } from "./axis-dia
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
 import { EdgePath } from "./edge-path";
-import { InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
+import { InsertTaskDialog } from "./task-dialogs";
 import { TaskContent, TaskGroup } from "./task-group";
 import { ToolsBar } from "./tools-bar";
 import { ZoomBar } from "./zoom-bar";
@@ -59,7 +59,6 @@ const DragAndDropExample: Component = () => {
           <ToolsBar />
           <ZoomBar />
           <InsertTaskDialog />
-          <UpdateTaskDialog />
           <InsertAxisDialog />
           <UpdateAxisDialog />
           <DeleteAxisDialog />

@@ -23,6 +23,7 @@ const enDict = {
       insertTask: "Add task",
       link: "Link",
       title: "Title",
+      updateTask: "Update task",
     },
     tools: {
       pane: "Hand (panning tool)",
