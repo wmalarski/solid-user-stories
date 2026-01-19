@@ -27,6 +27,7 @@ import {
 import { FieldError } from "~/ui/field-error/field-error";
 import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
+import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
@@ -129,7 +130,6 @@ export const InsertTaskDialog: Component = () => {
 };
 
 type UpdateTaskDialogProps = {
-  dialogId: string;
   task: TaskModel;
 };
 
@@ -137,6 +137,7 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
   const { t } = useI18n();
 
   const formId = createUniqueId();
+  const dialogId = createUniqueId();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -156,24 +157,38 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
       draft.title = parsed.output.title;
     });
 
-    closeDialog(props.dialogId);
+    closeDialog(dialogId);
+  };
+
+  const onButtonClick = () => {
+    openDialog(dialogId);
   };
 
   return (
-    <Dialog id={props.dialogId}>
-      <DialogBox>
-        <DialogTitle>{t("common.update")}</DialogTitle>
-        <form id={formId} onSubmit={onSubmit}>
-          <TaskFields initialValues={props.task} />
-        </form>
-        <DialogActions>
-          <Button color="primary" form={formId} type="submit">
-            {t("common.update")}
-          </Button>
-        </DialogActions>
-      </DialogBox>
-      <DialogBackdrop />
-    </Dialog>
+    <>
+      <Button
+        aria-label={t("board.tasks.updateTask")}
+        shape="circle"
+        size="xs"
+        onClick={onButtonClick}
+      >
+        <PencilIcon class="size-4" />
+      </Button>
+      <Dialog id={dialogId}>
+        <DialogBox>
+          <DialogTitle>{t("common.update")}</DialogTitle>
+          <form id={formId} onSubmit={onSubmit}>
+            <TaskFields initialValues={props.task} />
+          </form>
+          <DialogActions>
+            <Button color="primary" form={formId} type="submit">
+              {t("common.update")}
+            </Button>
+          </DialogActions>
+        </DialogBox>
+        <DialogBackdrop />
+      </Dialog>
+    </>
   );
 };
 

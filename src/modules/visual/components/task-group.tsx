@@ -1,12 +1,8 @@
 import * as d3 from "d3";
-import { createMemo, createSignal, createUniqueId, Show, type Component } from "solid-js";
-import { useI18n } from "~/integrations/i18n";
+import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
-import { Button } from "~/ui/button/button";
-import { openDialog } from "~/ui/dialog/dialog";
-import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
 import { useBoardThemeContext } from "../contexts/board-theme";
@@ -75,7 +71,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
             <span class="text-xs truncate">Y:{props.task.axisY}</span>
             <span class="text-xs truncate">Points:{props.task.estimate}</span>
           </div>
-          <TaskUpdateButton task={props.task} />
+          <UpdateTaskDialog task={props.task} />
         </div>
       </foreignObject>
       <TaskHandle
@@ -193,34 +189,6 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
       <Show when={isDragging()}>
         <path d={path()} stroke={boardTheme().edgeDrawingColor} fill="transparent" />
       </Show>
-    </>
-  );
-};
-
-type TaskUpdateButtonProps = {
-  task: TaskModel;
-};
-
-const TaskUpdateButton: Component<TaskUpdateButtonProps> = (props) => {
-  const { t } = useI18n();
-
-  const dialogId = createUniqueId();
-
-  const onButtonClick = () => {
-    openDialog(dialogId);
-  };
-
-  return (
-    <>
-      <Button
-        aria-label={t("board.tasks.updateTask")}
-        shape="circle"
-        size="xs"
-        onClick={onButtonClick}
-      >
-        <PencilIcon class="size-4" />
-      </Button>
-      <UpdateTaskDialog dialogId={dialogId} task={props.task} />
     </>
   );
 };

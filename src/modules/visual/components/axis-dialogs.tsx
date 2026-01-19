@@ -18,10 +18,14 @@ import {
   DialogBackdrop,
   DialogBox,
   DialogTitle,
+  openDialog,
 } from "~/ui/dialog/dialog";
 import { FieldError } from "~/ui/field-error/field-error";
 import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
+import { PencilIcon } from "~/ui/icons/pencil-icon";
+import { PlusIcon } from "~/ui/icons/plus-icon";
+import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { useAxisConfigContext } from "../contexts/axis-config";
@@ -33,7 +37,6 @@ const AxisFieldsSchema = v.object({
 });
 
 type InsertAxisDialogProps = {
-  dialogId: string;
   orientation: AxisModel["orientation"];
   index: number;
 };
@@ -46,6 +49,11 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
 
   const boardId = useBoardId();
   const formId = createUniqueId();
+  const dialogId = createUniqueId();
+
+  const onButtonClick = () => {
+    openDialog(dialogId);
+  };
 
   const shiftHorizontalTasks = (index: number, shift: number, newAxisId: string) => {
     const axisConfigValue = axisConfig();
@@ -110,7 +118,7 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
       size,
     });
 
-    closeDialog(props.dialogId);
+    closeDialog(dialogId);
 
     if (props.orientation === "horizontal") {
       shiftHorizontalTasks(props.index, size, axisId);
@@ -120,25 +128,34 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
   };
 
   return (
-    <Dialog id={props.dialogId}>
-      <DialogBox>
-        <DialogTitle>{t("board.axis.insertAxis")}</DialogTitle>
-        <form id={formId} onSubmit={onSubmit}>
-          <AxisFields />
-        </form>
-        <DialogActions>
-          <Button color="primary" form={formId} type="submit">
-            {t("common.save")}
-          </Button>
-        </DialogActions>
-      </DialogBox>
-      <DialogBackdrop />
-    </Dialog>
+    <>
+      <Button
+        aria-label={t("board.axis.insertAxis")}
+        shape="circle"
+        size="sm"
+        onClick={onButtonClick}
+      >
+        <PlusIcon class="size-4" />
+      </Button>
+      <Dialog id={dialogId}>
+        <DialogBox>
+          <DialogTitle>{t("board.axis.insertAxis")}</DialogTitle>
+          <form id={formId} onSubmit={onSubmit}>
+            <AxisFields />
+          </form>
+          <DialogActions>
+            <Button color="primary" form={formId} type="submit">
+              {t("common.save")}
+            </Button>
+          </DialogActions>
+        </DialogBox>
+        <DialogBackdrop />
+      </Dialog>
+    </>
   );
 };
 
 type UpdateAxisDialogProps = {
-  dialogId: string;
   axis: AxisModel;
 };
 
@@ -146,6 +163,11 @@ export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
   const formId = createUniqueId();
+  const dialogId = createUniqueId();
+
+  const onButtonClick = () => {
+    openDialog(dialogId);
+  };
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -162,24 +184,34 @@ export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
       draft.name = parsed.output.name;
     });
 
-    closeDialog(props.dialogId);
+    closeDialog(dialogId);
   };
 
   return (
-    <Dialog id={props.dialogId}>
-      <DialogBox>
-        <DialogTitle>{t("common.update")}</DialogTitle>
-        <form id={formId} onSubmit={onSubmit}>
-          <AxisFields initialValues={props.axis} />
-        </form>
-        <DialogActions>
-          <Button color="primary" form={formId} type="submit">
-            {t("common.update")}
-          </Button>
-        </DialogActions>
-      </DialogBox>
-      <DialogBackdrop />
-    </Dialog>
+    <>
+      <Button
+        aria-label={t("board.axis.updateAxis")}
+        shape="circle"
+        size="sm"
+        onClick={onButtonClick}
+      >
+        <PencilIcon class="size-4" />
+      </Button>
+      <Dialog id={dialogId}>
+        <DialogBox>
+          <DialogTitle>{t("common.update")}</DialogTitle>
+          <form id={formId} onSubmit={onSubmit}>
+            <AxisFields initialValues={props.axis} />
+          </form>
+          <DialogActions>
+            <Button color="primary" form={formId} type="submit">
+              {t("common.update")}
+            </Button>
+          </DialogActions>
+        </DialogBox>
+        <DialogBackdrop />
+      </Dialog>
+    </>
   );
 };
 
@@ -216,24 +248,39 @@ const AxisFields: Component<AxisFieldsProps> = (props) => {
 
 type DeleteAxisDialogProps = {
   axisId: string;
-  dialogId: string;
 };
 
 export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
+  const dialogId = createUniqueId();
+
+  const onButtonClick = () => {
+    openDialog(dialogId);
+  };
+
   const onSave = () => {
     axisCollection.delete(props.axisId);
 
-    closeDialog(props.dialogId);
+    closeDialog(dialogId);
   };
 
   return (
-    <AlertDialog
-      description={t("board.axis.confirmDelete")}
-      dialogId={props.dialogId}
-      onSave={onSave}
-      title={t("common.delete")}
-    />
+    <>
+      <Button
+        aria-label={t("board.axis.deleteAxis")}
+        shape="circle"
+        size="sm"
+        onClick={onButtonClick}
+      >
+        <TrashIcon class="size-4" />
+      </Button>
+      <AlertDialog
+        description={t("board.axis.confirmDelete")}
+        dialogId={dialogId}
+        onSave={onSave}
+        title={t("common.delete")}
+      />
+    </>
   );
 };
