@@ -14,8 +14,6 @@ import { useDrag } from "../contexts/drag-state";
 import { useIsTaskSelected } from "../contexts/selection-state";
 import { useTasksDataContext } from "../contexts/tasks-data";
 import {
-  BUTTON_PADDING,
-  BUTTON_SIZE,
   TASK_HANDLE_SIZE,
   TASK_HANDLE_SIZE_HALF,
   TASK_HANDLE_Y_SHIFT,
@@ -30,8 +28,6 @@ type TaskGroupProps = {
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
-
-  const boardTheme = useBoardThemeContext();
 
   const [shiftX, setShiftX] = createSignal(0);
   const [shiftY, setShiftY] = createSignal(0);
@@ -60,22 +56,28 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
     ref: rectRef,
   });
 
-  const fill = d3.interpolateRainbow(Math.random());
-
   const isSelected = useIsTaskSelected(() => props.task.id);
 
   return (
     <>
-      <rect
+      <foreignObject
         ref={setRectRef}
         x={props.task.positionX}
         y={props.task.positionY}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
-        stroke={isSelected() ? boardTheme().selectionColor : undefined}
-        stroke-width={2}
-        fill={fill}
-      />
+      >
+        <div data-selected={isSelected()} class="bg-base-200 w-full h-full flex gap-1 py-1 px-3">
+          <div class="flex flex-col grow">
+            <span class="text-xs truncate">{props.task.title}</span>
+            <span class="text-xs truncate">{props.task.description}</span>
+            <span class="text-xs truncate">X:{props.task.axisX}</span>
+            <span class="text-xs truncate">Y:{props.task.axisY}</span>
+            <span class="text-xs truncate">Points:{props.task.estimate}</span>
+          </div>
+          <TaskUpdateButton task={props.task} />
+        </div>
+      </foreignObject>
       <TaskHandle
         kind="source"
         x={props.task.positionX}
@@ -88,33 +90,6 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         y={props.task.positionY}
         taskId={props.task.id}
       />
-      <TaskUpdateButton task={props.task} />
-    </>
-  );
-};
-
-type TaskContentProps = {
-  task: TaskModel;
-};
-
-export const TaskContent: Component<TaskContentProps> = (props) => {
-  return (
-    <>
-      <text x={props.task.positionX + 16} y={props.task.positionY + 16}>
-        {props.task.title}
-      </text>
-      <text x={props.task.positionX + 16} y={props.task.positionY + 34}>
-        {props.task.description}
-      </text>
-      <text x={props.task.positionX + 16} y={props.task.positionY + 52}>
-        X:{props.task.axisX}
-      </text>
-      <text x={props.task.positionX + 16} y={props.task.positionY + 70}>
-        Y:{props.task.axisY}
-      </text>
-      <text x={props.task.positionX + 16} y={props.task.positionY + 88}>
-        Points:{props.task.estimate}
-      </text>
     </>
   );
 };
@@ -236,12 +211,7 @@ const TaskUpdateButton: Component<TaskUpdateButtonProps> = (props) => {
   };
 
   return (
-    <foreignObject
-      x={props.task.positionX + TASK_RECT_WIDTH - BUTTON_PADDING - BUTTON_SIZE}
-      y={props.task.positionY + BUTTON_PADDING}
-      width={50}
-      height={50}
-    >
+    <>
       <Button
         aria-label={t("board.tasks.updateTask")}
         shape="circle"
@@ -251,6 +221,6 @@ const TaskUpdateButton: Component<TaskUpdateButtonProps> = (props) => {
         <PencilIcon class="size-4" />
       </Button>
       <UpdateTaskDialog dialogId={dialogId} task={props.task} />
-    </foreignObject>
+    </>
   );
 };

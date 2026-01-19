@@ -17,7 +17,7 @@ import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
 import { EdgePath } from "./edge-path";
 import { InsertTaskDialog } from "./task-dialogs";
-import { TaskContent, TaskGroup } from "./task-group";
+import { TaskGroup } from "./task-group";
 import { ToolsBar } from "./tools-bar";
 import { ZoomBar } from "./zoom-bar";
 
@@ -53,7 +53,6 @@ const DragAndDropExample: Component = () => {
           <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
             <AxisGridPaths />
             <SelectableGroup />
-            <TaskContentGroup />
             <AxisGroup />
           </svg>
           <ToolsBar />
@@ -85,22 +84,6 @@ const SelectableGroup: Component = () => {
         {(entry) => <EdgePath edge={entry.edge} source={entry.source} target={entry.target} />}
       </For>
       <For each={tasksData().entries}>{(task) => <TaskGroup task={task} />}</For>
-    </g>
-  );
-};
-
-const TaskContentGroup: Component = () => {
-  const boardTransformContext = useBoardTransformContext();
-
-  const tasksData = useTasksDataContext();
-  const dragState = useDragStateContext();
-
-  return (
-    <g
-      cursor={dragState().isDragging() ? "grabbing" : "grab"}
-      transform={boardTransformContext().transform as unknown as string}
-    >
-      <For each={tasksData().entries}>{(task) => <TaskContent task={task} />}</For>
     </g>
   );
 };
