@@ -77,17 +77,11 @@ export const AxisGroup: Component = () => {
 };
 
 const HorizontalBackgroundRect: Component = () => {
-  const boardTheme = useBoardThemeContext();
-
-  return (
-    <rect class="w-screen" x={0} y={0} height={100} fill={boardTheme().axisBoackgroundColor} />
-  );
+  return <rect class="w-screen fill-base-300" x={0} y={0} height={100} />;
 };
 
 const VerticalBackgroundRect: Component = () => {
-  const boardTheme = useBoardThemeContext();
-
-  return <rect class="h-screen" x={0} y={0} width={100} fill={boardTheme().axisBoackgroundColor} />;
+  return <rect class="h-screen fill-base-300" x={0} y={0} width={100} />;
 };
 
 type HorizontalItemRectProps = {
@@ -97,8 +91,6 @@ type HorizontalItemRectProps = {
 };
 
 const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
-
   const boardTransform = useBoardTransformContext();
 
   const transformed = createMemo(() =>
@@ -115,17 +107,11 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
 
   return (
     <>
-      <rect
-        width={width()}
-        x={transformed()}
-        y={0}
-        height={AXIS_OFFSET}
-        fill={boardTheme().axisItemBoackgroundColor}
-      />
-      <text x={transformed()} y={20}>
+      <rect class="fill-base-200" width={width()} x={transformed()} y={0} height={AXIS_OFFSET} />
+      <text class="fill-base-content" x={transformed()} y={20}>
         {props.config.axis.name}
       </text>
-      <text x={transformed()} y={40}>
+      <text class="fill-base-content" x={transformed()} y={40}>
         {props.config.axis.id}
       </text>
       <AxisSummaryText tasks={tasks()} axis={props.config.axis} x={transformed()} y={60} />
@@ -158,8 +144,6 @@ type VerticalItemRectProps = {
 };
 
 const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
-
   const boardTransform = useBoardTransformContext();
 
   const transformed = createMemo(() =>
@@ -175,16 +159,16 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
   return (
     <>
       <rect
+        class="fill-base-200"
         height={props.config.axis.size * boardTransform().transform.k}
         x={0}
         y={transformed()}
         width={AXIS_OFFSET}
-        fill={boardTheme().axisItemBoackgroundColor}
       />
-      <text y={transformed() + 20} x={0}>
+      <text class="fill-base-content" y={transformed() + 20} x={0}>
         {props.config.axis.name}
       </text>
-      <text y={transformed() + 40} x={0}>
+      <text class="fill-base-content" y={transformed() + 40} x={0}>
         {props.config.axis.id}
       </text>
       <AxisSummaryText tasks={tasks()} axis={props.config.axis} x={0} y={transformed() + 60} />
@@ -223,7 +207,7 @@ const AxisSummaryText: Component<AxisSummaryTextProps> = (props) => {
   });
 
   return (
-    <text y={props.y} x={props.x}>
+    <text class="fill-base-content" y={props.y} x={props.x}>
       {esitmationSum()}
     </text>
   );
@@ -329,7 +313,6 @@ type AxisDeleteButtonProps = {
 };
 
 const AxisDeleteButton: Component<AxisDeleteButtonProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
   const boardDialogs = useBoardDialogsContext();
 
   const [ref, setRef] = createSignal<SVGRectElement>();
@@ -361,7 +344,9 @@ const AxisDeleteButton: Component<AxisDeleteButtonProps> = (props) => {
       y={props.y}
       width={BUTTON_SIZE}
       height={BUTTON_SIZE}
-      fill={boardTheme().taskMenuButtonBackgroundColor}
+      rx={6}
+      ry={6}
+      class="fill-base-300"
     />
   );
 };
