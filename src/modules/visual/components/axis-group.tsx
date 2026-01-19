@@ -1,8 +1,16 @@
 import { eq, useLiveQuery } from "@tanstack/solid-db";
 import * as d3 from "d3";
-import { createEffect, createMemo, createSignal, Index, onCleanup, type Component } from "solid-js";
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  Index,
+  onCleanup,
+  Show,
+  type Component,
+} from "solid-js";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
-import type { AxisModel } from "~/integrations/tanstack-db/schema";
+import type { AxisModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import {
   DELETE_AXIS_DIALOG_ID,
@@ -17,15 +25,22 @@ import { AXIS_OFFSET, BUTTON_PADDING, BUTTON_SIZE } from "../utils/constants";
 export const AxisGroup: Component = () => {
   const axisConfig = useAxisConfigContext();
 
+  const xLength = createMemo(() => axisConfig().config.x.length);
+  const yLength = createMemo(() => axisConfig().config.y.length);
+
   return (
     <>
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
       <Index each={axisConfig().config.x}>
-        {(entry, index) => <HorizontalItemRect config={entry()} index={index} />}
+        {(entry, index) => (
+          <HorizontalItemRect totalLength={xLength()} config={entry()} index={index} />
+        )}
       </Index>
       <Index each={axisConfig().config.y}>
-        {(entry, index) => <VerticalItemRect config={entry()} index={index} />}
+        {(entry, index) => (
+          <VerticalItemRect totalLength={yLength()} config={entry()} index={index} />
+        )}
       </Index>
     </>
   );
@@ -48,6 +63,7 @@ const VerticalBackgroundRect: Component = () => {
 type HorizontalItemRectProps = {
   config: AxisConfig;
   index: number;
+  totalLength: number;
 };
 
 const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
@@ -62,6 +78,10 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
   const width = createMemo(() => props.config.axis.size * boardTransform().transform.k);
 
   const endX = createMemo(() => transformed() + width());
+
+  const tasks = useLiveQuery((q) =>
+    q.from({ tasks: taskCollection }).where(({ tasks }) => eq(tasks.axisX, props.config.axis.id)),
+  );
 
   return (
     <>
@@ -78,7 +98,7 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
       <text x={transformed()} y={40}>
         {props.config.axis.id}
       </text>
-      <AxisSummaryText axis={props.config.axis} x={transformed()} y={60} />
+      <AxisSummaryText tasks={tasks()} axis={props.config.axis} x={transformed()} y={60} />
       <AxisInsertButton
         orientation={props.config.axis.orientation}
         index={props.index}
@@ -90,11 +110,13 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
         x={endX() - BUTTON_SIZE - BUTTON_PADDING}
         y={BUTTON_PADDING + BUTTON_SIZE + BUTTON_PADDING}
       />
-      <AxisDeleteButton
-        axis={props.config.axis}
-        x={endX() - BUTTON_SIZE - BUTTON_PADDING}
-        y={BUTTON_PADDING + 2 * (BUTTON_SIZE + BUTTON_PADDING)}
-      />
+      <Show when={props.totalLength > 1 && tasks().length === 0}>
+        <AxisDeleteButton
+          axis={props.config.axis}
+          x={endX() - BUTTON_SIZE - BUTTON_PADDING}
+          y={BUTTON_PADDING + 2 * (BUTTON_SIZE + BUTTON_PADDING)}
+        />
+      </Show>
     </>
   );
 };
@@ -102,6 +124,7 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
 type VerticalItemRectProps = {
   config: AxisConfig;
   index: number;
+  totalLength: number;
 };
 
 const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
@@ -114,6 +137,10 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
   );
 
   const buttonX = AXIS_OFFSET - BUTTON_SIZE - BUTTON_PADDING;
+
+  const tasks = useLiveQuery((q) =>
+    q.from({ tasks: taskCollection }).where(({ tasks }) => eq(tasks.axisY, props.config.axis.id)),
+  );
 
   return (
     <>
@@ -130,7 +157,7 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
       <text y={transformed() + 40} x={0}>
         {props.config.axis.id}
       </text>
-      <AxisSummaryText axis={props.config.axis} x={0} y={transformed() + 60} />
+      <AxisSummaryText tasks={tasks()} axis={props.config.axis} x={0} y={transformed() + 60} />
       <AxisInsertButton
         orientation={props.config.axis.orientation}
         index={props.index}
@@ -142,11 +169,13 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
         x={buttonX}
         y={transformed() + BUTTON_PADDING + BUTTON_SIZE + BUTTON_PADDING}
       />
-      <AxisDeleteButton
-        axis={props.config.axis}
-        x={buttonX}
-        y={transformed() + BUTTON_PADDING + 2 * (BUTTON_SIZE + BUTTON_PADDING)}
-      />
+      <Show when={props.totalLength > 1 && tasks().length === 0}>
+        <AxisDeleteButton
+          axis={props.config.axis}
+          x={buttonX}
+          y={transformed() + BUTTON_PADDING + 2 * (BUTTON_SIZE + BUTTON_PADDING)}
+        />
+      </Show>
     </>
   );
 };
@@ -155,20 +184,12 @@ type AxisSummaryTextProps = {
   axis: AxisModel;
   x: number;
   y: number;
+  tasks: TaskModel[];
 };
 
 const AxisSummaryText: Component<AxisSummaryTextProps> = (props) => {
-  const collection = useLiveQuery((q) =>
-    q
-      .from({ tasks: taskCollection })
-      .where(({ tasks }) =>
-        props.axis.orientation === "horizontal"
-          ? eq(tasks.axisX, props.axis.id)
-          : eq(tasks.axisY, props.axis.id),
-      ),
-  );
   const esitmationSum = createMemo(() => {
-    return collection().reduce((previous, current) => previous + current.estimate, 0);
+    return props.tasks.reduce((previous, current) => previous + current.estimate, 0);
   });
 
   return (
