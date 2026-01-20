@@ -2,7 +2,6 @@ import { For, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AxisConfigProvider } from "../contexts/axis-config";
-import { BoardDialogsProvider } from "../contexts/board-dialogs";
 import { BoardModelProvider } from "../contexts/board-model";
 import { BoardThemeProvider } from "../contexts/board-theme";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
@@ -48,16 +47,14 @@ const DragAndDropExample: Component = () => {
   return (
     <SelectionStateProvider>
       <BoardTransformProvider>
-        <BoardDialogsProvider>
-          <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
-            <AxisGridPaths />
-            <SelectableGroup />
-            <AxisGroup />
-          </svg>
-          <ToolsBar />
-          <ZoomBar />
-          <InsertTaskDialog />
-        </BoardDialogsProvider>
+        <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
+          <AxisGridPaths />
+          <SelectableGroup />
+          <AxisGroup />
+        </svg>
+        <ToolsBar />
+        <ZoomBar />
+        <InsertTaskDialog />
       </BoardTransformProvider>
     </SelectionStateProvider>
   );
