@@ -5,14 +5,11 @@ import { HandIcon } from "~/ui/icons/hand-icon";
 import { MousePointerIcon } from "~/ui/icons/mouse-pointer-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
 import { Tooltip } from "~/ui/tooltip/tooltip";
-import { useBoardModelContext } from "../contexts/board-model";
 import { useToolsStateContext, type ToolType } from "../contexts/tools-state";
 import { ToolContainer } from "./tool-container";
 
 export const ToolsBar: Component = () => {
   const { t } = useI18n();
-
-  const boardModel = useBoardModelContext();
 
   const toolsState = useToolsStateContext();
 
@@ -22,11 +19,7 @@ export const ToolsBar: Component = () => {
 
   return (
     <div class="absolute bottom-2 w-full flex justify-center">
-      <ToolContainer class="justify-center items-center px-3">
-        <div class="flex flex-col px-2">
-          <span class="font-semibold">{boardModel().board.title}</span>
-          <span>{boardModel().board.description}</span>
-        </div>
+      <ToolContainer class="justify-center items-center px-3 py-2">
         <Tooltip data-tip={t("board.tools.pane")} placement="bottom">
           <Button
             aria-label={t("board.tools.pane")}

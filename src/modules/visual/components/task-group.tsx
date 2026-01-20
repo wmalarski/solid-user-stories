@@ -3,6 +3,7 @@ import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
+import { Badge } from "~/ui/badge/badge";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
 import { useDrag } from "../contexts/drag-state";
@@ -79,7 +80,9 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
           {/* <span class="text-xs truncate">X:{props.task.axisX}</span>
             <span class="text-xs truncate">Y:{props.task.axisY}</span> */}
           <div class="flex gap-2 w-full justify-end items-center">
-            <span class="badge badge-sm badge-info">{props.task.estimate}</span>
+            <Badge size="sm" color="info">
+              {props.task.estimate}
+            </Badge>
             <UpdateTaskDialog task={props.task} />
           </div>
         </div>
