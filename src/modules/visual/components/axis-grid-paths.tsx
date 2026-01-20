@@ -4,7 +4,7 @@ import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useDrag } from "../contexts/drag-state";
 import { useTasksDataContext } from "../contexts/tasks-data";
-import { AXIS_OFFSET } from "../utils/constants";
+import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
 
 const sharedLineProps: ComponentProps<"line"> = {
   class: "stroke-base-content",
@@ -29,7 +29,7 @@ export const AxisGridPaths: Component = () => {
 const HorizontalZeroPath: Component = () => {
   const boardTransform = useBoardTransformContext();
 
-  const y = createMemo(() => translateY(boardTransform().transform, AXIS_OFFSET));
+  const y = createMemo(() => translateY(boardTransform().transform, AXIS_Y_OFFSET));
 
   return <line {...sharedLineProps} x1={0} x2="100%" y1={y()} y2={y()} />;
 };
@@ -37,7 +37,7 @@ const HorizontalZeroPath: Component = () => {
 const VerticalZeroPath: Component = () => {
   const boardTransform = useBoardTransformContext();
 
-  const x = createMemo(() => translateX(boardTransform().transform, AXIS_OFFSET));
+  const x = createMemo(() => translateX(boardTransform().transform, AXIS_X_OFFSET));
 
   return <line y1={0} y2="100%" x1={x()} x2={x()} {...sharedLineProps} />;
 };
@@ -52,7 +52,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
   const boardTransform = useBoardTransformContext();
 
   const transformed = createMemo(() =>
-    translateY(boardTransform().transform, props.config.end + AXIS_OFFSET),
+    translateY(boardTransform().transform, props.config.end + AXIS_Y_OFFSET),
   );
 
   const [ref, setRef] = createSignal<SVGCircleElement>();
@@ -65,12 +65,12 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       let maxNotDraggedPosition = 0;
       const draggedTasks = new Map<string, number>();
       for (const entry of tasksData().entries) {
-        if (entry.positionY > props.config.end + AXIS_OFFSET) {
+        if (entry.positionY > props.config.end + AXIS_Y_OFFSET) {
           draggedTasks.set(entry.id, entry.positionY);
         } else {
           maxNotDraggedPosition = Math.max(
             maxNotDraggedPosition,
-            entry.positionY - AXIS_OFFSET + 10,
+            entry.positionY - AXIS_Y_OFFSET + 10,
           );
         }
       }
@@ -81,7 +81,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
     },
     onDragged(event) {
       const transform = boardTransform().transform;
-      const updatedY = (event.y - transform.y) / transform.k - AXIS_OFFSET;
+      const updatedY = (event.y - transform.y) / transform.k - AXIS_Y_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
       const size = withLimit - props.config.start;
 
@@ -124,7 +124,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
   const boardTransform = useBoardTransformContext();
 
   const transformed = createMemo(() =>
-    translateX(boardTransform().transform, props.config.end + AXIS_OFFSET),
+    translateX(boardTransform().transform, props.config.end + AXIS_X_OFFSET),
   );
 
   const [ref, setRef] = createSignal<SVGElement>();
@@ -137,12 +137,12 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       let maxNotDraggedPosition = 0;
       const draggedTasks = new Map<string, number>();
       for (const entry of tasksData().entries) {
-        if (entry.positionX > props.config.end + AXIS_OFFSET) {
+        if (entry.positionX > props.config.end + AXIS_X_OFFSET) {
           draggedTasks.set(entry.id, entry.positionX);
         } else {
           maxNotDraggedPosition = Math.max(
             maxNotDraggedPosition,
-            entry.positionX - AXIS_OFFSET + 10,
+            entry.positionX - AXIS_X_OFFSET + 10,
           );
         }
       }
@@ -153,7 +153,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
     },
     onDragged(event) {
       const transform = boardTransform().transform;
-      const updatedX = (event.x - transform.x) / transform.k - AXIS_OFFSET;
+      const updatedX = (event.x - transform.x) / transform.k - AXIS_X_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
       const size = withLimit - props.config.start;
 

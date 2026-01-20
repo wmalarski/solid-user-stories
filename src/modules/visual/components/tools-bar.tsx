@@ -21,7 +21,7 @@ export const ToolsBar: Component = () => {
   };
 
   return (
-    <div class="absolute top-2 w-full flex justify-center">
+    <div class="absolute bottom-2 w-full flex justify-center">
       <ToolContainer class="justify-center items-center px-3">
         <div class="flex flex-col px-2">
           <span class="font-semibold">{boardModel().board.title}</span>

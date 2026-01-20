@@ -3,7 +3,7 @@ import { createMemo, Index, Show, type Component } from "solid-js";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { AXIS_OFFSET } from "../utils/constants";
+import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
 import { DeleteAxisDialog, InsertAxisDialog, UpdateAxisDialog } from "./axis-dialogs";
 
 export const AxisGroup: Component = () => {
@@ -18,7 +18,7 @@ export const AxisGroup: Component = () => {
   //   () =>
   //     translateX(
   //       boardTransform().transform,
-  //       (axisConfig().config.x.at(-1)?.end ?? 0) + AXIS_OFFSET,
+  //       (axisConfig().config.x.at(-1)?.end ?? 0) + AXIS_X_OFFSET,
   //     ) + BUTTON_PADDING,
   // );
 
@@ -26,7 +26,7 @@ export const AxisGroup: Component = () => {
   //   () =>
   //     translateY(
   //       boardTransform().transform,
-  //       (axisConfig().config.y.at(-1)?.end ?? 0) + AXIS_OFFSET,
+  //       (axisConfig().config.y.at(-1)?.end ?? 0) + AXIS_Y_OFFSET,
   //     ) + BUTTON_PADDING,
   // );
 
@@ -57,11 +57,11 @@ export const AxisGroup: Component = () => {
 };
 
 const HorizontalBackgroundRect: Component = () => {
-  return <rect class="w-screen fill-base-300" x={0} y={0} height={100} />;
+  return <rect class="w-screen fill-base-300" x={0} y={0} height={AXIS_Y_OFFSET} />;
 };
 
 const VerticalBackgroundRect: Component = () => {
-  return <rect class="h-screen fill-base-300" x={0} y={0} width={100} />;
+  return <rect class="h-screen fill-base-300" x={0} y={0} width={AXIS_X_OFFSET} />;
 };
 
 type HorizontalItemRectProps = {
@@ -74,14 +74,14 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
   const boardTransform = useBoardTransformContext();
 
   const transformed = createMemo(() =>
-    translateX(boardTransform().transform, props.config.start + AXIS_OFFSET),
+    translateX(boardTransform().transform, props.config.start + AXIS_X_OFFSET),
   );
 
   const width = createMemo(() => props.config.axis.size * boardTransform().transform.k);
 
   return (
     <>
-      <foreignObject width={width()} x={transformed()} y={0} height={AXIS_OFFSET}>
+      <foreignObject width={width()} x={transformed()} y={0} height={AXIS_Y_OFFSET}>
         <AxisItemContent
           config={props.config}
           index={props.index}
@@ -102,7 +102,7 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
   const boardTransform = useBoardTransformContext();
 
   const transformed = createMemo(() =>
-    translateY(boardTransform().transform, props.config.start + AXIS_OFFSET),
+    translateY(boardTransform().transform, props.config.start + AXIS_Y_OFFSET),
   );
 
   return (
@@ -111,7 +111,7 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
         height={props.config.axis.size * boardTransform().transform.k}
         x={0}
         y={transformed()}
-        width={AXIS_OFFSET}
+        width={AXIS_X_OFFSET}
       >
         <AxisItemContent
           config={props.config}
@@ -145,13 +145,11 @@ const AxisItemContent: Component<AxisItemContentProps> = (props) => {
   });
 
   return (
-    <div class="bg-base-200 w-full h-full flex px-3 py-1 gap-1">
-      <div class="flex flex-col grow">
-        <span>{props.config.axis.name}</span>
-        <span>{props.config.axis.id}</span>
+    <div class="bg-base-200 w-full h-full grid grid-cols-1 px-3 py-1">
+      <span class="text-sm truncate font-semibold">{props.config.axis.name}</span>
+      {/* <span>{props.config.axis.id}</span> */}
+      <div class="flex">
         <span>{esitmationSum()}</span>
-      </div>
-      <div>
         <InsertAxisDialog orientation={props.config.axis.orientation} index={props.index} />
         <UpdateAxisDialog axis={props.config.axis} />
         <Show when={props.totalLength > 1 && tasks().length === 0}>
