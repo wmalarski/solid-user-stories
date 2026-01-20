@@ -184,7 +184,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
         y={props.y + TASK_HANDLE_Y_SHIFT}
         width={TASK_HANDLE_SIZE}
         height={TASK_HANDLE_SIZE}
-        fill={boardTheme().taskHandleBackgroundColor}
+        class="fill-accent"
       />
       <Show when={isDragging()}>
         <path d={path()} stroke={boardTheme().edgeDrawingColor} fill="transparent" />

@@ -39,11 +39,21 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
     <>
       <path
         d={path()}
-        stroke-width={isSelected() ? 3 : 2}
         fill="transparent"
-        class="stroke-base-content"
+        class="stroke-accent"
         marker-end="url(#arrow)"
-      />
+        stroke-dasharray="5,5"
+        stroke-opacity={0.7}
+        stroke-dashoffset={0}
+        stroke-width={isSelected() ? 4 : 3}
+      >
+        <animate
+          attributeName="stroke-dashoffset"
+          values="10;0"
+          dur="0.5s"
+          repeatCount="indefinite"
+        />
+      </path>
       <Show when={isSelected()}>
         <EdgeHandle edge={props.edge} source={props.source} target={props.target} />
       </Show>

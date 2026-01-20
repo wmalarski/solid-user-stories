@@ -1,11 +1,17 @@
-import { createMemo, createSignal, Index, type Component } from "solid-js";
+import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
 import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
-import { useBoardThemeContext } from "../contexts/board-theme";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useDrag } from "../contexts/drag-state";
 import { useTasksDataContext } from "../contexts/tasks-data";
 import { AXIS_OFFSET } from "../utils/constants";
+
+const sharedLineProps: ComponentProps<"line"> = {
+  class: "stroke-base-content",
+  "stroke-dasharray": "5,5",
+  "stroke-opacity": 0.2,
+  "stroke-width": 3,
+};
 
 export const AxisGridPaths: Component = () => {
   const axisConfig = useAxisConfigContext();
@@ -21,35 +27,19 @@ export const AxisGridPaths: Component = () => {
 };
 
 const HorizontalZeroPath: Component = () => {
-  const boardTheme = useBoardThemeContext();
-
   const boardTransform = useBoardTransformContext();
 
-  return (
-    <rect
-      x={0}
-      class="w-full"
-      y={translateY(boardTransform().transform, AXIS_OFFSET)}
-      height={2}
-      fill={boardTheme().axisGridColor}
-    />
-  );
+  const y = createMemo(() => translateY(boardTransform().transform, AXIS_OFFSET));
+
+  return <line {...sharedLineProps} x1={0} x2="100%" y1={y()} y2={y()} />;
 };
 
 const VerticalZeroPath: Component = () => {
-  const boardTheme = useBoardThemeContext();
-
   const boardTransform = useBoardTransformContext();
 
-  return (
-    <rect
-      y={0}
-      class="h-screen"
-      x={translateX(boardTransform().transform, AXIS_OFFSET)}
-      width={2}
-      fill={boardTheme().axisGridColor}
-    />
-  );
+  const x = createMemo(() => translateX(boardTransform().transform, AXIS_OFFSET));
+
+  return <line y1={0} y2="100%" x1={x()} x2={x()} {...sharedLineProps} />;
 };
 
 type HorizontalPathProps = {
@@ -57,8 +47,6 @@ type HorizontalPathProps = {
 };
 
 const HorizontalPath: Component<HorizontalPathProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
-
   const tasksData = useTasksDataContext();
 
   const boardTransform = useBoardTransformContext();
@@ -67,10 +55,10 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
     translateY(boardTransform().transform, props.config.end + AXIS_OFFSET),
   );
 
+  const [ref, setRef] = createSignal<SVGCircleElement>();
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
   const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
   const [startPosition, setStartPosition] = createSignal<number>(0);
-  const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
 
   useDrag({
     onDragStarted() {
@@ -111,17 +99,17 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
         }
       });
     },
-    ref: rectRef,
+    ref,
   });
 
   return (
-    <rect
-      ref={setRectRef}
-      x={0}
-      class="w-full"
-      y={transformed()}
-      height={2}
-      fill={boardTheme().axisGridColor}
+    <line
+      ref={setRef}
+      x1={0}
+      x2="100%"
+      y1={transformed()}
+      y2={transformed()}
+      {...sharedLineProps}
     />
   );
 };
@@ -131,8 +119,6 @@ type VerticalPathProps = {
 };
 
 const VerticalPath: Component<VerticalPathProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
-
   const tasksData = useTasksDataContext();
 
   const boardTransform = useBoardTransformContext();
@@ -141,10 +127,10 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
     translateX(boardTransform().transform, props.config.end + AXIS_OFFSET),
   );
 
+  const [ref, setRef] = createSignal<SVGElement>();
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
   const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
   const [startPosition, setStartPosition] = createSignal<number>(0);
-  const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
 
   useDrag({
     onDragStarted() {
@@ -185,17 +171,17 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
         }
       });
     },
-    ref: rectRef,
+    ref,
   });
 
   return (
-    <rect
-      ref={setRectRef}
-      y={0}
-      class="h-screen"
-      x={transformed()}
-      width={2}
-      fill={boardTheme().axisGridColor}
+    <line
+      ref={setRef}
+      y1={0}
+      y2="100%"
+      x1={transformed()}
+      x2={transformed()}
+      {...sharedLineProps}
     />
   );
 };

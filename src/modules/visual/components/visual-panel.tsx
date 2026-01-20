@@ -90,11 +90,11 @@ const SvgDefinitions: Component = () => {
         viewBox="0 0 10 10"
         refX="14"
         refY="5"
-        markerWidth="8"
-        markerHeight="8"
+        markerWidth="6"
+        markerHeight="6"
         orient="auto-start-reverse"
       >
-        <path class="fill-base-content" d="M 0 0 L 10 5 L 0 10 z" />
+        <path class="fill-accent" d="M 0 0 L 10 5 L 0 10 z" />
       </marker>
     </defs>
   );
