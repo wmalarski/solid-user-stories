@@ -1,5 +1,5 @@
 export const TASK_RECT_WIDTH = 200;
-export const TASK_RECT_HEIGHT = 100;
+export const TASK_RECT_HEIGHT = 110;
 export const TASK_RECT_HEIGHT_HALF = TASK_RECT_HEIGHT / 2;
 export const TASK_HANDLE_SIZE = 16;
 export const TASK_HANDLE_SIZE_HALF = TASK_HANDLE_SIZE / 2;

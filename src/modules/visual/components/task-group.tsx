@@ -55,6 +55,14 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
 
   return (
     <>
+      <rect
+        x={props.task.positionX}
+        y={props.task.positionY}
+        width={TASK_RECT_WIDTH}
+        height={TASK_RECT_HEIGHT}
+        filter="url(#task-shadow)"
+        class="opacity-50"
+      />
       <foreignObject
         ref={setRectRef}
         x={props.task.positionX}
@@ -62,15 +70,18 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
       >
-        <div data-selected={isSelected()} class="bg-base-200 w-full h-full flex gap-1 py-1 px-3">
-          <div class="flex flex-col grow">
-            <span class="text-xs truncate">{props.task.title}</span>
-            <span class="text-xs truncate">{props.task.description}</span>
-            <span class="text-xs truncate">X:{props.task.axisX}</span>
-            <span class="text-xs truncate">Y:{props.task.axisY}</span>
-            <span class="text-xs truncate">Points:{props.task.estimate}</span>
+        <div
+          data-selected={isSelected()}
+          class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[auto_1fr_auto] py-2 px-3"
+        >
+          <span class="text-sm truncate font-semibold">{props.task.title}</span>
+          <span class="text-xs line-clamp-3 opacity-80">{props.task.description}</span>
+          {/* <span class="text-xs truncate">X:{props.task.axisX}</span>
+            <span class="text-xs truncate">Y:{props.task.axisY}</span> */}
+          <div class="flex gap-2 w-full justify-end items-center">
+            <span class="badge badge-sm badge-info">{props.task.estimate}</span>
+            <UpdateTaskDialog task={props.task} />
           </div>
-          <UpdateTaskDialog task={props.task} />
         </div>
       </foreignObject>
       <TaskHandle

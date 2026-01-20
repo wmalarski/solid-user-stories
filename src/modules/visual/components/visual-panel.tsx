@@ -93,6 +93,11 @@ const SvgDefinitions: Component = () => {
       >
         <path class="fill-accent" d="M 0 0 L 10 5 L 0 10 z" />
       </marker>
+      <filter id="task-shadow" width="50" height="50">
+        <feOffset in="SourceAlpha" dx="3" dy="3" />
+        <feGaussianBlur stdDeviation="10" />
+        <feBlend in="SourceGraphic" in2="blurOut" />
+      </filter>
     </defs>
   );
 };
