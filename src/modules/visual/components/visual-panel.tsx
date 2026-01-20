@@ -48,6 +48,7 @@ const DragAndDropExample: Component = () => {
     <SelectionStateProvider>
       <BoardTransformProvider>
         <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
+          <SvgDefinitions />
           <AxisGridPaths />
           <SelectableGroup />
           <AxisGroup />
@@ -78,5 +79,23 @@ const SelectableGroup: Component = () => {
       </For>
       <For each={tasksData().entries}>{(task) => <TaskGroup task={task} />}</For>
     </g>
+  );
+};
+
+const SvgDefinitions: Component = () => {
+  return (
+    <defs>
+      <marker
+        id="arrow"
+        viewBox="0 0 10 10"
+        refX="14"
+        refY="5"
+        markerWidth="8"
+        markerHeight="8"
+        orient="auto-start-reverse"
+      >
+        <path class="fill-base-content" d="M 0 0 L 10 5 L 0 10 z" />
+      </marker>
+    </defs>
   );
 };

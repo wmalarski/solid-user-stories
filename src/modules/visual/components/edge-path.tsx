@@ -1,8 +1,7 @@
 import * as d3 from "d3";
-import { createMemo, createSignal, type Component } from "solid-js";
+import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { edgeCollection } from "~/integrations/tanstack-db/collections";
 import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
-import { useBoardThemeContext } from "../contexts/board-theme";
 import { useDrag } from "../contexts/drag-state";
 import { useIsEdgeSelected } from "../contexts/selection-state";
 import {
@@ -19,8 +18,6 @@ type EdgePathProps = {
 };
 
 export const EdgePath: Component<EdgePathProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
-
   const isSelected = useIsEdgeSelected(() => props.edge.id);
 
   const path = createMemo(() => {
@@ -43,10 +40,13 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
       <path
         d={path()}
         stroke-width={isSelected() ? 3 : 2}
-        stroke={isSelected() ? boardTheme().selectionColor : boardTheme().edgeColor}
         fill="transparent"
+        class="stroke-base-content"
+        marker-end="url(#arrow)"
       />
-      <EdgeHandle edge={props.edge} source={props.source} target={props.target} />
+      <Show when={isSelected()}>
+        <EdgeHandle edge={props.edge} source={props.source} target={props.target} />
+      </Show>
     </>
   );
 };
@@ -58,8 +58,6 @@ type EdgeHandleProps = {
 };
 
 const EdgeHandle: Component<EdgeHandleProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
-
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
   useDrag({
@@ -82,7 +80,7 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
       }
       width={EDGE_HANDLE_SIZE}
       height={EDGE_HANDLE_SIZE}
-      fill={boardTheme().edgeHandleColor}
+      class="fill-base-content"
     />
   );
 };
