@@ -5,7 +5,6 @@ import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
-import { useBoardThemeContext } from "../contexts/board-theme";
 import { useDrag } from "../contexts/drag-state";
 import { useIsTaskSelected } from "../contexts/selection-state";
 import { useTasksDataContext } from "../contexts/tasks-data";
@@ -98,8 +97,6 @@ type TaskHandleProps = {
 };
 
 const TaskHandle: Component<TaskHandleProps> = (props) => {
-  const boardTheme = useBoardThemeContext();
-
   const boardId = useBoardId();
 
   const tasksData = useTasksDataContext();
@@ -187,7 +184,21 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
         class="fill-accent"
       />
       <Show when={isDragging()}>
-        <path d={path()} stroke={boardTheme().edgeDrawingColor} fill="transparent" />
+        <path
+          d={path()}
+          stroke-width={3}
+          class="stroke-accent"
+          fill="transparent"
+          stroke-dasharray="5,5"
+          marker-end="url(#arrow)"
+        >
+          <animate
+            attributeName="stroke-dashoffset"
+            values="10;0"
+            dur="0.5s"
+            repeatCount="indefinite"
+          />
+        </path>
       </Show>
     </>
   );

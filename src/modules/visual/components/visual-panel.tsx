@@ -3,7 +3,6 @@ import { cx } from "tailwind-variants";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AxisConfigProvider } from "../contexts/axis-config";
 import { BoardModelProvider } from "../contexts/board-model";
-import { BoardThemeProvider } from "../contexts/board-theme";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgesDataProvider, useEdgesDataContext } from "../contexts/edges-data";
@@ -25,21 +24,19 @@ type VisualPanelProps = {
 
 export const VisualPanel: Component<VisualPanelProps> = (props) => {
   return (
-    <BoardThemeProvider>
-      <BoardModelProvider board={props.board}>
-        <TasksDataProvider>
-          <EdgesDataProvider>
-            <AxisConfigProvider>
-              <ToolsStateProvider>
-                <DragStateProvider>
-                  <DragAndDropExample />
-                </DragStateProvider>
-              </ToolsStateProvider>
-            </AxisConfigProvider>
-          </EdgesDataProvider>
-        </TasksDataProvider>
-      </BoardModelProvider>
-    </BoardThemeProvider>
+    <BoardModelProvider board={props.board}>
+      <TasksDataProvider>
+        <EdgesDataProvider>
+          <AxisConfigProvider>
+            <ToolsStateProvider>
+              <DragStateProvider>
+                <DragAndDropExample />
+              </DragStateProvider>
+            </ToolsStateProvider>
+          </AxisConfigProvider>
+        </EdgesDataProvider>
+      </TasksDataProvider>
+    </BoardModelProvider>
   );
 };
 
