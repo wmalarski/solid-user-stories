@@ -9,8 +9,9 @@ import {
 } from "solid-js";
 import { axisCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel } from "~/integrations/tanstack-db/schema";
-import type { Point2D } from "~/modules/editor/utils/types";
+
 import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
+import type { Point2D } from "../utils/types";
 import { useBoardId } from "./board-model";
 
 const createAxisConfigContext = (boardId: string) => {

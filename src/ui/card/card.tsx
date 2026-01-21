@@ -14,7 +14,7 @@ export const Card: Component<CardProps> = (props) => {
 
 export type CardTitleProps<T extends ValidComponent> = DynamicProps<T>;
 
-export function CardTitle<T extends ValidComponent>(props: CardTitleProps<T>) {
+export const CardTitle = <T extends ValidComponent>(props: CardTitleProps<T>) => {
   return (
     <Dynamic
       {...props}
@@ -22,7 +22,7 @@ export function CardTitle<T extends ValidComponent>(props: CardTitleProps<T>) {
       component={props.component}
     />
   );
-}
+};
 
 export type CardBodyProps = ComponentProps<"div">;
 

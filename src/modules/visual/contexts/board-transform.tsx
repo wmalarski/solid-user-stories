@@ -10,8 +10,8 @@ import {
   onCleanup,
   useContext,
 } from "solid-js";
-import type { Point2D } from "~/modules/editor/utils/types";
 import { SVG_SELECTOR } from "../utils/constants";
+import type { Point2D } from "../utils/types";
 import { useToolsStateContext } from "./tools-state";
 
 export type Transform = {

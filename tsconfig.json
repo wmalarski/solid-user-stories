@@ -10,17 +10,17 @@
     "isolatedModules": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "skipLibCheck": true,
     "noEmit": true,
     // Type Checking & Safety
     "strict": true,
     "types": [
       "vite/client"
     ],
-    "baseUrl": ".",
     "paths": {
       "~/*": [
         "./src/*"
       ]
-    },
+    }
   }
 }

@@ -20,7 +20,7 @@ export const Head: Component<HeadProps> = (props) => {
   });
 
   const url = createMemo(() => {
-    const href = getRequestEvent()?.request.url || globalThis.location.href;
+    const href = getRequestEvent()?.request.url ?? globalThis.location.href;
     return new URL(href);
   });
 

@@ -26,7 +26,7 @@ export const parseFormValidationError = (issues: v.BaseIssue<unknown>[]): FormIs
   return {
     errors: Object.fromEntries(
       issues.map((issue) => [
-        issue.path?.map((item) => item.key).join(".") || "global",
+        issue.path?.map((item) => item.key).join(".") ?? "global",
         issue.message,
       ]),
     ),

@@ -10,11 +10,7 @@ import { alertRecipe } from "./alert.recipe";
 export type AlertProps = ComponentVariantProps<"div", typeof alertRecipe>;
 
 export const Alert: Component<AlertProps> = (props) => {
-  const [variants, withoutVariants] = splitProps(props, [
-    "variant",
-    "color",
-    "direction",
-  ]);
+  const [variants, withoutVariants] = splitProps(props, ["variant", "color", "direction"]);
 
   return (
     <div
@@ -25,10 +21,7 @@ export const Alert: Component<AlertProps> = (props) => {
   );
 };
 
-const alertIconMap: Record<
-  "error" | "info" | "success" | "warning",
-  typeof CheckCircleIcon
-> = {
+const alertIconMap: Record<"error" | "info" | "success" | "warning", typeof CheckCircleIcon> = {
   error: XCircleIcon,
   info: InfoIcon,
   success: CheckCircleIcon,
@@ -43,7 +36,5 @@ export const AlertIcon: Component<AlertIconProps> = (props) => {
   const component = () => {
     return alertIconMap[props.variant];
   };
-  return (
-    <Dynamic class="size-6 shrink-0 stroke-current" component={component()} />
-  );
+  return <Dynamic class="size-6 shrink-0 stroke-current" component={component()} />;
 };

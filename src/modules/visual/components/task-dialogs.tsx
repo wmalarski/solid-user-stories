@@ -13,7 +13,6 @@ import { useI18n } from "~/integrations/i18n";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
-import type { Point2D } from "~/modules/editor/utils/types";
 import { Button } from "~/ui/button/button";
 import {
   closeDialog,
@@ -34,6 +33,7 @@ import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
 import { useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
+import type { Point2D } from "../utils/types";
 
 const TaskFieldsSchema = v.object({
   description: v.string(),

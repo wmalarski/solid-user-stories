@@ -4,7 +4,6 @@ import { ErrorBoundary, Suspense, type Component } from "solid-js";
 import { I18nContextProvider } from "./integrations/i18n";
 import { Head } from "./integrations/meta/head";
 import { ErrorFallback } from "./integrations/router/error-fallback";
-import { BoardRoute } from "./modules/board/board-route";
 import { HomeRoute } from "./modules/home/home-route";
 import { VisualRoute } from "./modules/visual/components/visual-route";
 
@@ -23,8 +22,7 @@ export const App: Component = () => (
       )}
     >
       <Route path="/" component={HomeRoute} />
-      <Route path="/board/:boardId" component={BoardRoute} />
-      <Route path="/panel/:boardId" component={VisualRoute} />
+      <Route path="/board/:boardId" component={VisualRoute} />
     </Router>
   </>
 );

@@ -6,7 +6,7 @@ import { VisualPanel } from "./visual-panel";
 
 export const VisualRoute: Component = () => {
   const params = useParams();
-  const boardId = createMemo(() => params.boardId || "");
+  const boardId = createMemo(() => params.boardId ?? "");
 
   const board = useLiveQuery((q) =>
     q
