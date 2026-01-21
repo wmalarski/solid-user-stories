@@ -15,24 +15,6 @@ export const AxisGroup: Component = () => {
   const xLength = createMemo(() => axisConfig().config.x.length);
   const yLength = createMemo(() => axisConfig().config.y.length);
 
-  // const boardTransform = useBoardTransformContext();
-
-  // const insertX = createMemo(
-  //   () =>
-  //     translateX(
-  //       boardTransform().transform,
-  //       (axisConfig().config.x.at(-1)?.end ?? 0) + AXIS_X_OFFSET,
-  //     ) + BUTTON_PADDING,
-  // );
-
-  // const insertY = createMemo(
-  //   () =>
-  //     translateY(
-  //       boardTransform().transform,
-  //       (axisConfig().config.y.at(-1)?.end ?? 0) + AXIS_Y_OFFSET,
-  //     ) + BUTTON_PADDING,
-  // );
-
   return (
     <>
       <HorizontalBackgroundRect />
@@ -48,14 +30,6 @@ export const AxisGroup: Component = () => {
         )}
       </Index>
       <CenterRect />
-      {/* <AxisInsertButton
-        index={xLength() - 1}
-        orientation="horizontal"
-      />
-      <AxisInsertButton
-        index={yLength() - 1}
-        orientation="vertical"
-      /> */}
     </>
   );
 };

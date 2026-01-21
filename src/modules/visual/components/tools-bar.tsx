@@ -1,9 +1,14 @@
-import type { Component } from "solid-js";
+import { createUniqueId, type Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
+import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
+import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
+import { closeDialog, openDialog } from "~/ui/dialog/dialog";
 import { HandIcon } from "~/ui/icons/hand-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
+import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Tooltip } from "~/ui/tooltip/tooltip";
+import { useSelectionStateContext } from "../contexts/selection-state";
 import { useToolsStateContext, type ToolType } from "../contexts/tools-state";
 import { ToolContainer } from "./tool-container";
 
@@ -11,9 +16,11 @@ export const ToolsBar: Component = () => {
   const { t } = useI18n();
 
   const toolsState = useToolsStateContext();
+  const selectionState = useSelectionStateContext();
 
   const onToolClickFactory = (tool: ToolType) => () => {
     toolsState().setTool(tool);
+    selectionState().setSelection(null);
   };
 
   return (
@@ -41,7 +48,58 @@ export const ToolsBar: Component = () => {
             <SquareIcon class="size-5" />
           </Button>
         </Tooltip>
+        <DeleteSelectedElementDialog />
       </ToolContainer>
     </div>
+  );
+};
+
+const DeleteSelectedElementDialog: Component = () => {
+  const { t } = useI18n();
+
+  const dialogId = createUniqueId();
+
+  const selectionState = useSelectionStateContext();
+
+  const onDeleteClick = () => {
+    openDialog(dialogId);
+  };
+
+  const onConfirmClick = () => {
+    closeDialog(dialogId);
+
+    const selection = selectionState().selection();
+
+    if (!selection) {
+      return;
+    }
+
+    if (selection.kind === "task") {
+      taskCollection.delete(selection.id);
+    } else {
+      edgeCollection.delete(selection.id);
+    }
+  };
+
+  return (
+    <>
+      <Tooltip data-tip={t("board.tools.delete")} placement="top">
+        <Button
+          aria-label={t("board.tools.delete")}
+          onClick={onDeleteClick}
+          shape="circle"
+          size="sm"
+          disabled={!selectionState().selection()}
+        >
+          <TrashIcon class="size-5" />
+        </Button>
+      </Tooltip>
+      <AlertDialog
+        description={t("board.axis.confirmDelete")}
+        dialogId={dialogId}
+        onSave={onConfirmClick}
+        title={t("common.delete")}
+      />
+    </>
   );
 };

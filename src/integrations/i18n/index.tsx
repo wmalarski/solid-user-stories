@@ -28,8 +28,8 @@ const enDict = {
       updateTask: "Update task",
     },
     tools: {
+      delete: "Delete",
       pane: "Hand (panning tool)",
-      selection: "Selection",
       task: "Task",
     },
     zoom: {

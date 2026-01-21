@@ -42,7 +42,7 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
 
   createD3ClickListener({
     onClick() {
-      selectionState().setSelection(props.edge.id);
+      selectionState().setSelection({ id: props.edge.id, kind: "edge" });
     },
     ref,
   });

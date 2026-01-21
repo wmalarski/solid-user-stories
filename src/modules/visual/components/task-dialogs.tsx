@@ -29,6 +29,7 @@ import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
+import { useSelectionStateContext } from "../contexts/selection-state";
 import { useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
@@ -47,6 +48,7 @@ export const InsertTaskDialog: Component = () => {
   const boardId = useBoardId();
   const axisConfig = useAxisConfigContext();
   const toolsState = useToolsStateContext();
+  const selectionState = useSelectionStateContext();
 
   const dialogId = createUniqueId();
   const formId = createUniqueId();
@@ -86,6 +88,7 @@ export const InsertTaskDialog: Component = () => {
     formRef()?.reset();
 
     toolsState().setTool("pane");
+    selectionState().setSelection({ id: taskId, kind: "task" });
   };
 
   createEffect(() => {

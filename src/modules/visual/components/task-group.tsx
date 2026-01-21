@@ -34,7 +34,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
 
   useDrag({
     onDragStarted(event) {
-      selectionState().setSelection(props.task.id);
+      selectionState().setSelection({ id: props.task.id, kind: "task" });
       setShiftX(props.task.positionX - event.x);
       setShiftY(props.task.positionY - event.y);
     },
@@ -120,6 +120,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   const boardId = useBoardId();
 
   const tasksData = useTasksDataContext();
+  const selectionState = useSelectionStateContext();
 
   const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
 
@@ -156,13 +157,16 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
         return;
       }
 
+      const edgeId = createId();
       edgeCollection.insert({
         boardId: boardId(),
         breakX: breakX(),
-        id: createId(),
+        id: edgeId,
         source: props.kind === "source" ? props.taskId : task.id,
         target: props.kind === "source" ? task.id : props.taskId,
       });
+
+      selectionState().setSelection({ id: edgeId, kind: "edge" });
     },
     onDragStarted() {
       setIsDragging(true);

@@ -8,8 +8,13 @@ import {
   useContext,
 } from "solid-js";
 
+type SelectionValue = {
+  id: string;
+  kind: "edge" | "task";
+};
+
 const createSelectionStateContext = () => {
-  const [selection, setSelection] = createSignal<string | null>(null);
+  const [selection, setSelection] = createSignal<SelectionValue | null>(null);
 
   return {
     selection,
@@ -37,5 +42,5 @@ export const useSelectionStateContext = () => {
 
 export const useIsSelected = (elementId: Accessor<string>) => {
   const context = useSelectionStateContext();
-  return createMemo(() => context().selection() === elementId());
+  return createMemo(() => context().selection()?.id === elementId());
 };
