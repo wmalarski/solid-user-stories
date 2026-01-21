@@ -9,7 +9,7 @@ import { EdgesDataProvider, useEdgesDataContext } from "../contexts/edges-data";
 import { SelectionStateProvider, useSelectionStateContext } from "../contexts/selection-state";
 import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
 import { ToolsStateProvider } from "../contexts/tools-state";
-import { SELECTABLE_GROUP_CLASS, SVG_CLASS } from "../utils/constants";
+import { SVG_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
@@ -32,7 +32,9 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
             <ToolsStateProvider>
               <DragStateProvider>
                 <SelectionStateProvider>
-                  <DragAndDropExample />
+                  <BoardTransformProvider>
+                    <BoardContent />
+                  </BoardTransformProvider>
                 </SelectionStateProvider>
               </DragStateProvider>
             </ToolsStateProvider>
@@ -43,9 +45,9 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
   );
 };
 
-const DragAndDropExample: Component = () => {
+const BoardContent: Component = () => {
   return (
-    <BoardTransformProvider>
+    <>
       <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
         <SvgDefinitions />
         <BackgroundRect />
@@ -56,7 +58,7 @@ const DragAndDropExample: Component = () => {
       <ToolsBar />
       <ZoomBar />
       <InsertTaskDialog />
-    </BoardTransformProvider>
+    </>
   );
 };
 
@@ -69,7 +71,6 @@ const SelectableGroup: Component = () => {
 
   return (
     <g
-      class={SELECTABLE_GROUP_CLASS}
       cursor={dragState().isDragging() ? "grabbing" : "grab"}
       transform={boardTransformContext().transform as unknown as string}
     >

@@ -1,10 +1,8 @@
-import * as d3 from "d3";
 import { decode } from "decode-formdata";
 import {
   createEffect,
   createSignal,
   createUniqueId,
-  onCleanup,
   type Component,
   type ComponentProps,
 } from "solid-js";
@@ -33,6 +31,7 @@ import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
 import { useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
+import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import type { Point2D } from "../utils/types";
 
 const TaskFieldsSchema = v.object({
@@ -96,18 +95,12 @@ export const InsertTaskDialog: Component = () => {
       return;
     }
 
-    const abortController = new AbortController();
-    d3.select(SVG_SELECTOR).on(
-      "click",
-      (event) => {
+    createD3ClickListener({
+      onClick(event) {
         setPosition({ x: event.x, y: event.y });
         openDialog(dialogId);
       },
-      { signal: abortController.signal },
-    );
-
-    onCleanup(() => {
-      abortController.abort();
+      ref: () => SVG_SELECTOR,
     });
   });
 

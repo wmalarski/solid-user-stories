@@ -12,7 +12,6 @@ import {
 } from "solid-js";
 import { SVG_SELECTOR } from "../utils/constants";
 import type { Point2D } from "../utils/types";
-import { useToolsStateContext } from "./tools-state";
 
 export type Transform = {
   k: number;
@@ -91,15 +90,7 @@ const BoardTransformContext = createContext<
 export const BoardTransformProvider: Component<ParentProps> = (props) => {
   const value = createMemo(() => createBoardTransformContext());
 
-  const toolsState = useToolsStateContext();
-
   createEffect(() => {
-    const isPane = toolsState().tool() === "pane";
-
-    if (!isPane) {
-      return;
-    }
-
     // oxlint-disable-next-line no-explicit-any
     d3.select(SVG_SELECTOR).call(value().plugin as any);
 

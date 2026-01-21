@@ -13,4 +13,3 @@ export const AXIS_Y_OFFSET = 80;
 export const SVG_CLASS = "cs-svg-select";
 export const SVG_SELECTOR = `.${SVG_CLASS}`;
 export const SELECTABLE_GROUP_CLASS = "cs-selectable";
-export const SELECTABLE_GROUP_SELECTOR = `.${SELECTABLE_GROUP_CLASS}`;
