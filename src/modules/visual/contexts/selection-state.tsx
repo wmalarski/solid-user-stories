@@ -23,6 +23,8 @@ const createSelectionStateContext = () => {
   const [taskSelection, setTaskSelection] = createSignal<string[]>([]);
   const [edgeSelection, setEdgeSelection] = createSignal<string[]>([]);
 
+  const [selection, setSelection] = createSignal<string | null>(null);
+
   const tasksData = useTasksDataContext();
   const edgesData = useEdgesDataContext();
 
@@ -65,7 +67,9 @@ const createSelectionStateContext = () => {
   return {
     edgeSelection,
     plugin,
+    selection,
     setEdgeSelection,
+    setSelection,
     setTaskSelection,
     taskSelection,
   };
@@ -113,4 +117,9 @@ export const useIsTaskSelected = (elementId: Accessor<string>) => {
 export const useIsEdgeSelected = (elementId: Accessor<string>) => {
   const context = useSelectionStateContext();
   return createMemo(() => context().edgeSelection().includes(elementId()));
+};
+
+export const useIsSelected = (elementId: Accessor<string>) => {
+  const context = useSelectionStateContext();
+  return createMemo(() => context().selection() === elementId());
 };

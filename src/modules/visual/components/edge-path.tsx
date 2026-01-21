@@ -3,13 +3,14 @@ import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { edgeCollection } from "~/integrations/tanstack-db/collections";
 import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { useDrag } from "../contexts/drag-state";
-import { useIsEdgeSelected } from "../contexts/selection-state";
+import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import {
   EDGE_HANDLE_SIZE,
   EDGE_HANDLE_SIZE_HALF,
   TASK_RECT_HEIGHT_HALF,
   TASK_RECT_WIDTH,
 } from "../utils/constants";
+import { createD3ClickListener } from "../utils/create-d3-click-listener";
 
 type EdgePathProps = {
   edge: EdgeModel;
@@ -18,7 +19,10 @@ type EdgePathProps = {
 };
 
 export const EdgePath: Component<EdgePathProps> = (props) => {
-  const isSelected = useIsEdgeSelected(() => props.edge.id);
+  const [ref, setRef] = createSignal<SVGElement>();
+
+  const selectionState = useSelectionStateContext();
+  const isSelected = useIsSelected(() => props.edge.id);
 
   const path = createMemo(() => {
     const startX = props.source.positionX + TASK_RECT_WIDTH;
@@ -35,9 +39,17 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
     return context.toString();
   });
 
+  createD3ClickListener({
+    onClick() {
+      selectionState().setSelection(props.edge.id);
+    },
+    ref,
+  });
+
   return (
     <>
       <path
+        ref={setRef}
         d={path()}
         fill="transparent"
         class="stroke-accent"
@@ -45,7 +57,6 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
         stroke-dasharray="5,5"
         stroke-opacity={0.7}
         stroke-dashoffset={0}
-        stroke-width={isSelected() ? 4 : 3}
       >
         <animate
           attributeName="stroke-dashoffset"

@@ -102,6 +102,7 @@ export const BoardTransformProvider: Component<ParentProps> = (props) => {
 
     // oxlint-disable-next-line no-explicit-any
     d3.select(SVG_SELECTOR).call(value().plugin as any);
+
     onCleanup(() => {
       d3.select(SVG_SELECTOR).on(".zoom", null);
     });

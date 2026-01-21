@@ -1,4 +1,4 @@
-import { For, type Component } from "solid-js";
+import { createSignal, For, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AxisConfigProvider } from "../contexts/axis-config";
@@ -6,10 +6,11 @@ import { BoardModelProvider } from "../contexts/board-model";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgesDataProvider, useEdgesDataContext } from "../contexts/edges-data";
-import { SelectionStateProvider } from "../contexts/selection-state";
+import { SelectionStateProvider, useSelectionStateContext } from "../contexts/selection-state";
 import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
 import { ToolsStateProvider } from "../contexts/tools-state";
 import { SELECTABLE_GROUP_CLASS, SVG_CLASS } from "../utils/constants";
+import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
 import { EdgePath } from "./edge-path";
@@ -30,7 +31,9 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
           <AxisConfigProvider>
             <ToolsStateProvider>
               <DragStateProvider>
-                <DragAndDropExample />
+                <SelectionStateProvider>
+                  <DragAndDropExample />
+                </SelectionStateProvider>
               </DragStateProvider>
             </ToolsStateProvider>
           </AxisConfigProvider>
@@ -42,19 +45,18 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
 
 const DragAndDropExample: Component = () => {
   return (
-    <SelectionStateProvider>
-      <BoardTransformProvider>
-        <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
-          <SvgDefinitions />
-          <AxisGridPaths />
-          <SelectableGroup />
-          <AxisGroup />
-        </svg>
-        <ToolsBar />
-        <ZoomBar />
-        <InsertTaskDialog />
-      </BoardTransformProvider>
-    </SelectionStateProvider>
+    <BoardTransformProvider>
+      <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
+        <SvgDefinitions />
+        <BackgroundRect />
+        <AxisGridPaths />
+        <SelectableGroup />
+        <AxisGroup />
+      </svg>
+      <ToolsBar />
+      <ZoomBar />
+      <InsertTaskDialog />
+    </BoardTransformProvider>
   );
 };
 
@@ -77,6 +79,20 @@ const SelectableGroup: Component = () => {
       <For each={tasksData().entries}>{(task) => <TaskGroup task={task} />}</For>
     </g>
   );
+};
+
+const BackgroundRect: Component = () => {
+  const [rectRef, setRectRef] = createSignal<SVGElement>();
+  const selectionState = useSelectionStateContext();
+
+  createD3ClickListener({
+    onClick() {
+      selectionState().setSelection(null);
+    },
+    ref: rectRef,
+  });
+
+  return <rect ref={setRectRef} x={0} y={0} width="100%" height="100%" fill="transparent" />;
 };
 
 const SvgDefinitions: Component = () => {

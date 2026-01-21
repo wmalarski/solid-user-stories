@@ -7,7 +7,7 @@ import { Badge } from "~/ui/badge/badge";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
 import { useDrag } from "../contexts/drag-state";
-import { useIsTaskSelected } from "../contexts/selection-state";
+import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useTasksDataContext } from "../contexts/tasks-data";
 import {
   TASK_HANDLE_SIZE,
@@ -29,9 +29,11 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const [shiftY, setShiftY] = createSignal(0);
 
   const axisConfig = useAxisConfigContext();
+  const selectionState = useSelectionStateContext();
 
   useDrag({
     onDragStarted(event) {
+      selectionState().setSelection(props.task.id);
       setShiftX(props.task.positionX - event.x);
       setShiftY(props.task.positionY - event.y);
     },
@@ -52,7 +54,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
     ref: rectRef,
   });
 
-  const isSelected = useIsTaskSelected(() => props.task.id);
+  const isSelected = useIsSelected(() => props.task.id);
 
   return (
     <>
@@ -87,18 +89,20 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
           </div>
         </div>
       </foreignObject>
-      <TaskHandle
-        kind="source"
-        x={props.task.positionX}
-        y={props.task.positionY}
-        taskId={props.task.id}
-      />
-      <TaskHandle
-        kind="target"
-        x={props.task.positionX}
-        y={props.task.positionY}
-        taskId={props.task.id}
-      />
+      <Show when={isSelected()}>
+        <TaskHandle
+          kind="source"
+          x={props.task.positionX}
+          y={props.task.positionY}
+          taskId={props.task.id}
+        />
+        <TaskHandle
+          kind="target"
+          x={props.task.positionX}
+          y={props.task.positionY}
+          taskId={props.task.id}
+        />
+      </Show>
     </>
   );
 };

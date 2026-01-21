@@ -65,8 +65,6 @@ export const useDrag = (args: CreateDragArgs) => {
     args.onDragEnded?.(event);
   };
 
-  const plugin = d3.drag().on("start", onDragStarted).on("drag", onDragged).on("end", onDragEnded);
-
   createEffect(() => {
     const refValue = args.ref();
     const toolsStateValue = toolsState();
@@ -74,6 +72,12 @@ export const useDrag = (args: CreateDragArgs) => {
     if (!refValue || toolsStateValue.tool() !== "pane") {
       return;
     }
+
+    const plugin = d3
+      .drag()
+      .on("start", onDragStarted)
+      .on("drag", onDragged)
+      .on("end", onDragEnded);
 
     // oxlint-disable-next-line no-explicit-any
     d3.select(refValue).call(plugin as any);

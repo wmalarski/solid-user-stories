@@ -181,7 +181,7 @@ const AxisItemContent: Component<AxisItemContentProps> = (props) => {
       <span class="text-sm truncate font-semibold">{props.config.axis.name}</span>
       {/* <span>{props.config.axis.id}</span> */}
       <div
-        class={cx("flex justify-end", {
+        class={cx("flex justify-end gap-2", {
           "items-center": !isVertical(),
           "items-end": isVertical(),
         })}
