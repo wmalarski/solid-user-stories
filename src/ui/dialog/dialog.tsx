@@ -14,7 +14,13 @@ export type DialogProps = ComponentVariantProps<"dialog", typeof modalRecipe, { 
 
 export const Dialog: Component<DialogProps> = (props) => {
   const [variants, withoutVariants] = splitProps(props, ["open", "horizontal", "vertical"]);
-  return <dialog {...withoutVariants} class={modalRecipe({ class: props.class, ...variants })} />;
+  return (
+    <dialog
+      {...withoutVariants}
+      style={{ transition: "none" }}
+      class={modalRecipe({ class: props.class, ...variants })}
+    />
+  );
 };
 
 export type DialogTriggerProps = ComponentProps<typeof Button> & {
