@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Component } from "solid-js";
+import { cx } from "tailwind-variants";
 import { edgeCollection } from "~/integrations/tanstack-db/collections";
 import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { useDrag } from "../contexts/drag-state";
@@ -51,9 +52,20 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
       <path
         ref={setRef}
         d={path()}
-        fill="transparent"
+        fill="none"
+        class={cx({
+          "stroke-accent opacity-5": isSelected(),
+          "stroke-transparent": !isSelected(),
+        })}
+        filter="url(#task-shadow)"
+        stroke-width={16}
+      />
+      <path
+        d={path()}
+        fill="none"
         class="stroke-accent"
         marker-end="url(#arrow)"
+        stroke-width={2}
         stroke-dasharray="5,5"
         stroke-opacity={0.7}
         stroke-dashoffset={0}
@@ -101,7 +113,7 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
       }
       width={EDGE_HANDLE_SIZE}
       height={EDGE_HANDLE_SIZE}
-      class="fill-base-content"
+      class="fill-accent"
     />
   );
 };

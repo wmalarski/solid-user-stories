@@ -101,7 +101,7 @@ const SvgDefinitions: Component = () => {
       <marker
         id="arrow"
         viewBox="0 0 10 10"
-        refX="14"
+        refX="10"
         refY="5"
         markerWidth="6"
         markerHeight="6"

@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Component } from "solid-js";
+import { cx } from "tailwind-variants";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
@@ -64,7 +65,8 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
         filter="url(#task-shadow)"
-        class="opacity-50"
+        stroke-width={5}
+        class={cx("opacity-50", { "stroke-accent": isSelected() })}
       />
       <foreignObject
         ref={setRectRef}
