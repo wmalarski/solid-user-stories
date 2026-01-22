@@ -1,6 +1,7 @@
 import { createUniqueId, type Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
-import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
+import { edgeCollection } from "~/integrations/tanstack-db/collections";
+import { deleteTaskWithDependencies } from "~/integrations/tanstack-db/utils";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import { closeDialog, openDialog } from "~/ui/dialog/dialog";
@@ -8,6 +9,7 @@ import { HandIcon } from "~/ui/icons/hand-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Tooltip } from "~/ui/tooltip/tooltip";
+import { getEdgesByTask, useEdgesDataContext } from "../contexts/edges-data";
 import { useSelectionStateContext } from "../contexts/selection-state";
 import { useToolsStateContext, type ToolType } from "../contexts/tools-state";
 import { ToolContainer } from "./tool-container";
@@ -59,6 +61,7 @@ const DeleteSelectedElementDialog: Component = () => {
 
   const dialogId = createUniqueId();
 
+  const edgesData = useEdgesDataContext();
   const selectionState = useSelectionStateContext();
 
   const onDeleteClick = () => {
@@ -75,7 +78,8 @@ const DeleteSelectedElementDialog: Component = () => {
     }
 
     if (selection.kind === "task") {
-      taskCollection.delete(selection.id);
+      const edges = getEdgesByTask(edgesData(), selection.id);
+      deleteTaskWithDependencies(selection.id, edges);
     } else {
       edgeCollection.delete(selection.id);
     }

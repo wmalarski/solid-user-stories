@@ -41,3 +41,12 @@ export const EdgesDataProvider: Component<ParentProps> = (props) => {
 
   return <EdgesDataContext.Provider value={value}>{props.children}</EdgesDataContext.Provider>;
 };
+
+export const getEdgesByTask = (
+  context: ReturnType<typeof createEdgesDataContext>,
+  taskId: string,
+) => {
+  return context.entries
+    .map((entry) => entry.edge)
+    .filter((edge) => edge.source === taskId || edge.target === taskId);
+};
