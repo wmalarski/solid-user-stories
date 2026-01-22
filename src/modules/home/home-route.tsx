@@ -2,7 +2,13 @@ import { A } from "@solidjs/router";
 import { useLiveQuery } from "@tanstack/solid-db";
 import { For, type Component } from "solid-js";
 import { createLink } from "~/integrations/router/create-link";
-import { boardsCollection } from "~/integrations/tanstack-db/collections";
+import {
+  axisCollection,
+  boardsCollection,
+  edgeCollection,
+  taskCollection,
+} from "~/integrations/tanstack-db/collections";
+import { Button } from "~/ui/button/button";
 import { InsertBoardDialog } from "../boards/insert-board-dialog";
 
 export const HomeRoute: Component = () => {
@@ -10,6 +16,16 @@ export const HomeRoute: Component = () => {
     <div>
       <InsertBoardDialog />
       <BoardList />
+      <Button
+        onClick={() => {
+          axisCollection.utils.clearStorage();
+          boardsCollection.utils.clearStorage();
+          taskCollection.utils.clearStorage();
+          edgeCollection.utils.clearStorage();
+        }}
+      >
+        Clear
+      </Button>
     </div>
   );
 };

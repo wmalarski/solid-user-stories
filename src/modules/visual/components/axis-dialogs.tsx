@@ -28,13 +28,25 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
-import { useAxisConfigContext } from "../contexts/axis-config";
+import { useAxisConfigContext, type AxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
 import { useTasksDataContext } from "../contexts/tasks-data";
 
 const AxisFieldsSchema = v.object({
   name: v.string(),
 });
+
+type ShiftAxisArgs = {
+  index: number;
+  axisId: string;
+  axisConfigValue: AxisConfigContext;
+};
+
+type ShiftTasksArgs = {
+  index: number;
+  shift: number;
+  axisConfigValue: AxisConfigContext;
+};
 
 type InsertAxisDialogProps = {
   orientation: AxisModel["orientation"];
@@ -51,50 +63,57 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
   const formId = createUniqueId();
   const dialogId = createUniqueId();
 
-  const shiftHorizontalTasks = (index: number, shift: number, newAxisId: string) => {
-    const axisConfigValue = axisConfig();
-    const horizontalConfigs = axisConfigValue.config.x;
-    const config = horizontalConfigs[index];
-    const tasksToMove = tasksData()
-      .entries.filter((entry) => entry.positionX > config.end)
-      .map((entry) => entry.id);
-
-    taskCollection.update(tasksToMove, (drafts) => {
-      for (const draft of drafts) {
-        draft.positionX += shift;
-      }
-    });
-
-    const axisIds = horizontalConfigs.map((config) => config.axis.id);
-    axisIds.splice(index, 0, newAxisId);
+  const shiftHorizontalAxis = ({ index, axisId, axisConfigValue }: ShiftAxisArgs) => {
+    const axisIds = axisConfigValue.x.map((config) => config.axis.id);
+    axisIds.splice(index + 1, 0, axisId);
     boardsCollection.update(boardId(), (draft) => {
       draft.axisXOrder = axisIds;
     });
   };
 
-  const shiftVerticalTasks = (index: number, shift: number, newAxisId: string) => {
-    const axisConfigValue = axisConfig();
-    const verticalConfigs = axisConfigValue.config.y;
-    const config = verticalConfigs[index];
+  const shiftHorizontalTasks = ({ index, shift, axisConfigValue }: ShiftTasksArgs) => {
+    const currentConfigEnd = axisConfigValue.x[index].end;
+
     const tasksToMove = tasksData()
-      .entries.filter((entry) => entry.positionY > config.end)
+      .entries.filter((entry) => entry.positionX > currentConfigEnd)
       .map((entry) => entry.id);
 
-    taskCollection.update(tasksToMove, (drafts) => {
-      for (const draft of drafts) {
-        draft.positionY += shift;
-      }
-    });
+    if (tasksToMove.length > 0) {
+      taskCollection.update(tasksToMove, (drafts) => {
+        for (const draft of drafts) {
+          draft.positionX += shift;
+        }
+      });
+    }
+  };
 
-    const axisIds = verticalConfigs.map((config) => config.axis.id);
-    axisIds.splice(index, 0, newAxisId);
+  const shiftVerticalAxis = ({ index, axisId, axisConfigValue }: ShiftAxisArgs) => {
+    const axisIds = axisConfigValue.y.map((config) => config.axis.id);
+    axisIds.splice(index + 1, 0, axisId);
     boardsCollection.update(boardId(), (draft) => {
       draft.axisYOrder = axisIds;
     });
   };
 
+  const shiftVerticalTasks = ({ index, shift, axisConfigValue }: ShiftTasksArgs) => {
+    const currentConfigEnd = axisConfigValue.y[index].end;
+
+    const tasksToMove = tasksData()
+      .entries.filter((entry) => entry.positionY > currentConfigEnd)
+      .map((entry) => entry.id);
+
+    if (tasksToMove.length > 0) {
+      taskCollection.update(tasksToMove, (drafts) => {
+        for (const draft of drafts) {
+          draft.positionY += shift;
+        }
+      });
+    }
+  };
+
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
+    closeDialog(dialogId);
 
     const formData = new FormData(event.currentTarget);
 
@@ -104,22 +123,24 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
       return;
     }
 
-    const size = 500;
+    const axisConfigValue = axisConfig().config;
+
+    const shift = 500;
     const axisId = createId();
     axisCollection.insert({
       boardId: boardId(),
       id: axisId,
       name: parsed.output.name,
       orientation: props.orientation,
-      size,
+      size: shift,
     });
 
-    closeDialog(dialogId);
-
     if (props.orientation === "horizontal") {
-      shiftHorizontalTasks(props.index, size, axisId);
+      shiftHorizontalAxis({ axisConfigValue, axisId, index: props.index });
+      shiftHorizontalTasks({ axisConfigValue, index: props.index, shift });
     } else {
-      shiftVerticalTasks(props.index, size, axisId);
+      shiftVerticalAxis({ axisConfigValue, axisId, index: props.index });
+      shiftVerticalTasks({ axisConfigValue, index: props.index, shift });
     }
   };
 
@@ -163,6 +184,7 @@ export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
+    closeDialog(dialogId);
 
     const formData = new FormData(event.currentTarget);
 
@@ -175,8 +197,6 @@ export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
     axisCollection.update(props.axis.id, (draft) => {
       draft.name = parsed.output.name;
     });
-
-    closeDialog(dialogId);
   };
 
   return (
@@ -245,12 +265,20 @@ type DeleteAxisDialogProps = {
 export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
+  const boardId = useBoardId();
   const dialogId = createUniqueId();
 
   const onSave = () => {
-    axisCollection.delete(props.axisId);
-
     closeDialog(dialogId);
+
+    const axisId = props.axisId;
+
+    boardsCollection.update(boardId(), (draft) => {
+      draft.axisXOrder = draft.axisXOrder.filter((id) => id !== axisId);
+      draft.axisYOrder = draft.axisYOrder.filter((id) => id !== axisId);
+    });
+
+    axisCollection.delete(axisId);
   };
 
   return (

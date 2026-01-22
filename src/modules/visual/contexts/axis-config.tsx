@@ -8,25 +8,24 @@ import {
   useContext,
 } from "solid-js";
 import { axisCollection } from "~/integrations/tanstack-db/collections";
-import type { AxisModel } from "~/integrations/tanstack-db/schema";
+import type { AxisModel, BoardModel } from "~/integrations/tanstack-db/schema";
 
 import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
 import type { Point2D } from "../utils/types";
-import { useBoardId } from "./board-model";
+import { useBoardId, useBoardModelContext } from "./board-model";
 
 const createAxisConfigContext = (boardId: string) => {
+  const boardModel = useBoardModelContext();
+
   const entries = useLiveQuery((q) =>
     q.from({ axis: axisCollection }).where(({ axis }) => eq(axis.boardId, boardId)),
   );
 
-  const config = createMemo(() => getAxisValues(entries()));
+  const config = createMemo(() => getAxisValues(entries(), boardModel().board));
 
   return {
     get config() {
       return config();
-    },
-    get entries() {
-      return entries();
     },
   };
 };
@@ -49,6 +48,20 @@ export const AxisConfigProvider: Component<ParentProps> = (props) => {
   return <AxisConfigContext.Provider value={value}>{props.children}</AxisConfigContext.Provider>;
 };
 
+const orderAxisModels = (collection: AxisModel[], order: string[]) => {
+  const map = new Map(collection.map((axis) => [axis.id, axis] as const));
+  const result: AxisModel[] = [];
+
+  for (const axisId of order) {
+    const axis = map.get(axisId);
+    if (axis) {
+      result.push(axis);
+    }
+  }
+
+  return result;
+};
+
 const getPositions = (collection: AxisModel[]) => {
   return collection.reduce(
     (previous, current) => {
@@ -60,7 +73,7 @@ const getPositions = (collection: AxisModel[]) => {
   );
 };
 
-const getAxisValues = (entries: AxisModel[]) => {
+const getAxisValues = (entries: AxisModel[], board: BoardModel) => {
   const horizontal: AxisModel[] = [];
   const vertical: AxisModel[] = [];
 
@@ -69,16 +82,19 @@ const getAxisValues = (entries: AxisModel[]) => {
     array.push(entry);
   }
 
-  const horizontalPositions = getPositions(horizontal);
-  const verticalPositions = getPositions(vertical);
+  const orderedHorizontal = orderAxisModels(horizontal, board.axisXOrder);
+  const orderedVertical = orderAxisModels(vertical, board.axisYOrder);
+
+  const horizontalPositions = getPositions(orderedHorizontal);
+  const verticalPositions = getPositions(orderedVertical);
 
   return {
-    x: horizontal.map((axis, index) => ({
+    x: orderedHorizontal.map((axis, index) => ({
       axis,
       end: horizontalPositions[index + 1],
       start: horizontalPositions[index],
     })),
-    y: vertical.map((axis, index) => ({
+    y: orderedVertical.map((axis, index) => ({
       axis,
       end: verticalPositions[index + 1],
       start: verticalPositions[index],
@@ -96,4 +112,5 @@ export const mapToAxis = (config: ReturnType<typeof getAxisValues>, point: Point
   return { axisX: axisX?.axis.id ?? null, axisY: axisY?.axis.id ?? null };
 };
 
+export type AxisConfigContext = ReturnType<typeof createAxisConfigContext>["config"];
 export type AxisConfig = ReturnType<typeof getAxisValues>["x"][0];
