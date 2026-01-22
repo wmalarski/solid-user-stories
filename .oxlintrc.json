@@ -1,6 +1,13 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["import", "typescript", "unicorn", "jsx-a11y", "oxc", "promise"],
+  "plugins": [
+    "import",
+    "typescript",
+    "unicorn",
+    "jsx-a11y",
+    "oxc",
+    "promise"
+  ],
   "categories": {
     "correctness": "error",
     "nursery": "error",
@@ -18,7 +25,8 @@
     "console": "readonly",
     "window": "readonly",
     "FormData": "readonly",
-    "AbortController": "readonly"
+    "AbortController": "readonly",
+    "crypto": "readonly"
   },
   "rules": {
     "eslint/arrow-body-style": "off",

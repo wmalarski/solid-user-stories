@@ -1,3 +1,3 @@
 export const createId = () => {
-  return String(Date.now());
+  return crypto.randomUUID();
 };

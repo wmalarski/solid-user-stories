@@ -19,9 +19,12 @@ const enDict = {
       updateAxis: "Update axis",
     },
     forms: {
+      createBoard: "Create Board",
       description: "Description",
       title: "Title",
       update: "Update board",
+      xAxisDefault: "Sprint 1",
+      yAxisDefault: "Feature 1",
     },
     tasks: {
       confirmDelete: "Confirm delete task",
