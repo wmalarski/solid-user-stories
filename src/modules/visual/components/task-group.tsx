@@ -17,7 +17,7 @@ import {
   TASK_RECT_HEIGHT,
   TASK_RECT_WIDTH,
 } from "../utils/constants";
-import { UpdateTaskDialog } from "./task-dialogs";
+import { DeleteTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 
 type TaskGroupProps = {
   task: TaskModel;
@@ -83,10 +83,11 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
           <span class="text-xs line-clamp-3 opacity-80">{props.task.description}</span>
           {/* <span class="text-xs truncate">X:{props.task.axisX}</span>
             <span class="text-xs truncate">Y:{props.task.axisY}</span> */}
-          <div class="flex gap-2 w-full justify-end items-center">
+          <div class="flex gap-1 w-full justify-end items-center">
             <Badge size="sm" color="info">
               {props.task.estimate}
             </Badge>
+            <DeleteTaskDialog task={props.task} />
             <UpdateTaskDialog task={props.task} />
           </div>
         </div>

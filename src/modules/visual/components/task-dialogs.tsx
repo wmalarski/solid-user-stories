@@ -11,6 +11,8 @@ import { useI18n } from "~/integrations/i18n";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
+import { deleteTaskWithDependencies } from "~/integrations/tanstack-db/utils";
+import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
   closeDialog,
@@ -25,10 +27,12 @@ import { FieldError } from "~/ui/field-error/field-error";
 import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
 import { PencilIcon } from "~/ui/icons/pencil-icon";
+import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
+import { getEdgesByTask, useEdgesDataContext } from "../contexts/edges-data";
 import { useSelectionStateContext } from "../contexts/selection-state";
 import { useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
@@ -165,7 +169,7 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
       <Button
         aria-label={t("board.tasks.updateTask")}
         shape="circle"
-        size="xs"
+        size="sm"
         onClick={onButtonClick}
       >
         <PencilIcon class="size-4" />
@@ -263,5 +267,42 @@ const TaskFields: Component<TaskFieldsProps> = (props) => {
       />
       <FieldError id="link-error" message={props.issues?.errors?.link} />
     </Fieldset>
+  );
+};
+
+type DeleteTaskDialogProps = {
+  task: TaskModel;
+};
+
+export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
+  const { t } = useI18n();
+
+  const dialogId = createUniqueId();
+
+  const edgesData = useEdgesDataContext();
+
+  const onDeleteClick = () => {
+    openDialog(dialogId);
+  };
+
+  const onConfirmClick = () => {
+    closeDialog(dialogId);
+
+    const edges = getEdgesByTask(edgesData(), props.task.id);
+    deleteTaskWithDependencies(props.task.id, edges);
+  };
+
+  return (
+    <>
+      <Button aria-label={t("board.tools.delete")} onClick={onDeleteClick} shape="circle" size="sm">
+        <TrashIcon class="size-4" />
+      </Button>
+      <AlertDialog
+        description={t("board.axis.confirmDelete")}
+        dialogId={dialogId}
+        onSave={onConfirmClick}
+        title={t("common.delete")}
+      />
+    </>
   );
 };

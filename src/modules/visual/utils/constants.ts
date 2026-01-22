@@ -1,5 +1,5 @@
 export const TASK_RECT_WIDTH = 200;
-export const TASK_RECT_HEIGHT = 110;
+export const TASK_RECT_HEIGHT = 115;
 export const TASK_RECT_HEIGHT_HALF = TASK_RECT_HEIGHT / 2;
 export const TASK_HANDLE_SIZE = 16;
 export const TASK_HANDLE_SIZE_HALF = TASK_HANDLE_SIZE / 2;
@@ -12,4 +12,3 @@ export const AXIS_X_OFFSET = 120;
 export const AXIS_Y_OFFSET = 80;
 export const SVG_CLASS = "cs-svg-select";
 export const SVG_SELECTOR = `.${SVG_CLASS}`;
-export const SELECTABLE_GROUP_CLASS = "cs-selectable";
