@@ -8,6 +8,7 @@ import { Badge } from "~/ui/badge/badge";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
 import { useDrag } from "../contexts/drag-state";
+import { useEdgesDataContext } from "../contexts/edges-data";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useTasksDataContext } from "../contexts/tasks-data";
 import {
@@ -121,9 +122,10 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   const boardId = useBoardId();
 
   const tasksData = useTasksDataContext();
+  const edgesData = useEdgesDataContext();
   const selectionState = useSelectionStateContext();
 
-  const [rectRef, setRectRef] = createSignal<SVGCircleElement>();
+  const [rectRef, setRectRef] = createSignal<SVGElement>();
 
   const xShift = createMemo(
     () => (props.kind === "source" ? TASK_RECT_WIDTH : 0) - TASK_HANDLE_SIZE_HALF,
@@ -155,6 +157,19 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
       );
 
       if (!task) {
+        return;
+      }
+
+      const source = props.kind === "source" ? props.taskId : task.id;
+      const target = props.kind === "source" ? task.id : props.taskId;
+
+      const hasTheSameConnection = edgesData().entries.some(
+        (entry) =>
+          (entry.edge.source === source && entry.edge.target === target) ||
+          (entry.edge.source === target && entry.edge.target === source),
+      );
+
+      if (hasTheSameConnection) {
         return;
       }
 
@@ -213,7 +228,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
           d={path()}
           stroke-width={3}
           class="stroke-accent"
-          fill="transparent"
+          fill="none"
           stroke-dasharray="5,5"
           marker-end="url(#arrow)"
         >
