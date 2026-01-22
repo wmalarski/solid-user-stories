@@ -2,6 +2,7 @@ import { createUniqueId, type Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
 import { edgeCollection } from "~/integrations/tanstack-db/collections";
 import { deleteTaskWithDependencies } from "~/integrations/tanstack-db/utils";
+import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import { closeDialog, openDialog } from "~/ui/dialog/dialog";
@@ -9,6 +10,7 @@ import { HandIcon } from "~/ui/icons/hand-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Tooltip } from "~/ui/tooltip/tooltip";
+import { useBoardModelContext } from "../contexts/board-model";
 import { getEdgesByTask, useEdgesDataContext } from "../contexts/edges-data";
 import { useSelectionStateContext } from "../contexts/selection-state";
 import { useToolsStateContext, type ToolType } from "../contexts/tools-state";
@@ -18,6 +20,7 @@ export const ToolsBar: Component = () => {
   const { t } = useI18n();
 
   const toolsState = useToolsStateContext();
+  const boardModel = useBoardModelContext();
   const selectionState = useSelectionStateContext();
 
   const onToolClickFactory = (tool: ToolType) => () => {
@@ -51,6 +54,9 @@ export const ToolsBar: Component = () => {
           </Button>
         </Tooltip>
         <DeleteSelectedElementDialog />
+        <Tooltip data-tip={t("board.forms.update")} placement="top">
+          <UpdateBoardDialog board={boardModel().board} />
+        </Tooltip>
       </ToolContainer>
     </div>
   );

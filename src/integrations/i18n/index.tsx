@@ -18,6 +18,11 @@ const enDict = {
       name: "Name",
       updateAxis: "Update axis",
     },
+    forms: {
+      description: "Description",
+      title: "Title",
+      update: "Update board",
+    },
     tasks: {
       confirmDelete: "Confirm delete task",
       description: "Description",
