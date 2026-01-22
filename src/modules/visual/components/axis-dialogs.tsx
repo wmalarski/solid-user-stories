@@ -18,7 +18,7 @@ import {
   DialogBackdrop,
   DialogBox,
   DialogTitle,
-  openDialog,
+  DialogTrigger,
 } from "~/ui/dialog/dialog";
 import { FieldError } from "~/ui/field-error/field-error";
 import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
@@ -50,10 +50,6 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
   const boardId = useBoardId();
   const formId = createUniqueId();
   const dialogId = createUniqueId();
-
-  const onButtonClick = () => {
-    openDialog(dialogId);
-  };
 
   const shiftHorizontalTasks = (index: number, shift: number, newAxisId: string) => {
     const axisConfigValue = axisConfig();
@@ -129,14 +125,14 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
 
   return (
     <>
-      <Button
+      <DialogTrigger
         aria-label={t("board.axis.insertAxis")}
         shape="circle"
         size="sm"
-        onClick={onButtonClick}
+        for={dialogId}
       >
         <PlusIcon class="size-4" />
-      </Button>
+      </DialogTrigger>
       <Dialog id={dialogId}>
         <DialogBox>
           <DialogTitle>{t("board.axis.insertAxis")}</DialogTitle>
@@ -165,10 +161,6 @@ export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
   const formId = createUniqueId();
   const dialogId = createUniqueId();
 
-  const onButtonClick = () => {
-    openDialog(dialogId);
-  };
-
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
 
@@ -189,14 +181,14 @@ export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
 
   return (
     <>
-      <Button
+      <DialogTrigger
         aria-label={t("board.axis.updateAxis")}
         shape="circle"
         size="sm"
-        onClick={onButtonClick}
+        for={dialogId}
       >
         <PencilIcon class="size-4" />
-      </Button>
+      </DialogTrigger>
       <Dialog id={dialogId}>
         <DialogBox>
           <DialogTitle>{t("common.update")}</DialogTitle>
@@ -255,10 +247,6 @@ export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
 
   const dialogId = createUniqueId();
 
-  const onButtonClick = () => {
-    openDialog(dialogId);
-  };
-
   const onSave = () => {
     axisCollection.delete(props.axisId);
 
@@ -267,14 +255,14 @@ export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
 
   return (
     <>
-      <Button
+      <DialogTrigger
         aria-label={t("board.axis.deleteAxis")}
         shape="circle"
         size="sm"
-        onClick={onButtonClick}
+        for={dialogId}
       >
         <TrashIcon class="size-4" />
-      </Button>
+      </DialogTrigger>
       <AlertDialog
         description={t("board.axis.confirmDelete")}
         dialogId={dialogId}

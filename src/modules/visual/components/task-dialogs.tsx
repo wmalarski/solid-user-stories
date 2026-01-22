@@ -21,6 +21,7 @@ import {
   DialogBackdrop,
   DialogBox,
   DialogTitle,
+  DialogTrigger,
   openDialog,
 } from "~/ui/dialog/dialog";
 import { FieldError } from "~/ui/field-error/field-error";
@@ -160,20 +161,16 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
     closeDialog(dialogId);
   };
 
-  const onButtonClick = () => {
-    openDialog(dialogId);
-  };
-
   return (
     <>
-      <Button
+      <DialogTrigger
         aria-label={t("board.tasks.updateTask")}
         shape="circle"
         size="sm"
-        onClick={onButtonClick}
+        for={dialogId}
       >
         <PencilIcon class="size-4" />
-      </Button>
+      </DialogTrigger>
       <Dialog id={dialogId}>
         <DialogBox>
           <DialogTitle>{t("common.update")}</DialogTitle>
@@ -281,10 +278,6 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
 
   const edgesData = useEdgesDataContext();
 
-  const onDeleteClick = () => {
-    openDialog(dialogId);
-  };
-
   const onConfirmClick = () => {
     closeDialog(dialogId);
 
@@ -294,9 +287,9 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
 
   return (
     <>
-      <Button aria-label={t("board.tools.delete")} onClick={onDeleteClick} shape="circle" size="sm">
+      <DialogTrigger aria-label={t("board.tools.delete")} for={dialogId} shape="circle" size="sm">
         <TrashIcon class="size-4" />
-      </Button>
+      </DialogTrigger>
       <AlertDialog
         description={t("board.axis.confirmDelete")}
         dialogId={dialogId}

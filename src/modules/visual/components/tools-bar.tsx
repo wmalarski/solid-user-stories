@@ -5,7 +5,7 @@ import { deleteTaskWithDependencies } from "~/integrations/tanstack-db/utils";
 import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
-import { closeDialog, openDialog } from "~/ui/dialog/dialog";
+import { closeDialog, DialogTrigger } from "~/ui/dialog/dialog";
 import { HandIcon } from "~/ui/icons/hand-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
@@ -70,10 +70,6 @@ const DeleteSelectedElementDialog: Component = () => {
   const edgesData = useEdgesDataContext();
   const selectionState = useSelectionStateContext();
 
-  const onDeleteClick = () => {
-    openDialog(dialogId);
-  };
-
   const onConfirmClick = () => {
     closeDialog(dialogId);
 
@@ -94,15 +90,15 @@ const DeleteSelectedElementDialog: Component = () => {
   return (
     <>
       <Tooltip data-tip={t("board.tools.delete")} placement="top">
-        <Button
+        <DialogTrigger
           aria-label={t("board.tools.delete")}
-          onClick={onDeleteClick}
+          for={dialogId}
           shape="circle"
           size="sm"
           disabled={!selectionState().selection()}
         >
           <TrashIcon class="size-5" />
-        </Button>
+        </DialogTrigger>
       </Tooltip>
       <AlertDialog
         description={t("board.axis.confirmDelete")}
