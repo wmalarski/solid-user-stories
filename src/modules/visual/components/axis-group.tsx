@@ -167,7 +167,7 @@ const AxisItemContent: Component<AxisItemContentProps> = (props) => {
           <InsertAxisDialog orientation={props.config.axis.orientation} index={props.index} />
           <UpdateAxisDialog axis={props.config.axis} />
           <Show when={props.totalLength > 1 && tasks().length === 0}>
-            <DeleteAxisDialog axisId={props.config.axis.id} />
+            <DeleteAxisDialog axis={props.config.axis} endPosition={props.config.end} />
           </Show>
         </div>
       </div>

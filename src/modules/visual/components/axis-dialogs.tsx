@@ -8,7 +8,7 @@ import {
   taskCollection,
 } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
-import type { AxisModel } from "~/integrations/tanstack-db/schema";
+import type { AxisModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
@@ -43,9 +43,9 @@ type ShiftAxisArgs = {
 };
 
 type ShiftTasksArgs = {
-  index: number;
   shift: number;
-  axisConfigValue: AxisConfigContext;
+  position: number;
+  tasks: TaskModel[];
 };
 
 type InsertAxisDialogProps = {
@@ -53,11 +53,35 @@ type InsertAxisDialogProps = {
   index: number;
 };
 
+const shiftHorizontalTasks = ({ shift, tasks, position }: ShiftTasksArgs) => {
+  const tasksToMove = tasks.filter((entry) => entry.positionX > position).map((entry) => entry.id);
+
+  if (tasksToMove.length > 0) {
+    taskCollection.update(tasksToMove, (drafts) => {
+      for (const draft of drafts) {
+        draft.positionX += shift;
+      }
+    });
+  }
+};
+
+const shiftVerticalTasks = ({ shift, tasks, position }: ShiftTasksArgs) => {
+  const tasksToMove = tasks.filter((entry) => entry.positionY > position).map((entry) => entry.id);
+
+  if (tasksToMove.length > 0) {
+    taskCollection.update(tasksToMove, (drafts) => {
+      for (const draft of drafts) {
+        draft.positionY += shift;
+      }
+    });
+  }
+};
+
 export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
-  const axisConfig = useAxisConfigContext();
   const tasksData = useTasksDataContext();
+  const axisConfig = useAxisConfigContext();
 
   const boardId = useBoardId();
   const formId = createUniqueId();
@@ -71,44 +95,12 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
     });
   };
 
-  const shiftHorizontalTasks = ({ index, shift, axisConfigValue }: ShiftTasksArgs) => {
-    const currentConfigEnd = axisConfigValue.x[index].end;
-
-    const tasksToMove = tasksData()
-      .entries.filter((entry) => entry.positionX > currentConfigEnd)
-      .map((entry) => entry.id);
-
-    if (tasksToMove.length > 0) {
-      taskCollection.update(tasksToMove, (drafts) => {
-        for (const draft of drafts) {
-          draft.positionX += shift;
-        }
-      });
-    }
-  };
-
   const shiftVerticalAxis = ({ index, axisId, axisConfigValue }: ShiftAxisArgs) => {
     const axisIds = axisConfigValue.y.map((config) => config.axis.id);
     axisIds.splice(index + 1, 0, axisId);
     boardsCollection.update(boardId(), (draft) => {
       draft.axisYOrder = axisIds;
     });
-  };
-
-  const shiftVerticalTasks = ({ index, shift, axisConfigValue }: ShiftTasksArgs) => {
-    const currentConfigEnd = axisConfigValue.y[index].end;
-
-    const tasksToMove = tasksData()
-      .entries.filter((entry) => entry.positionY > currentConfigEnd)
-      .map((entry) => entry.id);
-
-    if (tasksToMove.length > 0) {
-      taskCollection.update(tasksToMove, (drafts) => {
-        for (const draft of drafts) {
-          draft.positionY += shift;
-        }
-      });
-    }
   };
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
@@ -124,6 +116,7 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
     }
 
     const axisConfigValue = axisConfig().config;
+    const tasks = tasksData().entries;
 
     const shift = 500;
     const axisId = createId();
@@ -137,10 +130,10 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
 
     if (props.orientation === "horizontal") {
       shiftHorizontalAxis({ axisConfigValue, axisId, index: props.index });
-      shiftHorizontalTasks({ axisConfigValue, index: props.index, shift });
+      shiftHorizontalTasks({ position: axisConfigValue.x[props.index].end, shift, tasks });
     } else {
       shiftVerticalAxis({ axisConfigValue, axisId, index: props.index });
-      shiftVerticalTasks({ axisConfigValue, index: props.index, shift });
+      shiftVerticalTasks({ position: axisConfigValue.y[props.index].end, shift, tasks });
     }
   };
 
@@ -259,24 +252,37 @@ const AxisFields: Component<AxisFieldsProps> = (props) => {
 };
 
 type DeleteAxisDialogProps = {
-  axisId: string;
+  axis: AxisModel;
+  endPosition: number;
 };
 
 export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
   const boardId = useBoardId();
+  const tasksData = useTasksDataContext();
+
   const dialogId = createUniqueId();
 
   const onSave = () => {
     closeDialog(dialogId);
 
-    const axisId = props.axisId;
+    const axisId = props.axis.id;
+    const shift = -props.axis.size;
+    const orientation = props.axis.orientation;
+    const endPosition = props.endPosition;
+    const tasks = tasksData().entries;
 
     boardsCollection.update(boardId(), (draft) => {
       draft.axisXOrder = draft.axisXOrder.filter((id) => id !== axisId);
       draft.axisYOrder = draft.axisYOrder.filter((id) => id !== axisId);
     });
+
+    if (orientation === "horizontal") {
+      shiftHorizontalTasks({ position: endPosition, shift, tasks });
+    } else {
+      shiftVerticalTasks({ position: endPosition, shift, tasks });
+    }
 
     axisCollection.delete(axisId);
   };
