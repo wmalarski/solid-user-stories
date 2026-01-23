@@ -13,13 +13,20 @@ const sharedLineProps: ComponentProps<"line"> = {
   "stroke-width": 3,
 };
 
+export const AxisGridStaticPaths: Component = () => {
+  return (
+    <>
+      <HorizontalZeroPath />
+      <VerticalZeroPath />
+    </>
+  );
+};
+
 export const AxisGridPaths: Component = () => {
   const axisConfig = useAxisConfigContext();
 
   return (
     <>
-      <HorizontalZeroPath />
-      <VerticalZeroPath />
       <Index each={axisConfig().config.y}>{(entry) => <HorizontalPath config={entry()} />}</Index>
       <Index each={axisConfig().config.x}>{(entry) => <VerticalPath config={entry()} />}</Index>
     </>

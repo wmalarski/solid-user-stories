@@ -15,7 +15,7 @@ import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
 import { ToolsStateProvider } from "../contexts/tools-state";
 import { SVG_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
-import { AxisGridPaths } from "./axis-grid-paths";
+import { AxisGridPaths, AxisGridStaticPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
 import { DraggedEdge } from "./dragged-edge";
 import { EdgePath } from "./edge-path";
@@ -78,7 +78,7 @@ const BoardContent: Component = () => {
       <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
         <SvgDefinitions />
         <BackgroundRect />
-        <AxisGridPaths />
+        <AxisGridStaticPaths />
         <SelectableGroup />
         <DraggedEdge />
         <AxisGroup />
@@ -98,14 +98,14 @@ const SelectableGroup: Component = () => {
   const dragState = useDragStateContext();
 
   return (
-    <g
-      cursor={dragState().isDragging() ? "grabbing" : "grab"}
-      transform={boardTransformContext().transform as unknown as string}
-    >
-      <For each={edgesData().entries}>
-        {(entry) => <EdgePath edge={entry.edge} source={entry.source} target={entry.target} />}
-      </For>
-      <For each={tasksData().entries}>{(task) => <TaskGroup task={task} />}</For>
+    <g cursor={dragState().isDragging() ? "grabbing" : "grab"}>
+      <AxisGridPaths />
+      <g transform={boardTransformContext().transform as unknown as string}>
+        <For each={edgesData().entries}>
+          {(entry) => <EdgePath edge={entry.edge} source={entry.source} target={entry.target} />}
+        </For>
+        <For each={tasksData().entries}>{(task) => <TaskGroup task={task} />}</For>
+      </g>
     </g>
   );
 };
