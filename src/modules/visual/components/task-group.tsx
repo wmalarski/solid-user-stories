@@ -127,7 +127,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   const edgesData = useEdgesDataContext();
   const selectionState = useSelectionStateContext();
   const boardTransform = useBoardTransformContext();
-  const [edgeDragState, { onDrag, onDragEnd, onDragStart }] = useEdgeDragStateContext();
+  const [_edgeDragState, { onDrag, onDragEnd, onDragStart }] = useEdgeDragStateContext();
 
   const [rectRef, setRectRef] = createSignal<SVGElement>();
 
@@ -136,18 +136,15 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   );
 
   useDrag({
-    onDragEnded() {
+    onDragEnded(event) {
       onDragEnd();
-
-      const cursorX = edgeDragState.cursor.x;
-      const cursorY = edgeDragState.cursor.y;
 
       const task = tasksData().entries.find(
         (task) =>
-          task.positionX < cursorX &&
-          cursorX < task.positionX + TASK_RECT_WIDTH &&
-          task.positionY < cursorY &&
-          cursorY < task.positionY + TASK_RECT_HEIGHT,
+          task.positionX < event.x &&
+          event.x < task.positionX + TASK_RECT_WIDTH &&
+          task.positionY < event.y &&
+          event.y < task.positionY + TASK_RECT_HEIGHT,
       );
 
       if (!task || task.id === props.taskId) {
@@ -167,7 +164,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
         return;
       }
 
-      const breakX = (edgeDragState.start.x + cursorX) / 2;
+      const breakX = (props.x + task.positionX + TASK_RECT_WIDTH) / 2;
 
       const edgeId = createId();
       edgeCollection.insert({

@@ -155,19 +155,17 @@ const AxisItemContent: Component<AxisItemContentProps> = (props) => {
       <span class="text-sm truncate font-semibold">{props.config.axis.name}</span>
       {/* <span>{props.config.axis.id}</span> */}
       <div
-        class={cx("flex justify-end gap-2", {
+        class={cx("flex gap-1 justify-end", {
+          "flex-col items-end": isVertical(),
           "items-center": !isVertical(),
-          "items-end": isVertical(),
         })}
       >
-        <div class={cx("flex", { "flex-col": isVertical() })}>
-          <InsertAxisDialog orientation={props.config.axis.orientation} index={props.index} />
-          <UpdateAxisDialog axis={props.config.axis} />
-          <Show when={props.totalLength > 1 && tasks().length === 0}>
-            <DeleteAxisDialog axis={props.config.axis} endPosition={props.config.end} />
-          </Show>
-        </div>
-        <Badge size="sm" color="accent" class="mb-1">
+        <InsertAxisDialog orientation={props.config.axis.orientation} index={props.index} />
+        <UpdateAxisDialog axis={props.config.axis} />
+        <Show when={props.totalLength > 1 && tasks().length === 0}>
+          <DeleteAxisDialog axis={props.config.axis} endPosition={props.config.end} />
+        </Show>
+        <Badge size="sm" color="accent" class="my-1">
           {esitmationSum()}
         </Badge>
       </div>

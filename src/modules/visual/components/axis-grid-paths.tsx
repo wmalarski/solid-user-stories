@@ -103,14 +103,18 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
   });
 
   return (
-    <line
-      ref={setRef}
-      x1={0}
-      x2="100%"
-      y1={transformed()}
-      y2={transformed()}
-      {...sharedLineProps}
-    />
+    <>
+      <line x1={0} x2="100%" y1={transformed()} y2={transformed()} {...sharedLineProps} />
+      <line
+        ref={setRef}
+        x1={0}
+        x2="100%"
+        y1={transformed()}
+        y2={transformed()}
+        stroke="transparent"
+        stroke-width={16}
+      />
+    </>
   );
 };
 
@@ -175,13 +179,17 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
   });
 
   return (
-    <line
-      ref={setRef}
-      y1={0}
-      y2="100%"
-      x1={transformed()}
-      x2={transformed()}
-      {...sharedLineProps}
-    />
+    <>
+      <line y1={0} y2="100%" x1={transformed()} x2={transformed()} {...sharedLineProps} />
+      <line
+        ref={setRef}
+        y1={0}
+        y2="100%"
+        x1={transformed()}
+        x2={transformed()}
+        stroke="transparent"
+        stroke-width={16}
+      />
+    </>
   );
 };
