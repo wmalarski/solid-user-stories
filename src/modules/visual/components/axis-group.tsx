@@ -160,9 +160,6 @@ const AxisItemContent: Component<AxisItemContentProps> = (props) => {
           "items-end": isVertical(),
         })}
       >
-        <Badge size="sm" color="info" class="mb-1">
-          {esitmationSum()}
-        </Badge>
         <div class={cx("flex", { "flex-col": isVertical() })}>
           <InsertAxisDialog orientation={props.config.axis.orientation} index={props.index} />
           <UpdateAxisDialog axis={props.config.axis} />
@@ -170,6 +167,9 @@ const AxisItemContent: Component<AxisItemContentProps> = (props) => {
             <DeleteAxisDialog axis={props.config.axis} endPosition={props.config.end} />
           </Show>
         </div>
+        <Badge size="sm" color="accent" class="mb-1">
+          {esitmationSum()}
+        </Badge>
       </div>
     </div>
   );

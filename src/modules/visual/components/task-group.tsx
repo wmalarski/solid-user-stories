@@ -85,11 +85,11 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
           {/* <span class="text-xs truncate">X:{props.task.axisX}</span>
             <span class="text-xs truncate">Y:{props.task.axisY}</span> */}
           <div class="flex gap-1 w-full justify-end items-center">
-            <Badge size="sm" color="info">
+            <UpdateTaskDialog task={props.task} />
+            <DeleteTaskDialog task={props.task} />
+            <Badge size="sm" color="accent">
               {props.task.estimate}
             </Badge>
-            <DeleteTaskDialog task={props.task} />
-            <UpdateTaskDialog task={props.task} />
           </div>
         </div>
       </foreignObject>
