@@ -8,6 +8,7 @@ import { AxisConfigProvider } from "../contexts/axis-config";
 import { BoardModelProvider } from "../contexts/board-model";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
+import { EdgeDragStateProvider } from "../contexts/edge-drag-state";
 import { EdgesDataProvider, useEdgesDataContext } from "../contexts/edges-data";
 import { SelectionStateProvider, useSelectionStateContext } from "../contexts/selection-state";
 import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
@@ -16,6 +17,7 @@ import { SVG_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { AxisGridPaths } from "./axis-grid-paths";
 import { AxisGroup } from "./axis-group";
+import { DraggedEdge } from "./dragged-edge";
 import { EdgePath } from "./edge-path";
 import { InsertTaskDialog } from "./task-dialogs";
 import { TaskGroup } from "./task-group";
@@ -56,7 +58,9 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
               <DragStateProvider>
                 <SelectionStateProvider>
                   <BoardTransformProvider>
-                    <BoardContent />
+                    <EdgeDragStateProvider>
+                      <BoardContent />
+                    </EdgeDragStateProvider>
                   </BoardTransformProvider>
                 </SelectionStateProvider>
               </DragStateProvider>
@@ -76,6 +80,7 @@ const BoardContent: Component = () => {
         <BackgroundRect />
         <AxisGridPaths />
         <SelectableGroup />
+        <DraggedEdge />
         <AxisGroup />
       </svg>
       <ToolsBar />

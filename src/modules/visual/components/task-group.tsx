@@ -1,4 +1,3 @@
-import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
@@ -7,7 +6,9 @@ import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { Badge } from "~/ui/badge/badge";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
+import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useDrag } from "../contexts/drag-state";
+import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
 import { useEdgesDataContext } from "../contexts/edges-data";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useTasksDataContext } from "../contexts/tasks-data";
@@ -16,6 +17,7 @@ import {
   TASK_HANDLE_SIZE_HALF,
   TASK_HANDLE_Y_SHIFT,
   TASK_RECT_HEIGHT,
+  TASK_RECT_HEIGHT_HALF,
   TASK_RECT_WIDTH,
 } from "../utils/constants";
 import { DeleteTaskDialog, UpdateTaskDialog } from "./task-dialogs";
@@ -124,6 +126,8 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
   const tasksData = useTasksDataContext();
   const edgesData = useEdgesDataContext();
   const selectionState = useSelectionStateContext();
+  const boardTransform = useBoardTransformContext();
+  const [edgeDragState, { onDrag, onDragEnd, onDragStart }] = useEdgeDragStateContext();
 
   const [rectRef, setRectRef] = createSignal<SVGElement>();
 
@@ -131,32 +135,22 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
     () => (props.kind === "source" ? TASK_RECT_WIDTH : 0) - TASK_HANDLE_SIZE_HALF,
   );
 
-  const [isDragging, setIsDragging] = createSignal(false);
-  const [hasPosition, setHasPosition] = createSignal(false);
-
-  const [x, setX] = createSignal(0);
-  const [y, setY] = createSignal(0);
-
-  const startX = createMemo(() => props.x + xShift() + TASK_HANDLE_SIZE_HALF);
-  const breakX = createMemo(() => (startX() + x()) / 2);
-
   useDrag({
     onDragEnded() {
-      setIsDragging(false);
-      setHasPosition(false);
+      onDragEnd();
 
-      const xValue = x();
-      const yValue = y();
+      const cursorX = edgeDragState.cursor.x;
+      const cursorY = edgeDragState.cursor.y;
 
       const task = tasksData().entries.find(
         (task) =>
-          task.positionX < xValue &&
-          xValue < task.positionX + TASK_RECT_WIDTH &&
-          task.positionY < yValue &&
-          yValue < task.positionY + TASK_RECT_HEIGHT,
+          task.positionX < cursorX &&
+          cursorX < task.positionX + TASK_RECT_WIDTH &&
+          task.positionY < cursorY &&
+          cursorY < task.positionY + TASK_RECT_HEIGHT,
       );
 
-      if (!task) {
+      if (!task || task.id === props.taskId) {
         return;
       }
 
@@ -173,10 +167,12 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
         return;
       }
 
+      const breakX = (edgeDragState.start.x + cursorX) / 2;
+
       const edgeId = createId();
       edgeCollection.insert({
         boardId: boardId(),
-        breakX: breakX(),
+        breakX,
         id: edgeId,
         source: props.kind === "source" ? props.taskId : task.id,
         target: props.kind === "source" ? task.id : props.taskId,
@@ -185,61 +181,30 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
       selectionState().setSelection({ id: edgeId, kind: "edge" });
     },
     onDragStarted() {
-      setIsDragging(true);
+      const transform = boardTransform().transform;
+      onDragStart({
+        x: translateX(transform, props.x + xShift() + TASK_HANDLE_SIZE_HALF),
+        y: translateY(transform, props.y + TASK_RECT_HEIGHT_HALF),
+      });
     },
     onDragged(event) {
-      setX(event.x);
-      setY(event.y);
-      setHasPosition(true);
+      const transform = boardTransform().transform;
+      onDrag({
+        x: translateX(transform, event.x),
+        y: translateY(transform, event.y),
+      });
     },
     ref: rectRef,
   });
 
-  const path = createMemo(() => {
-    if (!hasPosition()) {
-      return;
-    }
-
-    const xValue = x();
-    const yValue = y();
-    const startY = props.y + TASK_HANDLE_Y_SHIFT + TASK_HANDLE_SIZE_HALF;
-    const breakXValue = breakX();
-
-    const context = d3.path();
-    context.moveTo(startX(), startY);
-    context.lineTo(breakXValue, startY);
-    context.lineTo(breakXValue, yValue);
-    context.lineTo(xValue, yValue);
-    return context.toString();
-  });
-
   return (
-    <>
-      <rect
-        ref={setRectRef}
-        x={props.x + xShift()}
-        y={props.y + TASK_HANDLE_Y_SHIFT}
-        width={TASK_HANDLE_SIZE}
-        height={TASK_HANDLE_SIZE}
-        class="fill-accent"
-      />
-      <Show when={isDragging()}>
-        <path
-          d={path()}
-          stroke-width={3}
-          class="stroke-accent"
-          fill="none"
-          stroke-dasharray="5,5"
-          marker-end="url(#arrow)"
-        >
-          <animate
-            attributeName="stroke-dashoffset"
-            values="10;0"
-            dur="0.5s"
-            repeatCount="indefinite"
-          />
-        </path>
-      </Show>
-    </>
+    <rect
+      ref={setRectRef}
+      x={props.x + xShift()}
+      y={props.y + TASK_HANDLE_Y_SHIFT}
+      width={TASK_HANDLE_SIZE}
+      height={TASK_HANDLE_SIZE}
+      class="fill-accent"
+    />
   );
 };
