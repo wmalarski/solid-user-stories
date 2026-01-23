@@ -21,7 +21,7 @@
     "@tanstack/solid-db": "^0.2.2",
     "d3": "^7.9.0",
     "decode-formdata": "^0.9.0",
-    "solid-js": "^1.9.10",
+    "solid-js": "^1.9.11",
     "tailwind-merge": "^3.4.0",
     "tailwind-variants": "^3.2.2",
     "tailwindcss": "^4.1.18",
