@@ -92,12 +92,14 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       const shift = withLimit - startPosition();
       const draggedTasksValue = draggedTasks();
 
-      taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
-        for (const draft of drafts) {
-          const position = draggedTasksValue.get(draft.id) ?? draft.positionY;
-          draft.positionY = position + shift;
-        }
-      });
+      if (draggedTasksValue.size > 0) {
+        taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
+          for (const draft of drafts) {
+            const position = draggedTasksValue.get(draft.id) ?? draft.positionY;
+            draft.positionY = position + shift;
+          }
+        });
+      }
     },
     ref,
   });
@@ -168,12 +170,14 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       const shift = withLimit - startPosition();
       const draggedTasksValue = draggedTasks();
 
-      taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
-        for (const draft of drafts) {
-          const position = draggedTasksValue.get(draft.id) ?? draft.positionX;
-          draft.positionX = position + shift;
-        }
-      });
+      if (draggedTasksValue.size > 0) {
+        taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
+          for (const draft of drafts) {
+            const position = draggedTasksValue.get(draft.id) ?? draft.positionX;
+            draft.positionX = position + shift;
+          }
+        });
+      }
     },
     ref,
   });
