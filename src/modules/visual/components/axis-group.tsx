@@ -1,11 +1,10 @@
-import { eq, useLiveQuery } from "@tanstack/solid-db";
 import { createMemo, Index, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
-import { taskCollection } from "~/integrations/tanstack-db/collections";
 import { Badge } from "~/ui/badge/badge";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import { useBoardModelContext } from "../contexts/board-model";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
+import { useTasksDataContext } from "../contexts/tasks-data";
 import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
 import { DeleteAxisDialog, InsertAxisDialog, UpdateAxisDialog } from "./axis-dialogs";
 
@@ -20,14 +19,10 @@ export const AxisGroup: Component = () => {
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
       <Index each={axisConfig().config.x}>
-        {(entry, index) => (
-          <HorizontalItemRect totalLength={xLength()} config={entry()} index={index} />
-        )}
+        {(entry) => <HorizontalItemRect totalLength={xLength()} config={entry()} />}
       </Index>
       <Index each={axisConfig().config.y}>
-        {(entry, index) => (
-          <VerticalItemRect totalLength={yLength()} config={entry()} index={index} />
-        )}
+        {(entry) => <VerticalItemRect totalLength={yLength()} config={entry()} />}
       </Index>
       <CenterRect />
     </>
@@ -68,7 +63,6 @@ const VerticalBackgroundRect: Component = () => {
 
 type HorizontalItemRectProps = {
   config: AxisConfig;
-  index: number;
   totalLength: number;
 };
 
@@ -84,11 +78,7 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
   return (
     <>
       <foreignObject width={width()} x={transformed()} y={0} height={AXIS_Y_OFFSET}>
-        <AxisItemContent
-          config={props.config}
-          index={props.index}
-          totalLength={props.totalLength}
-        />
+        <AxisItemContent config={props.config} totalLength={props.totalLength} />
       </foreignObject>
     </>
   );
@@ -96,7 +86,6 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
 
 type VerticalItemRectProps = {
   config: AxisConfig;
-  index: number;
   totalLength: number;
 };
 
@@ -107,19 +96,12 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
     translateY(boardTransform().transform, props.config.start + AXIS_Y_OFFSET),
   );
 
+  const height = createMemo(() => props.config.axis.size * boardTransform().transform.k);
+
   return (
     <>
-      <foreignObject
-        height={props.config.axis.size * boardTransform().transform.k}
-        x={0}
-        y={transformed()}
-        width={AXIS_X_OFFSET}
-      >
-        <AxisItemContent
-          config={props.config}
-          index={props.index}
-          totalLength={props.totalLength}
-        />
+      <foreignObject height={height()} x={0} y={transformed()} width={AXIS_X_OFFSET}>
+        <AxisItemContent config={props.config} totalLength={props.totalLength} />
       </foreignObject>
     </>
   );
@@ -127,27 +109,26 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
 
 type AxisItemContentProps = {
   config: AxisConfig;
-  index: number;
   totalLength: number;
 };
 
 const AxisItemContent: Component<AxisItemContentProps> = (props) => {
-  const tasks = useLiveQuery((q) =>
-    q
-      .from({ tasks: taskCollection })
-      .where(({ tasks }) =>
-        props.config.axis.orientation === "horizontal"
-          ? eq(tasks.axisX, props.config.axis.id)
-          : eq(tasks.axisY, props.config.axis.id),
-      ),
-  );
-
-  const esitmationSum = createMemo(() => {
-    return tasks().reduce((previous, current) => previous + current.estimate, 0);
-  });
+  const tasksData = useTasksDataContext();
 
   const isVertical = createMemo(() => {
     return props.config.axis.orientation === "vertical";
+  });
+
+  const tasks = createMemo(() => {
+    const isVerticalValue = isVertical();
+    const axisId = props.config.axis.id;
+    return tasksData().entries.filter((entry) =>
+      isVerticalValue ? entry.axisY === axisId : entry.axisX === axisId,
+    );
+  });
+
+  const esitmationSum = createMemo(() => {
+    return tasks().reduce((previous, current) => previous + current.estimate, 0);
   });
 
   return (
@@ -160,7 +141,7 @@ const AxisItemContent: Component<AxisItemContentProps> = (props) => {
           "items-center": !isVertical(),
         })}
       >
-        <InsertAxisDialog orientation={props.config.axis.orientation} index={props.index} />
+        <InsertAxisDialog orientation={props.config.axis.orientation} index={props.config.index} />
         <UpdateAxisDialog axis={props.config.axis} />
         <Show when={props.totalLength > 1 && tasks().length === 0}>
           <DeleteAxisDialog axis={props.config.axis} endPosition={props.config.end} />

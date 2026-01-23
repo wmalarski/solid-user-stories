@@ -88,18 +88,21 @@ const getAxisValues = (entries: AxisModel[], board: BoardModel) => {
   const horizontalPositions = getPositions(orderedHorizontal);
   const verticalPositions = getPositions(orderedVertical);
 
-  return {
-    x: orderedHorizontal.map((axis, index) => ({
-      axis,
-      end: horizontalPositions[index + 1],
-      start: horizontalPositions[index],
-    })),
-    y: orderedVertical.map((axis, index) => ({
-      axis,
-      end: verticalPositions[index + 1],
-      start: verticalPositions[index],
-    })),
-  } as const;
+  const x = orderedHorizontal.map((axis, index) => ({
+    axis,
+    end: horizontalPositions[index + 1],
+    index,
+    start: horizontalPositions[index],
+  }));
+
+  const y = orderedVertical.map((axis, index) => ({
+    axis,
+    end: verticalPositions[index + 1],
+    index,
+    start: verticalPositions[index],
+  }));
+
+  return { x, y } as const;
 };
 
 export const mapToAxis = (config: ReturnType<typeof getAxisValues>, point: Point2D) => {
