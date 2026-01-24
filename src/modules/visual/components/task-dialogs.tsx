@@ -32,6 +32,7 @@ import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { getEdgesByTask, useBoardId, useBoardStateContext } from "../contexts/board-state";
+import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useSelectionStateContext } from "../contexts/selection-state";
 import { useToolsStateContext } from "../contexts/tools-state";
@@ -52,13 +53,13 @@ export const InsertTaskDialog: Component = () => {
   const boardId = useBoardId();
   const sectionConfigs = useSectionConfigsContext();
 
+  const [transform] = useBoardTransformContext();
   const [toolsState, { onToolChage }] = useToolsStateContext();
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
   const dialogId = createUniqueId();
   const formId = createUniqueId();
 
-  const [formRef, setFormRef] = createSignal<HTMLFormElement>();
   const [position, setPosition] = createSignal<Point2D | null>(null);
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
@@ -82,15 +83,16 @@ export const InsertTaskDialog: Component = () => {
       estimate: parsed.output.estimate,
       id: taskId,
       link: parsed.output.link,
-      positionX: positionValue.x,
-      positionY: positionValue.y,
+      positionX: translateX(transform(), positionValue.x),
+      positionY: translateY(transform(), positionValue.y),
       sectionX: sectionIds.sectionX,
       sectionY: sectionIds.sectionY,
       title: parsed.output.title,
     });
 
     closeDialog(dialogId);
-    formRef()?.reset();
+
+    event.currentTarget.reset();
 
     onToolChage("pane");
     onSelectionChange({ id: taskId, kind: "task" });
@@ -116,7 +118,7 @@ export const InsertTaskDialog: Component = () => {
     <Dialog id={dialogId}>
       <DialogBox>
         <DialogTitle>{t("board.tasks.insertTask")}</DialogTitle>
-        <form ref={setFormRef} id={formId} onSubmit={onSubmit}>
+        <form id={formId} onSubmit={onSubmit}>
           <TaskFields />
         </form>
         <DialogActions>

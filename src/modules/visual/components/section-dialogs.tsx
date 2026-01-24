@@ -138,6 +138,8 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
       shiftVerticalSections({ index: props.index, sectionConfigs: sectionConfigsValue, sectionId });
       shiftVerticalTasks({ position: sectionConfigsValue.y[props.index].end, shift, tasks });
     }
+
+    event.currentTarget.reset();
   };
 
   return (

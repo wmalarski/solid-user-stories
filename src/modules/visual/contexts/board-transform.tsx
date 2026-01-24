@@ -59,11 +59,10 @@ const createBoardTransformContext = () => {
   };
 
   createEffect(() => {
-    // oxlint-disable-next-line no-explicit-any
-    d3.select(SVG_SELECTOR).call(plugin as any);
+    selection().call(plugin);
 
     onCleanup(() => {
-      d3.select(SVG_SELECTOR).on(".zoom", null);
+      selection().on(".zoom", null);
     });
   });
 
