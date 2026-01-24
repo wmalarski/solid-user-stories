@@ -1,9 +1,12 @@
 import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
+import { useI18n } from "~/integrations/i18n";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { Badge } from "~/ui/badge/badge";
+import { LinkButton } from "~/ui/button/button";
+import { LinkIcon } from "~/ui/icons/link-icon";
 import { useBoardId, useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
@@ -25,6 +28,8 @@ type TaskGroupProps = {
 };
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
+  const { t } = useI18n();
+
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
   const [shiftX, setShiftX] = createSignal(0);
@@ -83,6 +88,20 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
           <span class="text-sm truncate font-semibold">{props.task.title}</span>
           <span class="text-xs line-clamp-3 opacity-80">{props.task.description}</span>
           <div class="flex gap-1 w-full justify-end items-center">
+            <Show when={props.task.link}>
+              {(link) => (
+                <LinkButton
+                  size="sm"
+                  shape="circle"
+                  href={link()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t("board.tasks.link")}
+                >
+                  <LinkIcon class="size-4" />
+                </LinkButton>
+              )}
+            </Show>
             <UpdateTaskDialog task={props.task} />
             <DeleteTaskDialog task={props.task} />
             <Badge size="sm" color="accent">

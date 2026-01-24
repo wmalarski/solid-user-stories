@@ -8,4 +8,4 @@ export type ComponentVariantProps<
   // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
   // oxlint-disable-next-line typescript/ban-types typescript/no-empty-object-type
   Rest = {},
-> = ComponentProps<T> & VariantProps<Component> & Rest;
+> = Omit<ComponentProps<T>, keyof VariantProps<Component>> & VariantProps<Component> & Rest;
