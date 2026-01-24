@@ -1,15 +1,8 @@
 import { decode } from "decode-formdata";
-import {
-  createEffect,
-  createSignal,
-  createUniqueId,
-  type Component,
-  type ComponentProps,
-} from "solid-js";
+import { createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
-import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { deleteTaskWithDependencies } from "~/integrations/tanstack-db/utils";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
@@ -22,7 +15,6 @@ import {
   DialogBox,
   DialogTitle,
   DialogTrigger,
-  openDialog,
 } from "~/ui/dialog/dialog";
 import { FieldError } from "~/ui/field-error/field-error";
 import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
@@ -31,108 +23,15 @@ import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
-import { getEdgesByTask, useBoardId, useBoardStateContext } from "../contexts/board-state";
-import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
-import { useSelectionStateContext } from "../contexts/selection-state";
-import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
-import { SVG_SELECTOR } from "../utils/constants";
-import { createD3ClickListener } from "../utils/create-d3-click-listener";
-import type { Point2D } from "../utils/types";
+import { getEdgesByTask, useBoardStateContext } from "../contexts/board-state";
+import { useDialogBoardToolUtils } from "../contexts/tools-state";
 
-const TaskFieldsSchema = v.object({
+export const TaskFieldsSchema = v.object({
   description: v.string(),
   estimate: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(0)),
   link: v.optional(v.string()),
   title: v.string(),
 });
-
-export const InsertTaskDialog: Component = () => {
-  const { t } = useI18n();
-
-  const boardId = useBoardId();
-  const sectionConfigs = useSectionConfigsContext();
-
-  const [transform] = useBoardTransformContext();
-  const { onClose, onClick } = useDialogBoardToolUtils();
-  const [toolsState, { onToolChage }] = useToolsStateContext();
-  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
-
-  const dialogId = createUniqueId();
-  const formId = createUniqueId();
-
-  const [position, setPosition] = createSignal<Point2D | null>(null);
-
-  const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
-    event.preventDefault();
-
-    const formData = new FormData(event.currentTarget);
-
-    const parsed = await v.safeParseAsync(TaskFieldsSchema, decode(formData));
-    const positionValue = position();
-
-    if (!parsed.success || !positionValue) {
-      return;
-    }
-
-    const taskId = createId();
-    const sectionIds = mapToSections(sectionConfigs(), positionValue);
-
-    taskCollection.insert({
-      boardId: boardId(),
-      description: parsed.output.description,
-      estimate: parsed.output.estimate,
-      id: taskId,
-      link: parsed.output.link,
-      positionX: translateX(transform(), positionValue.x),
-      positionY: translateY(transform(), positionValue.y),
-      sectionX: sectionIds.sectionX,
-      sectionY: sectionIds.sectionY,
-      title: parsed.output.title,
-    });
-
-    closeDialog(dialogId);
-
-    event.currentTarget.reset();
-
-    onToolChage("pane");
-    onSelectionChange({ id: taskId, kind: "task" });
-  };
-
-  createEffect(() => {
-    const isCreateTask = toolsState() === "create-task";
-
-    if (!isCreateTask) {
-      return;
-    }
-
-    createD3ClickListener({
-      onClick(event) {
-        onClick();
-        setPosition({ x: event.x, y: event.y });
-        openDialog(dialogId);
-      },
-      ref: () => SVG_SELECTOR,
-    });
-  });
-
-  return (
-    <Dialog id={dialogId} onClose={onClose}>
-      <DialogBox>
-        <DialogTitle>{t("board.tasks.insertTask")}</DialogTitle>
-        <form id={formId} onSubmit={onSubmit}>
-          <TaskFields />
-        </form>
-        <DialogActions>
-          <Button color="primary" form={formId} type="submit">
-            {t("common.save")}
-          </Button>
-        </DialogActions>
-      </DialogBox>
-      <DialogBackdrop />
-    </Dialog>
-  );
-};
 
 type UpdateTaskDialogProps = {
   task: TaskModel;
@@ -202,7 +101,7 @@ type TaskFieldsProps = {
   initialValues?: Partial<TaskModel>;
 };
 
-const TaskFields: Component<TaskFieldsProps> = (props) => {
+export const TaskFields: Component<TaskFieldsProps> = (props) => {
   const { t } = useI18n();
 
   return (

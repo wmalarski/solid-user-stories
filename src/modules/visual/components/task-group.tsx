@@ -1,3 +1,4 @@
+import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
@@ -13,6 +14,7 @@ import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
 import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import {
+  TASK_ARROW_OFFSET,
   TASK_HANDLE_SIZE,
   TASK_HANDLE_SIZE_HALF,
   TASK_HANDLE_Y_SHIFT,
@@ -20,7 +22,9 @@ import {
   TASK_RECT_HEIGHT_HALF,
   TASK_RECT_WIDTH,
 } from "../utils/constants";
+import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
+import { useInsertTaskDialogContext } from "./insert-task-dialog";
 import { DeleteTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 
 type TaskGroupProps = {
@@ -72,7 +76,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         height={TASK_RECT_HEIGHT}
         filter="url(#task-shadow)"
         stroke-width={5}
-        class={cx("opacity-15", { "stroke-accent opacity-50": isSelected() })}
+        class={cx("opacity-15", { "stroke-accent opacity-40": isSelected() })}
       />
       <foreignObject
         ref={setRectRef}
@@ -123,6 +127,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
           y={props.task.positionY}
           taskId={props.task.id}
         />
+        <TaskArrows task={props.task} />
       </Show>
     </>
   );
@@ -222,5 +227,85 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
       height={TASK_HANDLE_SIZE}
       class="fill-accent"
     />
+  );
+};
+
+type TaskArrowsProps = {
+  task: TaskModel;
+};
+
+const TaskArrows: Component<TaskArrowsProps> = (props) => {
+  const [rightPathRef, setRightPathRef] = createSignal<SVGElement>();
+  const [leftPathRef, setLeftPathRef] = createSignal<SVGElement>();
+
+  const insertTaskDialog = useInsertTaskDialogContext();
+
+  createD3ClickListener({
+    onClick() {
+      insertTaskDialog.openInsertDialog({
+        x: props.task.positionX + TASK_RECT_WIDTH + 400,
+        y: props.task.positionY,
+      });
+    },
+    ref: rightPathRef,
+  });
+
+  createD3ClickListener({
+    onClick() {
+      insertTaskDialog.openInsertDialog({
+        x: props.task.positionX - 400,
+        y: props.task.positionY,
+      });
+    },
+    ref: leftPathRef,
+  });
+
+  return (
+    <>
+      <ChevronRightPath ref={setRightPathRef} task={props.task} />
+      <ChevronLeftPath ref={setLeftPathRef} task={props.task} />
+    </>
+  );
+};
+
+const ARROW_HEIGHT_HALF = 10;
+const ARROW_WIDTH = 10;
+
+type ChevronPathProps = {
+  task: TaskModel;
+  ref: (element: SVGElement) => void;
+};
+
+const ChevronRightPath: Component<ChevronPathProps> = (props) => {
+  const path = createMemo(() => {
+    const x = props.task.positionX + TASK_RECT_WIDTH + TASK_ARROW_OFFSET;
+    const y = props.task.positionY + TASK_RECT_HEIGHT_HALF;
+
+    const context = d3.path();
+    context.moveTo(x, y - ARROW_HEIGHT_HALF);
+    context.lineTo(x + ARROW_WIDTH, y);
+    context.lineTo(x, y + ARROW_HEIGHT_HALF);
+    return context.toString();
+  });
+
+  return (
+    <path ref={props.ref} d={path()} class="stroke-base-content" fill="none" stroke-width={3} />
+  );
+};
+
+const ChevronLeftPath: Component<ChevronPathProps> = (props) => {
+  const path = createMemo(() => {
+    const x = props.task.positionX - TASK_ARROW_OFFSET;
+    const y = props.task.positionY + TASK_RECT_HEIGHT_HALF;
+
+    const context = d3.path();
+    context.moveTo(x, y - ARROW_HEIGHT_HALF);
+    context.lineTo(x - ARROW_WIDTH, y);
+    context.lineTo(x, y + ARROW_HEIGHT_HALF);
+    return context.toString();
+  });
+
+  return (
+    <path ref={props.ref} d={path()} class="stroke-base-content" fill="none" stroke-width={3} />
   );
 };

@@ -1,6 +1,14 @@
 import { useParams } from "@solidjs/router";
 import { eq, useLiveQuery } from "@tanstack/solid-db";
-import { createMemo, createSignal, For, Show, Suspense, type Component } from "solid-js";
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  Show,
+  Suspense,
+  type Component,
+} from "solid-js";
 import { cx } from "tailwind-variants";
 import { boardsCollection } from "~/integrations/tanstack-db/collections";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
@@ -10,14 +18,14 @@ import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgeDragStateProvider } from "../contexts/edge-drag-state";
 import { SectionConfigsProvider } from "../contexts/section-configs";
 import { SelectionStateProvider, useSelectionStateContext } from "../contexts/selection-state";
-import { ToolsStateProvider } from "../contexts/tools-state";
-import { SVG_CLASS } from "../utils/constants";
+import { ToolsStateProvider, useToolsStateContext } from "../contexts/tools-state";
+import { SVG_CLASS, SVG_SELECTOR } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { DraggedEdge } from "./dragged-edge";
 import { EdgePath } from "./edge-path";
+import { InsertTaskDialogProvider, useInsertTaskDialogContext } from "./insert-task-dialog";
 import { SectionGridPaths, SectionGridStaticPaths } from "./section-grid-paths";
 import { SectionItems } from "./section-items";
-import { InsertTaskDialog } from "./task-dialogs";
 import { TaskGroup } from "./task-group";
 import { ToolsBar, ZoomBar } from "./tools-bar";
 
@@ -67,7 +75,7 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
 
 const BoardContent: Component = () => {
   return (
-    <>
+    <InsertTaskDialogProvider>
       <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
         <SvgDefinitions />
         <BackgroundRect />
@@ -78,8 +86,7 @@ const BoardContent: Component = () => {
       </svg>
       <ToolsBar />
       <ZoomBar />
-      <InsertTaskDialog />
-    </>
+    </InsertTaskDialogProvider>
   );
 };
 
@@ -115,6 +122,27 @@ const BackgroundRect: Component = () => {
   });
 
   return <rect ref={setRectRef} x={0} y={0} width="100%" height="100%" fill="transparent" />;
+};
+
+export const createToolInsertTask = () => {
+  const [toolsState] = useToolsStateContext();
+
+  const insertTaskDialog = useInsertTaskDialogContext();
+
+  createEffect(() => {
+    const isCreateTask = toolsState() === "create-task";
+
+    if (!isCreateTask) {
+      return;
+    }
+
+    createD3ClickListener({
+      onClick(event) {
+        insertTaskDialog.openInsertDialog({ x: event.x, y: event.y });
+      },
+      ref: () => SVG_SELECTOR,
+    });
+  });
 };
 
 const SvgDefinitions: Component = () => {
