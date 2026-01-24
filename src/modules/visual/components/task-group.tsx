@@ -33,11 +33,13 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const [shiftY, setShiftY] = createSignal(0);
 
   const axisConfig = useAxisConfigContext();
-  const selectionState = useSelectionStateContext();
+
+  const isSelected = useIsSelected(() => props.task.id);
+  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
   useDrag({
     onDragStarted(event) {
-      selectionState().setSelection({ id: props.task.id, kind: "task" });
+      onSelectionChange({ id: props.task.id, kind: "task" });
       setShiftX(props.task.positionX - event.x);
       setShiftY(props.task.positionY - event.y);
     },
@@ -57,8 +59,6 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
     },
     ref: rectRef,
   });
-
-  const isSelected = useIsSelected(() => props.task.id);
 
   return (
     <>
@@ -125,8 +125,9 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
 
   const tasksData = useTasksDataContext();
   const edgesData = useEdgesDataContext();
-  const selectionState = useSelectionStateContext();
   const boardTransform = useBoardTransformContext();
+
+  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
   const [_edgeDragState, { onDrag, onDragEnd, onDragStart }] = useEdgeDragStateContext();
 
   const [rectRef, setRectRef] = createSignal<SVGElement>();
@@ -175,7 +176,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
         target: props.kind === "source" ? task.id : props.taskId,
       });
 
-      selectionState().setSelection({ id: edgeId, kind: "edge" });
+      onSelectionChange({ id: edgeId, kind: "edge" });
     },
     onDragStarted() {
       const transform = boardTransform().transform;

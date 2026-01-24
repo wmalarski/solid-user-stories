@@ -22,7 +22,8 @@ type EdgePathProps = {
 export const EdgePath: Component<EdgePathProps> = (props) => {
   const [ref, setRef] = createSignal<SVGElement>();
 
-  const selectionState = useSelectionStateContext();
+  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
+
   const isSelected = useIsSelected(() => props.edge.id);
 
   const path = createMemo(() => {
@@ -42,7 +43,7 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
 
   createD3ClickListener({
     onClick() {
-      selectionState().setSelection({ id: props.edge.id, kind: "edge" });
+      onSelectionChange({ id: props.edge.id, kind: "edge" });
     },
     ref,
   });

@@ -16,20 +16,15 @@ type SelectionValue = {
 const createSelectionStateContext = () => {
   const [selection, setSelection] = createSignal<SelectionValue | null>(null);
 
-  return {
-    selection,
-    setSelection,
-  };
+  return [selection, { onSelectionChange: setSelection }] as const;
 };
 
-const SelectionStateContext = createContext<
-  Accessor<ReturnType<typeof createSelectionStateContext>>
->(() => {
-  throw new Error("SelectionStateContext is not defined");
-});
+const SelectionStateContext = createContext<ReturnType<typeof createSelectionStateContext> | null>(
+  null,
+);
 
 export const SelectionStateProvider: Component<ParentProps> = (props) => {
-  const value = createMemo(() => createSelectionStateContext());
+  const value = createSelectionStateContext();
 
   return (
     <SelectionStateContext.Provider value={value}>{props.children}</SelectionStateContext.Provider>
@@ -37,10 +32,14 @@ export const SelectionStateProvider: Component<ParentProps> = (props) => {
 };
 
 export const useSelectionStateContext = () => {
-  return useContext(SelectionStateContext);
+  const context = useContext(SelectionStateContext);
+  if (!context) {
+    throw new Error("SelectionStateContext is not defined");
+  }
+  return context;
 };
 
 export const useIsSelected = (elementId: Accessor<string>) => {
-  const context = useSelectionStateContext();
-  return createMemo(() => context().selection()?.id === elementId());
+  const [selection] = useSelectionStateContext();
+  return createMemo(() => selection()?.id === elementId());
 };

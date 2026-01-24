@@ -19,13 +19,14 @@ import { ToolContainer } from "./tool-container";
 export const ToolsBar: Component = () => {
   const { t } = useI18n();
 
-  const toolsState = useToolsStateContext();
   const boardModel = useBoardModelContext();
-  const selectionState = useSelectionStateContext();
+
+  const [toolsState, { onToolChage }] = useToolsStateContext();
+  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
   const onToolClickFactory = (tool: ToolType) => () => {
-    toolsState().setTool(tool);
-    selectionState().setSelection(null);
+    onToolChage(tool);
+    onSelectionChange(null);
   };
 
   return (
@@ -37,7 +38,7 @@ export const ToolsBar: Component = () => {
             onClick={onToolClickFactory("pane")}
             shape="circle"
             size="sm"
-            color={toolsState().tool() === "pane" ? "primary" : undefined}
+            color={toolsState() === "pane" ? "primary" : undefined}
           >
             <HandIcon class="size-5" />
           </Button>
@@ -48,7 +49,7 @@ export const ToolsBar: Component = () => {
             onClick={onToolClickFactory("create-task")}
             shape="circle"
             size="sm"
-            color={toolsState().tool() === "create-task" ? "primary" : undefined}
+            color={toolsState() === "create-task" ? "primary" : undefined}
           >
             <SquareIcon class="size-5" />
           </Button>
@@ -68,12 +69,13 @@ const DeleteSelectedElementDialog: Component = () => {
   const dialogId = createUniqueId();
 
   const edgesData = useEdgesDataContext();
-  const selectionState = useSelectionStateContext();
+
+  const [selectionState] = useSelectionStateContext();
 
   const onConfirmClick = () => {
     closeDialog(dialogId);
 
-    const selection = selectionState().selection();
+    const selection = selectionState();
 
     if (!selection) {
       return;
@@ -95,7 +97,7 @@ const DeleteSelectedElementDialog: Component = () => {
           for={dialogId}
           shape="circle"
           size="sm"
-          disabled={!selectionState().selection()}
+          disabled={!selectionState()}
         >
           <TrashIcon class="size-5" />
         </DialogTrigger>

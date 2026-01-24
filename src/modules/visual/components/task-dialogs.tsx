@@ -52,8 +52,9 @@ export const InsertTaskDialog: Component = () => {
 
   const boardId = useBoardId();
   const axisConfig = useAxisConfigContext();
-  const toolsState = useToolsStateContext();
-  const selectionState = useSelectionStateContext();
+
+  const [toolsState, { onToolChage }] = useToolsStateContext();
+  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
   const dialogId = createUniqueId();
   const formId = createUniqueId();
@@ -92,12 +93,12 @@ export const InsertTaskDialog: Component = () => {
     closeDialog(dialogId);
     formRef()?.reset();
 
-    toolsState().setTool("pane");
-    selectionState().setSelection({ id: taskId, kind: "task" });
+    onToolChage("pane");
+    onSelectionChange({ id: taskId, kind: "task" });
   };
 
   createEffect(() => {
-    const isCreateTask = toolsState().tool() === "create-task";
+    const isCreateTask = toolsState() === "create-task";
 
     if (!isCreateTask) {
       return;

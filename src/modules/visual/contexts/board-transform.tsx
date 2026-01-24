@@ -66,8 +66,6 @@ const createBoardTransformContext = () => {
     get transform() {
       return transform();
     },
-    translateX,
-    translateY,
     zoomIn,
     zoomOut,
   };

@@ -49,7 +49,7 @@ type CreateDragArgs = {
 
 export const useDrag = (args: CreateDragArgs) => {
   const dragContext = useDragStateContext();
-  const toolsState = useToolsStateContext();
+  const [toolsState] = useToolsStateContext();
 
   const onDragStarted = (event: DragEvent) => {
     dragContext().onDragStart();
@@ -69,7 +69,7 @@ export const useDrag = (args: CreateDragArgs) => {
     const refValue = args.ref();
     const toolsStateValue = toolsState();
 
-    if (!refValue || toolsStateValue.tool() !== "pane") {
+    if (!refValue || toolsStateValue !== "pane") {
       return;
     }
 

@@ -112,11 +112,12 @@ const SelectableGroup: Component = () => {
 
 const BackgroundRect: Component = () => {
   const [rectRef, setRectRef] = createSignal<SVGElement>();
-  const selectionState = useSelectionStateContext();
+
+  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
   createD3ClickListener({
     onClick() {
-      selectionState().setSelection(null);
+      onSelectionChange(null);
     },
     ref: rectRef,
   });
