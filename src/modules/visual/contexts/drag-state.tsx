@@ -2,7 +2,6 @@ import * as d3 from "d3";
 import {
   createContext,
   createEffect,
-  createMemo,
   createSignal,
   onCleanup,
   useContext,
@@ -23,19 +22,21 @@ const createDragStateContext = () => {
     setIsDragging(false);
   };
 
-  return { isDragging, onDragEnd, onDragStart };
+  return [isDragging, { onDragEnd, onDragStart }] as const;
 };
 
-const DragStateContext = createContext<Accessor<ReturnType<typeof createDragStateContext>>>(() => {
-  throw new Error("DragContext not defined");
-});
+const DragStateContext = createContext<ReturnType<typeof createDragStateContext> | null>(null);
 
 export const useDragStateContext = () => {
-  return useContext(DragStateContext);
+  const context = useContext(DragStateContext);
+  if (!context) {
+    throw new Error("DragContext not defined");
+  }
+  return context;
 };
 
 export const DragStateProvider: Component<ParentProps> = (props) => {
-  const value = createMemo(() => createDragStateContext());
+  const value = createDragStateContext();
 
   return <DragStateContext.Provider value={value}>{props.children}</DragStateContext.Provider>;
 };
@@ -48,11 +49,11 @@ type CreateDragArgs = {
 };
 
 export const useDrag = (args: CreateDragArgs) => {
-  const dragContext = useDragStateContext();
+  const [_isDragging, { onDragEnd, onDragStart }] = useDragStateContext();
   const [toolsState] = useToolsStateContext();
 
   const onDragStarted = (event: DragEvent) => {
-    dragContext().onDragStart();
+    onDragStart();
     args.onDragStarted?.(event);
   };
 
@@ -61,7 +62,7 @@ export const useDrag = (args: CreateDragArgs) => {
   };
 
   const onDragEnded = (event: DragEvent) => {
-    dragContext().onDragEnd();
+    onDragEnd();
     args.onDragEnded?.(event);
   };
 

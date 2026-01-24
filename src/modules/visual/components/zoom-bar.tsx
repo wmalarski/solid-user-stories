@@ -14,18 +14,18 @@ const center = () => {
 export const ZoomBar: Component = () => {
   const { t } = useI18n();
 
-  const transform = useBoardTransformContext();
+  const [transform, { reset, zoomIn, zoomOut }] = useBoardTransformContext();
 
   const onZoomInClick = () => {
-    transform().zoomIn(center());
+    zoomIn(center());
   };
 
   const onZoomOutClick = () => {
-    transform().zoomOut(center());
+    zoomOut(center());
   };
 
   const onZoomResetClick = () => {
-    transform().reset();
+    reset();
   };
 
   return (
@@ -50,7 +50,7 @@ export const ZoomBar: Component = () => {
           size="sm"
           variant="ghost"
         >
-          {Math.round(transform().transform.k * 100)}%
+          {Math.round(transform().k * 100)}%
         </Button>
       </Tooltip>
       <Tooltip data-tip={t("board.zoom.zoomOut")}>

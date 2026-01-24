@@ -1,11 +1,9 @@
 import * as d3 from "d3";
 import {
-  type Accessor,
   type Component,
   type ParentProps,
   createContext,
   createEffect,
-  createMemo,
   createSignal,
   onCleanup,
   useContext,
@@ -60,15 +58,16 @@ const createBoardTransformContext = () => {
     plugin.scaleTo(selection(), state.k / SCALE_BY, [point.x, point.y]);
   };
 
-  return {
-    plugin,
-    reset,
-    get transform() {
-      return transform();
-    },
-    zoomIn,
-    zoomOut,
-  };
+  createEffect(() => {
+    // oxlint-disable-next-line no-explicit-any
+    d3.select(SVG_SELECTOR).call(plugin as any);
+
+    onCleanup(() => {
+      d3.select(SVG_SELECTOR).on(".zoom", null);
+    });
+  });
+
+  return [transform, { reset, zoomIn, zoomOut }] as const;
 };
 
 export const translateX = (transform: Transform, x: number) => {
@@ -79,23 +78,12 @@ export const translateY = (transform: Transform, y: number) => {
   return y * transform.k + transform.y;
 };
 
-const BoardTransformContext = createContext<
-  Accessor<ReturnType<typeof createBoardTransformContext>>
->(() => {
-  throw new Error("BoardTransformContext is not defined");
-});
+const BoardTransformContext = createContext<ReturnType<typeof createBoardTransformContext> | null>(
+  null,
+);
 
 export const BoardTransformProvider: Component<ParentProps> = (props) => {
-  const value = createMemo(() => createBoardTransformContext());
-
-  createEffect(() => {
-    // oxlint-disable-next-line no-explicit-any
-    d3.select(SVG_SELECTOR).call(value().plugin as any);
-
-    onCleanup(() => {
-      d3.select(SVG_SELECTOR).on(".zoom", null);
-    });
-  });
+  const value = createBoardTransformContext();
 
   return (
     <BoardTransformContext.Provider value={value}>{props.children}</BoardTransformContext.Provider>
@@ -103,5 +91,11 @@ export const BoardTransformProvider: Component<ParentProps> = (props) => {
 };
 
 export const useBoardTransformContext = () => {
-  return useContext(BoardTransformContext);
+  const context = useContext(BoardTransformContext);
+
+  if (!context) {
+    throw new Error("BoardTransformContext is not defined");
+  }
+
+  return context;
 };

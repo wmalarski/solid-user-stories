@@ -9,7 +9,7 @@ import {
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 
 const createBoardModelContext = (board: BoardModel) => {
-  return { board };
+  return board;
 };
 
 const BoardModelContext = createContext<Accessor<ReturnType<typeof createBoardModelContext>>>(
@@ -24,7 +24,7 @@ export const useBoardModelContext = () => {
 
 export const useBoardId = () => {
   const context = useBoardModelContext();
-  return createMemo(() => context().board.id);
+  return createMemo(() => context().id);
 };
 
 type BoardModelProviderProps = ParentProps<{

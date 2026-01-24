@@ -91,16 +91,16 @@ const BoardContent: Component = () => {
 };
 
 const SelectableGroup: Component = () => {
-  const boardTransformContext = useBoardTransformContext();
-
   const tasksData = useTasksDataContext();
   const edgesData = useEdgesDataContext();
-  const dragState = useDragStateContext();
+
+  const [isDragging] = useDragStateContext();
+  const [transform] = useBoardTransformContext();
 
   return (
-    <g cursor={dragState().isDragging() ? "grabbing" : "grab"}>
+    <g cursor={isDragging() ? "grabbing" : "grab"}>
       <AxisGridPaths />
-      <g transform={boardTransformContext().transform as unknown as string}>
+      <g transform={transform() as unknown as string}>
         <For each={edgesData().entries}>
           {(entry) => <EdgePath edge={entry.edge} source={entry.source} target={entry.target} />}
         </For>

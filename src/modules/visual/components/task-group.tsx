@@ -125,7 +125,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
 
   const tasksData = useTasksDataContext();
   const edgesData = useEdgesDataContext();
-  const boardTransform = useBoardTransformContext();
+  const [transform] = useBoardTransformContext();
 
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
   const [_edgeDragState, { onDrag, onDragEnd, onDragStart }] = useEdgeDragStateContext();
@@ -179,17 +179,17 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
       onSelectionChange({ id: edgeId, kind: "edge" });
     },
     onDragStarted() {
-      const transform = boardTransform().transform;
+      const transformValue = transform();
       onDragStart({
-        x: translateX(transform, props.x + xShift() + TASK_HANDLE_SIZE_HALF),
-        y: translateY(transform, props.y + TASK_RECT_HEIGHT_HALF),
+        x: translateX(transformValue, props.x + xShift() + TASK_HANDLE_SIZE_HALF),
+        y: translateY(transformValue, props.y + TASK_RECT_HEIGHT_HALF),
       });
     },
     onDragged(event) {
-      const transform = boardTransform().transform;
+      const transformValue = transform();
       onDrag({
-        x: translateX(transform, event.x),
-        y: translateY(transform, event.y),
+        x: translateX(transformValue, event.x),
+        y: translateY(transformValue, event.y),
       });
     },
     ref: rectRef,

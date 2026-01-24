@@ -21,7 +21,7 @@ const createAxisConfigContext = (boardId: string) => {
     q.from({ axis: axisCollection }).where(({ axis }) => eq(axis.boardId, boardId)),
   );
 
-  const config = createMemo(() => getAxisValues(entries(), boardModel().board));
+  const config = createMemo(() => getAxisValues(entries(), boardModel()));
 
   return {
     get config() {

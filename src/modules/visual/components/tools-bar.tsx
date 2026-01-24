@@ -56,7 +56,7 @@ export const ToolsBar: Component = () => {
         </Tooltip>
         <DeleteSelectedElementDialog />
         <Tooltip data-tip={t("board.forms.update")} placement="top">
-          <UpdateBoardDialog board={boardModel().board} />
+          <UpdateBoardDialog board={boardModel()} />
         </Tooltip>
       </ToolContainer>
     </div>

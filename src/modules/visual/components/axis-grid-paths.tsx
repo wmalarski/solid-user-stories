@@ -34,17 +34,17 @@ export const AxisGridPaths: Component = () => {
 };
 
 const HorizontalZeroPath: Component = () => {
-  const boardTransform = useBoardTransformContext();
+  const [transform] = useBoardTransformContext();
 
-  const y = createMemo(() => translateY(boardTransform().transform, AXIS_Y_OFFSET));
+  const y = createMemo(() => translateY(transform(), AXIS_Y_OFFSET));
 
   return <line {...sharedLineProps} x1={0} x2="100%" y1={y()} y2={y()} />;
 };
 
 const VerticalZeroPath: Component = () => {
-  const boardTransform = useBoardTransformContext();
+  const [transform] = useBoardTransformContext();
 
-  const x = createMemo(() => translateX(boardTransform().transform, AXIS_X_OFFSET));
+  const x = createMemo(() => translateX(transform(), AXIS_X_OFFSET));
 
   return <line y1={0} y2="100%" x1={x()} x2={x()} {...sharedLineProps} />;
 };
@@ -56,11 +56,9 @@ type HorizontalPathProps = {
 const HorizontalPath: Component<HorizontalPathProps> = (props) => {
   const tasksData = useTasksDataContext();
 
-  const boardTransform = useBoardTransformContext();
+  const [transform] = useBoardTransformContext();
 
-  const transformed = createMemo(() =>
-    translateY(boardTransform().transform, props.config.end + AXIS_Y_OFFSET),
-  );
+  const transformed = createMemo(() => translateY(transform(), props.config.end + AXIS_Y_OFFSET));
 
   const [ref, setRef] = createSignal<SVGCircleElement>();
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
@@ -87,8 +85,8 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       setDraggedTasks(draggedTasks);
     },
     onDragged(event) {
-      const transform = boardTransform().transform;
-      const updatedY = (event.y - transform.y) / transform.k - AXIS_Y_OFFSET;
+      const transformValue = transform();
+      const updatedY = (event.y - transformValue.y) / transformValue.k - AXIS_Y_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
       const size = withLimit - props.config.start;
 
@@ -134,11 +132,9 @@ type VerticalPathProps = {
 const VerticalPath: Component<VerticalPathProps> = (props) => {
   const tasksData = useTasksDataContext();
 
-  const boardTransform = useBoardTransformContext();
+  const [transform] = useBoardTransformContext();
 
-  const transformed = createMemo(() =>
-    translateX(boardTransform().transform, props.config.end + AXIS_X_OFFSET),
-  );
+  const transformed = createMemo(() => translateX(transform(), props.config.end + AXIS_X_OFFSET));
 
   const [ref, setRef] = createSignal<SVGElement>();
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
@@ -165,8 +161,8 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       setDraggedTasks(draggedTasks);
     },
     onDragged(event) {
-      const transform = boardTransform().transform;
-      const updatedX = (event.x - transform.x) / transform.k - AXIS_X_OFFSET;
+      const transformValue = transform();
+      const updatedX = (event.x - transformValue.x) / transformValue.k - AXIS_X_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
       const size = withLimit - props.config.start;
 

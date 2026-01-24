@@ -67,13 +67,11 @@ type HorizontalItemRectProps = {
 };
 
 const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
-  const boardTransform = useBoardTransformContext();
+  const [transform] = useBoardTransformContext();
 
-  const transformed = createMemo(() =>
-    translateX(boardTransform().transform, props.config.start + AXIS_X_OFFSET),
-  );
+  const transformed = createMemo(() => translateX(transform(), props.config.start + AXIS_X_OFFSET));
 
-  const width = createMemo(() => props.config.axis.size * boardTransform().transform.k);
+  const width = createMemo(() => props.config.axis.size * transform().k);
 
   return (
     <>
@@ -90,13 +88,11 @@ type VerticalItemRectProps = {
 };
 
 const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
-  const boardTransform = useBoardTransformContext();
+  const [transform] = useBoardTransformContext();
 
-  const transformed = createMemo(() =>
-    translateY(boardTransform().transform, props.config.start + AXIS_Y_OFFSET),
-  );
+  const transformed = createMemo(() => translateY(transform(), props.config.start + AXIS_Y_OFFSET));
 
-  const height = createMemo(() => props.config.axis.size * boardTransform().transform.k);
+  const height = createMemo(() => props.config.axis.size * transform().k);
 
   return (
     <>
@@ -161,8 +157,8 @@ const CenterRect: Component = () => {
     <>
       <foreignObject x={0} y={0} width={AXIS_X_OFFSET} height={AXIS_Y_OFFSET}>
         <div class="grid grid-cols-1 grid-rows-[auto_1fr] p-1 bg-base-300 text-base-content w-full h-full">
-          <span class="font-semibold truncate">{boardModel().board.title}</span>
-          <span class="text-sm line-clamp-2 opacity-80">{boardModel().board.description}</span>
+          <span class="font-semibold truncate">{boardModel().title}</span>
+          <span class="text-sm line-clamp-2 opacity-80">{boardModel().description}</span>
         </div>
       </foreignObject>
     </>
