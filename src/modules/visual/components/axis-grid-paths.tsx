@@ -27,8 +27,8 @@ export const AxisGridPaths: Component = () => {
 
   return (
     <>
-      <Index each={axisConfig().config.y}>{(entry) => <HorizontalPath config={entry()} />}</Index>
-      <Index each={axisConfig().config.x}>{(entry) => <VerticalPath config={entry()} />}</Index>
+      <Index each={axisConfig().y}>{(entry) => <HorizontalPath config={entry()} />}</Index>
+      <Index each={axisConfig().x}>{(entry) => <VerticalPath config={entry()} />}</Index>
     </>
   );
 };

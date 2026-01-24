@@ -1,11 +1,4 @@
-import {
-  type Accessor,
-  type Component,
-  type ParentProps,
-  createContext,
-  createMemo,
-  useContext,
-} from "solid-js";
+import { type Component, type ParentProps, createContext, createMemo, useContext } from "solid-js";
 import type { AxisModel, BoardModel } from "~/integrations/tanstack-db/schema";
 
 import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
@@ -14,28 +7,19 @@ import { useBoardStateContext } from "./board-state";
 
 const createAxisConfigContext = () => {
   const boardState = useBoardStateContext();
-
-  const config = createMemo(() => getAxisValues(boardState.sections(), boardState.board()));
-
-  return {
-    get config() {
-      return config();
-    },
-  };
+  return createMemo(() => getAxisValues(boardState.sections(), boardState.board()));
 };
 
-const AxisConfigContext = createContext<Accessor<ReturnType<typeof createAxisConfigContext>>>(
-  () => {
-    throw new Error("AxisConfigContext not defined");
-  },
-);
+const AxisConfigContext = createContext<ReturnType<typeof createAxisConfigContext>>(() => {
+  throw new Error("AxisConfigContext not defined");
+});
 
 export const useAxisConfigContext = () => {
   return useContext(AxisConfigContext);
 };
 
 export const AxisConfigProvider: Component<ParentProps> = (props) => {
-  const value = createMemo(() => createAxisConfigContext());
+  const value = createAxisConfigContext();
 
   return <AxisConfigContext.Provider value={value}>{props.children}</AxisConfigContext.Provider>;
 };
@@ -107,5 +91,5 @@ export const mapToAxis = (config: ReturnType<typeof getAxisValues>, point: Point
   return { axisX: axisX?.axis.id ?? null, axisY: axisY?.axis.id ?? null };
 };
 
-export type AxisConfigContext = ReturnType<typeof createAxisConfigContext>["config"];
+export type AxisConfigContext = ReturnType<ReturnType<typeof createAxisConfigContext>>;
 export type AxisConfig = ReturnType<typeof getAxisValues>["x"][0];

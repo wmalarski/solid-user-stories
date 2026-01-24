@@ -45,7 +45,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       const updatedX = event.x + shiftX();
       const updatedY = event.y + shiftY();
 
-      const axis = mapToAxis(axisConfig().config, { x: updatedX, y: updatedY });
+      const axis = mapToAxis(axisConfig(), { x: updatedX, y: updatedY });
 
       taskCollection.update(props.task.id, (draft) => {
         draft.positionX = updatedX;

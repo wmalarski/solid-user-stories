@@ -79,10 +79,10 @@ const shiftVerticalTasks = ({ shift, tasks, position }: ShiftTasksArgs) => {
 export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
+  const boardId = useBoardId();
   const boardState = useBoardStateContext();
   const axisConfig = useAxisConfigContext();
 
-  const boardId = useBoardId();
   const formId = createUniqueId();
   const dialogId = createUniqueId();
 
@@ -114,7 +114,7 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
       return;
     }
 
-    const axisConfigValue = axisConfig().config;
+    const axisConfigValue = axisConfig();
     const tasks = boardState.tasks();
 
     const shift = 500;

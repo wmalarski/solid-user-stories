@@ -10,17 +10,17 @@ import { DeleteAxisDialog, InsertAxisDialog, UpdateAxisDialog } from "./axis-dia
 export const AxisGroup: Component = () => {
   const axisConfig = useAxisConfigContext();
 
-  const xLength = createMemo(() => axisConfig().config.x.length);
-  const yLength = createMemo(() => axisConfig().config.y.length);
+  const xLength = createMemo(() => axisConfig().x.length);
+  const yLength = createMemo(() => axisConfig().y.length);
 
   return (
     <>
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
-      <Index each={axisConfig().config.x}>
+      <Index each={axisConfig().x}>
         {(entry) => <HorizontalItemRect totalLength={xLength()} config={entry()} />}
       </Index>
-      <Index each={axisConfig().config.y}>
+      <Index each={axisConfig().y}>
         {(entry) => <VerticalItemRect totalLength={yLength()} config={entry()} />}
       </Index>
       <CenterRect />

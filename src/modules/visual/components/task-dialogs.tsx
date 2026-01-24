@@ -74,7 +74,7 @@ export const InsertTaskDialog: Component = () => {
     }
 
     const taskId = createId();
-    const axis = mapToAxis(axisConfig().config, positionValue);
+    const axis = mapToAxis(axisConfig(), positionValue);
 
     taskCollection.insert({
       axisX: axis.axisX,
