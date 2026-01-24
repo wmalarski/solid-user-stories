@@ -29,8 +29,7 @@ import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { useAxisConfigContext, type AxisConfigContext } from "../contexts/axis-config";
-import { useBoardId } from "../contexts/board-model";
-import { useTasksDataContext } from "../contexts/tasks-data";
+import { useBoardId, useBoardStateContext } from "../contexts/board-state";
 
 const AxisFieldsSchema = v.object({
   name: v.string(),
@@ -80,7 +79,7 @@ const shiftVerticalTasks = ({ shift, tasks, position }: ShiftTasksArgs) => {
 export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
-  const tasksData = useTasksDataContext();
+  const boardState = useBoardStateContext();
   const axisConfig = useAxisConfigContext();
 
   const boardId = useBoardId();
@@ -116,7 +115,7 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
     }
 
     const axisConfigValue = axisConfig().config;
-    const tasks = tasksData().entries;
+    const tasks = boardState.tasks();
 
     const shift = 500;
     const axisId = createId();
@@ -260,7 +259,7 @@ export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
   const { t } = useI18n();
 
   const boardId = useBoardId();
-  const tasksData = useTasksDataContext();
+  const boardState = useBoardStateContext();
 
   const dialogId = createUniqueId();
 
@@ -271,7 +270,7 @@ export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
     const shift = -props.axis.size;
     const orientation = props.axis.orientation;
     const endPosition = props.endPosition;
-    const tasks = tasksData().entries;
+    const tasks = boardState.tasks();
 
     boardsCollection.update(boardId(), (draft) => {
       draft.axisXOrder = draft.axisXOrder.filter((id) => id !== axisId);

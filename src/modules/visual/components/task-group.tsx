@@ -5,12 +5,10 @@ import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { Badge } from "~/ui/badge/badge";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
-import { useBoardId } from "../contexts/board-model";
+import { useBoardId, useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
-import { useEdgesDataContext } from "../contexts/edges-data";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
-import { useTasksDataContext } from "../contexts/tasks-data";
 import {
   TASK_HANDLE_SIZE,
   TASK_HANDLE_SIZE_HALF,
@@ -123,8 +121,7 @@ type TaskHandleProps = {
 const TaskHandle: Component<TaskHandleProps> = (props) => {
   const boardId = useBoardId();
 
-  const tasksData = useTasksDataContext();
-  const edgesData = useEdgesDataContext();
+  const boardState = useBoardStateContext();
   const [transform] = useBoardTransformContext();
 
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
@@ -140,13 +137,15 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
     onDragEnded(event) {
       onDragEnd();
 
-      const task = tasksData().entries.find(
-        (task) =>
-          task.positionX < event.x &&
-          event.x < task.positionX + TASK_RECT_WIDTH &&
-          task.positionY < event.y &&
-          event.y < task.positionY + TASK_RECT_HEIGHT,
-      );
+      const task = boardState
+        .tasks()
+        .find(
+          (task) =>
+            task.positionX < event.x &&
+            event.x < task.positionX + TASK_RECT_WIDTH &&
+            task.positionY < event.y &&
+            event.y < task.positionY + TASK_RECT_HEIGHT,
+        );
 
       if (!task || task.id === props.taskId) {
         return;
@@ -155,11 +154,13 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
       const source = props.kind === "source" ? props.taskId : task.id;
       const target = props.kind === "source" ? task.id : props.taskId;
 
-      const hasTheSameConnection = edgesData().entries.some(
-        (entry) =>
-          (entry.edge.source === source && entry.edge.target === target) ||
-          (entry.edge.source === target && entry.edge.target === source),
-      );
+      const hasTheSameConnection = boardState
+        .edges()
+        .some(
+          (entry) =>
+            (entry.edge.source === source && entry.edge.target === target) ||
+            (entry.edge.source === target && entry.edge.target === source),
+        );
 
       if (hasTheSameConnection) {
         return;

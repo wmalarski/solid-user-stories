@@ -32,8 +32,7 @@ import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
-import { useBoardId } from "../contexts/board-model";
-import { getEdgesByTask, useEdgesDataContext } from "../contexts/edges-data";
+import { getEdgesByTask, useBoardId, useBoardStateContext } from "../contexts/board-state";
 import { useSelectionStateContext } from "../contexts/selection-state";
 import { useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
@@ -277,12 +276,12 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
 
   const dialogId = createUniqueId();
 
-  const edgesData = useEdgesDataContext();
+  const boardState = useBoardStateContext();
 
   const onConfirmClick = () => {
     closeDialog(dialogId);
 
-    const edges = getEdgesByTask(edgesData(), props.task.id);
+    const edges = getEdgesByTask(boardState.edges(), props.task.id);
     deleteTaskWithDependencies(props.task.id, edges);
   };
 

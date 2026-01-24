@@ -1,4 +1,3 @@
-import { eq, useLiveQuery } from "@tanstack/solid-db";
 import {
   type Accessor,
   type Component,
@@ -7,21 +6,16 @@ import {
   createMemo,
   useContext,
 } from "solid-js";
-import { axisCollection } from "~/integrations/tanstack-db/collections";
 import type { AxisModel, BoardModel } from "~/integrations/tanstack-db/schema";
 
 import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
 import type { Point2D } from "../utils/types";
-import { useBoardId, useBoardModelContext } from "./board-model";
+import { useBoardStateContext } from "./board-state";
 
-const createAxisConfigContext = (boardId: string) => {
-  const boardModel = useBoardModelContext();
+const createAxisConfigContext = () => {
+  const boardState = useBoardStateContext();
 
-  const entries = useLiveQuery((q) =>
-    q.from({ axis: axisCollection }).where(({ axis }) => eq(axis.boardId, boardId)),
-  );
-
-  const config = createMemo(() => getAxisValues(entries(), boardModel()));
+  const config = createMemo(() => getAxisValues(boardState.sections(), boardState.board()));
 
   return {
     get config() {
@@ -41,9 +35,7 @@ export const useAxisConfigContext = () => {
 };
 
 export const AxisConfigProvider: Component<ParentProps> = (props) => {
-  const boardId = useBoardId();
-
-  const value = createMemo(() => createAxisConfigContext(boardId()));
+  const value = createMemo(() => createAxisConfigContext());
 
   return <AxisConfigContext.Provider value={value}>{props.children}</AxisConfigContext.Provider>;
 };

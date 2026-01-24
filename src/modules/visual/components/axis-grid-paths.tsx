@@ -1,8 +1,8 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
 import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
+import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { useTasksDataContext } from "../contexts/tasks-data";
 import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
 
@@ -54,7 +54,7 @@ type HorizontalPathProps = {
 };
 
 const HorizontalPath: Component<HorizontalPathProps> = (props) => {
-  const tasksData = useTasksDataContext();
+  const boardState = useBoardStateContext();
 
   const [transform] = useBoardTransformContext();
 
@@ -69,7 +69,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
     onDragStarted() {
       let maxNotDraggedPosition = 0;
       const draggedTasks = new Map<string, number>();
-      for (const entry of tasksData().entries) {
+      for (const entry of boardState.tasks()) {
         if (entry.positionY > props.config.end + AXIS_Y_OFFSET) {
           draggedTasks.set(entry.id, entry.positionY);
         } else {
@@ -130,7 +130,7 @@ type VerticalPathProps = {
 };
 
 const VerticalPath: Component<VerticalPathProps> = (props) => {
-  const tasksData = useTasksDataContext();
+  const boardState = useBoardStateContext();
 
   const [transform] = useBoardTransformContext();
 
@@ -145,7 +145,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
     onDragStarted() {
       let maxNotDraggedPosition = 0;
       const draggedTasks = new Map<string, number>();
-      for (const entry of tasksData().entries) {
+      for (const entry of boardState.tasks()) {
         if (entry.positionX > props.config.end + AXIS_X_OFFSET) {
           draggedTasks.set(entry.id, entry.positionX);
         } else {

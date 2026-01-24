@@ -2,9 +2,8 @@ import { createMemo, Index, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { Badge } from "~/ui/badge/badge";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
-import { useBoardModelContext } from "../contexts/board-model";
+import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { useTasksDataContext } from "../contexts/tasks-data";
 import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
 import { DeleteAxisDialog, InsertAxisDialog, UpdateAxisDialog } from "./axis-dialogs";
 
@@ -109,7 +108,7 @@ type AxisItemContentProps = {
 };
 
 const AxisItemContent: Component<AxisItemContentProps> = (props) => {
-  const tasksData = useTasksDataContext();
+  const boardState = useBoardStateContext();
 
   const isVertical = createMemo(() => {
     return props.config.axis.orientation === "vertical";
@@ -118,9 +117,9 @@ const AxisItemContent: Component<AxisItemContentProps> = (props) => {
   const tasks = createMemo(() => {
     const isVerticalValue = isVertical();
     const axisId = props.config.axis.id;
-    return tasksData().entries.filter((entry) =>
-      isVerticalValue ? entry.axisY === axisId : entry.axisX === axisId,
-    );
+    return boardState
+      .tasks()
+      .filter((entry) => (isVerticalValue ? entry.axisY === axisId : entry.axisX === axisId));
   });
 
   const esitmationSum = createMemo(() => {
@@ -151,14 +150,14 @@ const AxisItemContent: Component<AxisItemContentProps> = (props) => {
 };
 
 const CenterRect: Component = () => {
-  const boardModel = useBoardModelContext();
+  const boardState = useBoardStateContext();
 
   return (
     <>
       <foreignObject x={0} y={0} width={AXIS_X_OFFSET} height={AXIS_Y_OFFSET}>
         <div class="grid grid-cols-1 grid-rows-[auto_1fr] p-1 bg-base-300 text-base-content w-full h-full">
-          <span class="font-semibold truncate">{boardModel().title}</span>
-          <span class="text-sm line-clamp-2 opacity-80">{boardModel().description}</span>
+          <span class="font-semibold truncate">{boardState.board().title}</span>
+          <span class="text-sm line-clamp-2 opacity-80">{boardState.board().description}</span>
         </div>
       </foreignObject>
     </>

@@ -5,13 +5,11 @@ import { cx } from "tailwind-variants";
 import { boardsCollection } from "~/integrations/tanstack-db/collections";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AxisConfigProvider } from "../contexts/axis-config";
-import { BoardModelProvider } from "../contexts/board-model";
+import { BoardStateProvider, useBoardStateContext } from "../contexts/board-state";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgeDragStateProvider } from "../contexts/edge-drag-state";
-import { EdgesDataProvider, useEdgesDataContext } from "../contexts/edges-data";
 import { SelectionStateProvider, useSelectionStateContext } from "../contexts/selection-state";
-import { TasksDataProvider, useTasksDataContext } from "../contexts/tasks-data";
 import { ToolsStateProvider } from "../contexts/tools-state";
 import { SVG_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
@@ -49,25 +47,21 @@ type VisualPanelProps = {
 
 export const VisualPanel: Component<VisualPanelProps> = (props) => {
   return (
-    <BoardModelProvider board={props.board}>
-      <TasksDataProvider>
-        <EdgesDataProvider>
-          <AxisConfigProvider>
-            <ToolsStateProvider>
-              <DragStateProvider>
-                <SelectionStateProvider>
-                  <BoardTransformProvider>
-                    <EdgeDragStateProvider>
-                      <BoardContent />
-                    </EdgeDragStateProvider>
-                  </BoardTransformProvider>
-                </SelectionStateProvider>
-              </DragStateProvider>
-            </ToolsStateProvider>
-          </AxisConfigProvider>
-        </EdgesDataProvider>
-      </TasksDataProvider>
-    </BoardModelProvider>
+    <BoardStateProvider board={props.board}>
+      <AxisConfigProvider>
+        <ToolsStateProvider>
+          <DragStateProvider>
+            <SelectionStateProvider>
+              <BoardTransformProvider>
+                <EdgeDragStateProvider>
+                  <BoardContent />
+                </EdgeDragStateProvider>
+              </BoardTransformProvider>
+            </SelectionStateProvider>
+          </DragStateProvider>
+        </ToolsStateProvider>
+      </AxisConfigProvider>
+    </BoardStateProvider>
   );
 };
 
@@ -90,8 +84,7 @@ const BoardContent: Component = () => {
 };
 
 const SelectableGroup: Component = () => {
-  const tasksData = useTasksDataContext();
-  const edgesData = useEdgesDataContext();
+  const boardState = useBoardStateContext();
 
   const [isDragging] = useDragStateContext();
   const [transform] = useBoardTransformContext();
@@ -100,10 +93,10 @@ const SelectableGroup: Component = () => {
     <g cursor={isDragging() ? "grabbing" : "grab"}>
       <AxisGridPaths />
       <g transform={transform() as unknown as string}>
-        <For each={edgesData().entries}>
+        <For each={boardState.edges()}>
           {(entry) => <EdgePath edge={entry.edge} source={entry.source} target={entry.target} />}
         </For>
-        <For each={tasksData().entries}>{(task) => <TaskGroup task={task} />}</For>
+        <For each={boardState.tasks()}>{(task) => <TaskGroup task={task} />}</For>
       </g>
     </g>
   );

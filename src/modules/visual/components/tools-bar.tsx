@@ -13,16 +13,15 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Tooltip } from "~/ui/tooltip/tooltip";
-import { useBoardModelContext } from "../contexts/board-model";
+import { getEdgesByTask, useBoardStateContext } from "../contexts/board-state";
 import { useBoardTransformContext } from "../contexts/board-transform";
-import { getEdgesByTask, useEdgesDataContext } from "../contexts/edges-data";
 import { useSelectionStateContext } from "../contexts/selection-state";
 import { useToolsStateContext, type ToolType } from "../contexts/tools-state";
 
 export const ToolsBar: Component = () => {
   const { t } = useI18n();
 
-  const boardModel = useBoardModelContext();
+  const boardState = useBoardStateContext();
 
   const [toolsState, { onToolChage }] = useToolsStateContext();
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
@@ -59,7 +58,7 @@ export const ToolsBar: Component = () => {
         </Tooltip>
         <DeleteSelectedElementDialog />
         <Tooltip data-tip={t("board.forms.update")} placement="top">
-          <UpdateBoardDialog board={boardModel()} />
+          <UpdateBoardDialog board={boardState.board()} />
         </Tooltip>
       </ToolContainer>
     </div>
@@ -71,7 +70,7 @@ const DeleteSelectedElementDialog: Component = () => {
 
   const dialogId = createUniqueId();
 
-  const edgesData = useEdgesDataContext();
+  const boardState = useBoardStateContext();
 
   const [selectionState] = useSelectionStateContext();
 
@@ -85,7 +84,7 @@ const DeleteSelectedElementDialog: Component = () => {
     }
 
     if (selection.kind === "task") {
-      const edges = getEdgesByTask(edgesData(), selection.id);
+      const edges = getEdgesByTask(boardState.edges(), selection.id);
       deleteTaskWithDependencies(selection.id, edges);
     } else {
       edgeCollection.delete(selection.id);
