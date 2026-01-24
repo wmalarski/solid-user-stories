@@ -2,9 +2,9 @@ import { createMemo, createSignal, Index, type Component, type ComponentProps } 
 import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { useDrag } from "../contexts/drag-state";
 import { useTasksDataContext } from "../contexts/tasks-data";
 import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
+import { createD3DragElement } from "../utils/create-d3-drag-element";
 
 const sharedLineProps: ComponentProps<"line"> = {
   class: "stroke-base-content",
@@ -65,7 +65,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
   const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
   const [startPosition, setStartPosition] = createSignal<number>(0);
 
-  useDrag({
+  createD3DragElement({
     onDragStarted() {
       let maxNotDraggedPosition = 0;
       const draggedTasks = new Map<string, number>();
@@ -141,7 +141,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
   const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
   const [startPosition, setStartPosition] = createSignal<number>(0);
 
-  useDrag({
+  createD3DragElement({
     onDragStarted() {
       let maxNotDraggedPosition = 0;
       const draggedTasks = new Map<string, number>();

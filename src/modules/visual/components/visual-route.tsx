@@ -21,8 +21,7 @@ import { DraggedEdge } from "./dragged-edge";
 import { EdgePath } from "./edge-path";
 import { InsertTaskDialog } from "./task-dialogs";
 import { TaskGroup } from "./task-group";
-import { ToolsBar } from "./tools-bar";
-import { ZoomBar } from "./zoom-bar";
+import { ToolsBar, ZoomBar } from "./tools-bar";
 
 export const VisualRoute: Component = () => {
   const params = useParams();

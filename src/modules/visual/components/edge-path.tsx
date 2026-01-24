@@ -3,7 +3,6 @@ import { createMemo, createSignal, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { edgeCollection } from "~/integrations/tanstack-db/collections";
 import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
-import { useDrag } from "../contexts/drag-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import {
   EDGE_HANDLE_SIZE,
@@ -12,6 +11,7 @@ import {
   TASK_RECT_WIDTH,
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
+import { createD3DragElement } from "../utils/create-d3-drag-element";
 
 type EdgePathProps = {
   edge: EdgeModel;
@@ -94,7 +94,7 @@ type EdgeHandleProps = {
 const EdgeHandle: Component<EdgeHandleProps> = (props) => {
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
-  useDrag({
+  createD3DragElement({
     onDragged(event) {
       edgeCollection.update(props.edge.id, (draft) => {
         draft.breakX = event.x;

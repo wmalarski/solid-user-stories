@@ -7,7 +7,6 @@ import { Badge } from "~/ui/badge/badge";
 import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId } from "../contexts/board-model";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { useDrag } from "../contexts/drag-state";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
 import { useEdgesDataContext } from "../contexts/edges-data";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
@@ -20,6 +19,7 @@ import {
   TASK_RECT_HEIGHT_HALF,
   TASK_RECT_WIDTH,
 } from "../utils/constants";
+import { createD3DragElement } from "../utils/create-d3-drag-element";
 import { DeleteTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 
 type TaskGroupProps = {
@@ -37,7 +37,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const isSelected = useIsSelected(() => props.task.id);
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
-  useDrag({
+  createD3DragElement({
     onDragStarted(event) {
       onSelectionChange({ id: props.task.id, kind: "task" });
       setShiftX(props.task.positionX - event.x);
@@ -136,7 +136,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
     () => (props.kind === "source" ? TASK_RECT_WIDTH : 0) - TASK_HANDLE_SIZE_HALF,
   );
 
-  useDrag({
+  createD3DragElement({
     onDragEnded(event) {
       onDragEnd();
 
