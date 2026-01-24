@@ -74,6 +74,10 @@ const enDict = {
       "Solid User Stories app is a non-trivial local first demo application built using Solid Start.",
     title: "Solid User Stories",
   },
+  theme: {
+    setDark: "Set dark theme",
+    setLight: "Set light theme",
+  },
 };
 
 export type Locale = "en";

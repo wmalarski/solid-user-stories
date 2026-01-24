@@ -54,7 +54,7 @@ export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
         size="sm"
         for={dialogId}
       >
-        <SettingsIcon class="size-4" />
+        <SettingsIcon class="size-5" />
       </DialogTrigger>
       <Dialog id={dialogId}>
         <DialogBox>

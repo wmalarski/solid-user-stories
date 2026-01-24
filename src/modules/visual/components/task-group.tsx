@@ -67,7 +67,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         height={TASK_RECT_HEIGHT}
         filter="url(#task-shadow)"
         stroke-width={5}
-        class={cx("opacity-50", { "stroke-accent": isSelected() })}
+        class={cx("opacity-15", { "stroke-accent opacity-50": isSelected() })}
       />
       <foreignObject
         ref={setRectRef}

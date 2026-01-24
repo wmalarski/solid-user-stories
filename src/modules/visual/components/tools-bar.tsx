@@ -3,6 +3,7 @@ import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
 import { edgeCollection } from "~/integrations/tanstack-db/collections";
 import { deleteTaskWithDependencies } from "~/integrations/tanstack-db/utils";
+import { ThemeToggle } from "~/integrations/theme/theme-toggle";
 import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
@@ -60,6 +61,7 @@ export const ToolsBar: Component = () => {
         <Tooltip data-tip={t("board.forms.update")} placement="top">
           <UpdateBoardDialog board={boardState.board()} />
         </Tooltip>
+        <ThemeToggle />
       </ToolContainer>
     </div>
   );
