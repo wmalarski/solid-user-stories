@@ -29,3 +29,17 @@ export const ToolsStateProvider: Component<ParentProps> = (props) => {
 
   return <ToolsStateContext.Provider value={value}>{props.children}</ToolsStateContext.Provider>;
 };
+
+export const useDialogBoardToolUtils = () => {
+  const [_tool, { onToolChage }] = useToolsStateContext();
+
+  const onClick = () => {
+    onToolChage("selector");
+  };
+
+  const onClose = () => {
+    onToolChage("pane");
+  };
+
+  return { onClick, onClose };
+};

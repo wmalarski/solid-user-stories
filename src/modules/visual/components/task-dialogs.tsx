@@ -35,7 +35,7 @@ import { getEdgesByTask, useBoardId, useBoardStateContext } from "../contexts/bo
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useSelectionStateContext } from "../contexts/selection-state";
-import { useToolsStateContext } from "../contexts/tools-state";
+import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import type { Point2D } from "../utils/types";
@@ -54,6 +54,7 @@ export const InsertTaskDialog: Component = () => {
   const sectionConfigs = useSectionConfigsContext();
 
   const [transform] = useBoardTransformContext();
+  const { onClose, onClick } = useDialogBoardToolUtils();
   const [toolsState, { onToolChage }] = useToolsStateContext();
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
@@ -107,6 +108,7 @@ export const InsertTaskDialog: Component = () => {
 
     createD3ClickListener({
       onClick(event) {
+        onClick();
         setPosition({ x: event.x, y: event.y });
         openDialog(dialogId);
       },
@@ -115,7 +117,7 @@ export const InsertTaskDialog: Component = () => {
   });
 
   return (
-    <Dialog id={dialogId}>
+    <Dialog id={dialogId} onClose={onClose}>
       <DialogBox>
         <DialogTitle>{t("board.tasks.insertTask")}</DialogTitle>
         <form id={formId} onSubmit={onSubmit}>
@@ -141,6 +143,8 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
+
+  const { onClick, onClose } = useDialogBoardToolUtils();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -170,10 +174,11 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
         shape="circle"
         size="sm"
         for={dialogId}
+        onClick={onClick}
       >
         <PencilIcon class="size-4" />
       </DialogTrigger>
-      <Dialog id={dialogId}>
+      <Dialog id={dialogId} onClose={onClose}>
         <DialogBox>
           <DialogTitle>{t("common.update")}</DialogTitle>
           <form id={formId} onSubmit={onSubmit}>
@@ -279,6 +284,7 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const dialogId = createUniqueId();
 
   const boardState = useBoardStateContext();
+  const { onClick, onClose } = useDialogBoardToolUtils();
 
   const onConfirmClick = () => {
     closeDialog(dialogId);
@@ -289,12 +295,19 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
 
   return (
     <>
-      <DialogTrigger aria-label={t("board.tools.delete")} for={dialogId} shape="circle" size="sm">
+      <DialogTrigger
+        aria-label={t("board.tools.delete")}
+        for={dialogId}
+        onClick={onClick}
+        shape="circle"
+        size="sm"
+      >
         <TrashIcon class="size-4" />
       </DialogTrigger>
       <AlertDialog
         description={t("board.sections.confirmDelete")}
         dialogId={dialogId}
+        onClose={onClose}
         onSave={onConfirmClick}
         title={t("common.delete")}
       />

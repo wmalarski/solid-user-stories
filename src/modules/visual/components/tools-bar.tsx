@@ -17,13 +17,18 @@ import { Tooltip } from "~/ui/tooltip/tooltip";
 import { getEdgesByTask, useBoardStateContext } from "../contexts/board-state";
 import { useBoardTransformContext } from "../contexts/board-transform";
 import { useSelectionStateContext } from "../contexts/selection-state";
-import { useToolsStateContext, type ToolType } from "../contexts/tools-state";
+import {
+  useDialogBoardToolUtils,
+  useToolsStateContext,
+  type ToolType,
+} from "../contexts/tools-state";
 
 export const ToolsBar: Component = () => {
   const { t } = useI18n();
 
   const boardState = useBoardStateContext();
 
+  const { onClick, onClose } = useDialogBoardToolUtils();
   const [toolsState, { onToolChage }] = useToolsStateContext();
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
@@ -59,7 +64,7 @@ export const ToolsBar: Component = () => {
         </Tooltip>
         <DeleteSelectedElementDialog />
         <Tooltip data-tip={t("board.forms.update")} placement="top">
-          <UpdateBoardDialog board={boardState.board()} />
+          <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
         </Tooltip>
         <ThemeToggle />
       </ToolContainer>

@@ -16,13 +16,14 @@ type AlertDialogProps = {
   title: string;
   description: string;
   onSave: () => void;
+  onClose?: () => void;
 };
 
 export const AlertDialog: Component<AlertDialogProps> = (props) => {
   const { t } = useI18n();
 
   return (
-    <Dialog open={props.open} id={props.dialogId}>
+    <Dialog open={props.open} onClose={props.onClose} id={props.dialogId}>
       <DialogBox>
         <DialogTitle>{props.title}</DialogTitle>
         <DialogActions>

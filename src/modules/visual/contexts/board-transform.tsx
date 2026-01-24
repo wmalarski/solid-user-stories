@@ -10,6 +10,7 @@ import {
 } from "solid-js";
 import { SVG_SELECTOR } from "../utils/constants";
 import type { Point2D } from "../utils/types";
+import { useToolsStateContext } from "./tools-state";
 
 export type Transform = {
   k: number;
@@ -22,6 +23,8 @@ const WIDTH = 500;
 const HEIGHT = 500;
 
 const createBoardTransformContext = () => {
+  const [toolsState] = useToolsStateContext();
+
   const [transform, setTransform] = createSignal<Transform>({ k: 1, x: 0, y: 0 });
 
   // oxlint-disable-next-line no-explicit-any
@@ -59,10 +62,18 @@ const createBoardTransformContext = () => {
   };
 
   createEffect(() => {
-    selection().call(plugin);
+    const toolsStateValue = toolsState();
 
-    onCleanup(() => {
-      selection().on(".zoom", null);
+    if (toolsStateValue === "selector") {
+      return;
+    }
+
+    createEffect(() => {
+      selection().call(plugin);
+
+      onCleanup(() => {
+        selection().on(".zoom", null);
+      });
     });
   });
 

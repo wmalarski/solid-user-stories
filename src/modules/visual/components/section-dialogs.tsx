@@ -30,6 +30,7 @@ import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { useBoardId, useBoardStateContext } from "../contexts/board-state";
 import { useSectionConfigsContext, type SectionConfigs } from "../contexts/section-configs";
+import { useDialogBoardToolUtils } from "../contexts/tools-state";
 
 const SectionFieldsSchema = v.object({
   name: v.string(),
@@ -82,6 +83,7 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
   const boardId = useBoardId();
   const boardState = useBoardStateContext();
   const sectionConfigs = useSectionConfigsContext();
+  const { onClick, onClose } = useDialogBoardToolUtils();
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
@@ -149,10 +151,11 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
         shape="circle"
         size="sm"
         for={dialogId}
+        onClick={onClick}
       >
         <PlusIcon class="size-4" />
       </DialogTrigger>
-      <Dialog id={dialogId}>
+      <Dialog id={dialogId} onClose={onClose}>
         <DialogBox>
           <DialogTitle>{t("board.sections.insertSection")}</DialogTitle>
           <form id={formId} onSubmit={onSubmit}>
@@ -179,6 +182,7 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
+  const { onClick, onClose } = useDialogBoardToolUtils();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -205,10 +209,11 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
         shape="circle"
         size="sm"
         for={dialogId}
+        onClick={onClick}
       >
         <PencilIcon class="size-4" />
       </DialogTrigger>
-      <Dialog id={dialogId}>
+      <Dialog id={dialogId} onClose={onClose}>
         <DialogBox>
           <DialogTitle>{t("common.update")}</DialogTitle>
           <form id={formId} onSubmit={onSubmit}>
@@ -267,6 +272,7 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
 
   const boardId = useBoardId();
   const boardState = useBoardStateContext();
+  const { onClick, onClose } = useDialogBoardToolUtils();
 
   const dialogId = createUniqueId();
 
@@ -300,10 +306,12 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
         shape="circle"
         size="sm"
         for={dialogId}
+        onClick={onClick}
       >
         <TrashIcon class="size-4" />
       </DialogTrigger>
       <AlertDialog
+        onClose={onClose}
         description={t("board.sections.confirmDelete")}
         dialogId={dialogId}
         onSave={onSave}

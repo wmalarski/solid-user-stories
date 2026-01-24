@@ -19,6 +19,8 @@ import { BoardFields, BoardFieldsSchema } from "./board-fields";
 
 type UpdateBoardDialogProps = {
   board: BoardModel;
+  onClose?: () => void;
+  onOpen?: () => void;
 };
 
 export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
@@ -53,10 +55,11 @@ export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
         shape="circle"
         size="sm"
         for={dialogId}
+        onClick={props.onOpen}
       >
         <SettingsIcon class="size-5" />
       </DialogTrigger>
-      <Dialog id={dialogId}>
+      <Dialog onClose={props.onClose} id={dialogId}>
         <DialogBox>
           <DialogTitle>{t("common.update")}</DialogTitle>
           <form id={formId} onSubmit={onSubmit}>
