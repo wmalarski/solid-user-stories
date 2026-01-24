@@ -3,12 +3,12 @@ import { createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import {
-  axisCollection,
   boardsCollection,
+  sectionCollection,
   taskCollection,
 } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
-import type { AxisModel, TaskModel } from "~/integrations/tanstack-db/schema";
+import type { SectionModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
@@ -28,17 +28,17 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
-import { useAxisConfigContext, type AxisConfigContext } from "../contexts/axis-config";
 import { useBoardId, useBoardStateContext } from "../contexts/board-state";
+import { useSectionConfigsContext, type SectionConfigs } from "../contexts/section-configs";
 
-const AxisFieldsSchema = v.object({
+const SectionFieldsSchema = v.object({
   name: v.string(),
 });
 
-type ShiftAxisArgs = {
+type ShiftSectionArgs = {
   index: number;
-  axisId: string;
-  axisConfigValue: AxisConfigContext;
+  sectionId: string;
+  sectionConfigs: SectionConfigs;
 };
 
 type ShiftTasksArgs = {
@@ -47,8 +47,8 @@ type ShiftTasksArgs = {
   tasks: TaskModel[];
 };
 
-type InsertAxisDialogProps = {
-  orientation: AxisModel["orientation"];
+type InsertSectionDialogProps = {
+  orientation: SectionModel["orientation"];
   index: number;
 };
 
@@ -76,29 +76,29 @@ const shiftVerticalTasks = ({ shift, tasks, position }: ShiftTasksArgs) => {
   }
 };
 
-export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
+export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) => {
   const { t } = useI18n();
 
   const boardId = useBoardId();
   const boardState = useBoardStateContext();
-  const axisConfig = useAxisConfigContext();
+  const sectionConfigs = useSectionConfigsContext();
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
 
-  const shiftHorizontalAxis = ({ index, axisId, axisConfigValue }: ShiftAxisArgs) => {
-    const axisIds = axisConfigValue.x.map((config) => config.axis.id);
-    axisIds.splice(index + 1, 0, axisId);
+  const shiftHorizontalSections = ({ index, sectionId, sectionConfigs }: ShiftSectionArgs) => {
+    const sectionIds = sectionConfigs.x.map((config) => config.section.id);
+    sectionIds.splice(index + 1, 0, sectionId);
     boardsCollection.update(boardId(), (draft) => {
-      draft.axisXOrder = axisIds;
+      draft.sectionXOrder = sectionIds;
     });
   };
 
-  const shiftVerticalAxis = ({ index, axisId, axisConfigValue }: ShiftAxisArgs) => {
-    const axisIds = axisConfigValue.y.map((config) => config.axis.id);
-    axisIds.splice(index + 1, 0, axisId);
+  const shiftVerticalSections = ({ index, sectionId, sectionConfigs }: ShiftSectionArgs) => {
+    const sectionIds = sectionConfigs.y.map((config) => config.section.id);
+    sectionIds.splice(index + 1, 0, sectionId);
     boardsCollection.update(boardId(), (draft) => {
-      draft.axisYOrder = axisIds;
+      draft.sectionYOrder = sectionIds;
     });
   };
 
@@ -108,38 +108,42 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
 
     const formData = new FormData(event.currentTarget);
 
-    const parsed = await v.safeParseAsync(AxisFieldsSchema, decode(formData));
+    const parsed = await v.safeParseAsync(SectionFieldsSchema, decode(formData));
 
     if (!parsed.success) {
       return;
     }
 
-    const axisConfigValue = axisConfig();
+    const sectionConfigsValue = sectionConfigs();
     const tasks = boardState.tasks();
 
     const shift = 500;
-    const axisId = createId();
-    axisCollection.insert({
+    const sectionId = createId();
+    sectionCollection.insert({
       boardId: boardId(),
-      id: axisId,
+      id: sectionId,
       name: parsed.output.name,
       orientation: props.orientation,
       size: shift,
     });
 
     if (props.orientation === "horizontal") {
-      shiftHorizontalAxis({ axisConfigValue, axisId, index: props.index });
-      shiftHorizontalTasks({ position: axisConfigValue.x[props.index].end, shift, tasks });
+      shiftHorizontalSections({
+        index: props.index,
+        sectionConfigs: sectionConfigsValue,
+        sectionId,
+      });
+      shiftHorizontalTasks({ position: sectionConfigsValue.x[props.index].end, shift, tasks });
     } else {
-      shiftVerticalAxis({ axisConfigValue, axisId, index: props.index });
-      shiftVerticalTasks({ position: axisConfigValue.y[props.index].end, shift, tasks });
+      shiftVerticalSections({ index: props.index, sectionConfigs: sectionConfigsValue, sectionId });
+      shiftVerticalTasks({ position: sectionConfigsValue.y[props.index].end, shift, tasks });
     }
   };
 
   return (
     <>
       <DialogTrigger
-        aria-label={t("board.axis.insertAxis")}
+        aria-label={t("board.sections.insertSection")}
         shape="circle"
         size="sm"
         for={dialogId}
@@ -148,9 +152,9 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
       </DialogTrigger>
       <Dialog id={dialogId}>
         <DialogBox>
-          <DialogTitle>{t("board.axis.insertAxis")}</DialogTitle>
+          <DialogTitle>{t("board.sections.insertSection")}</DialogTitle>
           <form id={formId} onSubmit={onSubmit}>
-            <AxisFields />
+            <SectionFields />
           </form>
           <DialogActions>
             <Button color="primary" form={formId} type="submit">
@@ -164,11 +168,11 @@ export const InsertAxisDialog: Component<InsertAxisDialogProps> = (props) => {
   );
 };
 
-type UpdateAxisDialogProps = {
-  axis: AxisModel;
+type UpdateSectionDialogProps = {
+  section: SectionModel;
 };
 
-export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
+export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) => {
   const { t } = useI18n();
 
   const formId = createUniqueId();
@@ -176,17 +180,18 @@ export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
+
     closeDialog(dialogId);
 
     const formData = new FormData(event.currentTarget);
 
-    const parsed = await v.safeParseAsync(AxisFieldsSchema, decode(formData));
+    const parsed = await v.safeParseAsync(SectionFieldsSchema, decode(formData));
 
     if (!parsed.success) {
       return;
     }
 
-    axisCollection.update(props.axis.id, (draft) => {
+    sectionCollection.update(props.section.id, (draft) => {
       draft.name = parsed.output.name;
     });
   };
@@ -194,7 +199,7 @@ export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
   return (
     <>
       <DialogTrigger
-        aria-label={t("board.axis.updateAxis")}
+        aria-label={t("board.sections.updateSection")}
         shape="circle"
         size="sm"
         for={dialogId}
@@ -205,7 +210,7 @@ export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
         <DialogBox>
           <DialogTitle>{t("common.update")}</DialogTitle>
           <form id={formId} onSubmit={onSubmit}>
-            <AxisFields initialValues={props.axis} />
+            <SectionFields initialValues={props.section} />
           </form>
           <DialogActions>
             <Button color="primary" form={formId} type="submit">
@@ -219,20 +224,20 @@ export const UpdateAxisDialog: Component<UpdateAxisDialogProps> = (props) => {
   );
 };
 
-type AxisFieldsProps = {
+type SectionFieldsProps = {
   pending?: boolean;
   issues?: FormIssues;
-  initialValues?: Partial<AxisModel>;
+  initialValues?: Partial<SectionModel>;
 };
 
-const AxisFields: Component<AxisFieldsProps> = (props) => {
+const SectionFields: Component<SectionFieldsProps> = (props) => {
   const { t } = useI18n();
 
   return (
     <Fieldset>
       <FormError message={props.issues?.error} />
 
-      <FieldsetLabel for="name">{t("board.axis.name")}</FieldsetLabel>
+      <FieldsetLabel for="name">{t("board.sections.name")}</FieldsetLabel>
       <Input
         disabled={props.pending}
         id="name"
@@ -250,12 +255,12 @@ const AxisFields: Component<AxisFieldsProps> = (props) => {
   );
 };
 
-type DeleteAxisDialogProps = {
-  axis: AxisModel;
+type DeleteSectionDialogProps = {
+  section: SectionModel;
   endPosition: number;
 };
 
-export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
+export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) => {
   const { t } = useI18n();
 
   const boardId = useBoardId();
@@ -266,15 +271,15 @@ export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
   const onSave = () => {
     closeDialog(dialogId);
 
-    const axisId = props.axis.id;
-    const shift = -props.axis.size;
-    const orientation = props.axis.orientation;
+    const sectionId = props.section.id;
+    const shift = -props.section.size;
+    const orientation = props.section.orientation;
     const endPosition = props.endPosition;
     const tasks = boardState.tasks();
 
     boardsCollection.update(boardId(), (draft) => {
-      draft.axisXOrder = draft.axisXOrder.filter((id) => id !== axisId);
-      draft.axisYOrder = draft.axisYOrder.filter((id) => id !== axisId);
+      draft.sectionXOrder = draft.sectionXOrder.filter((id) => id !== sectionId);
+      draft.sectionYOrder = draft.sectionYOrder.filter((id) => id !== sectionId);
     });
 
     if (orientation === "horizontal") {
@@ -283,13 +288,13 @@ export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
       shiftVerticalTasks({ position: endPosition, shift, tasks });
     }
 
-    axisCollection.delete(axisId);
+    sectionCollection.delete(sectionId);
   };
 
   return (
     <>
       <DialogTrigger
-        aria-label={t("board.axis.deleteAxis")}
+        aria-label={t("board.sections.deleteSection")}
         shape="circle"
         size="sm"
         for={dialogId}
@@ -297,7 +302,7 @@ export const DeleteAxisDialog: Component<DeleteAxisDialogProps> = (props) => {
         <TrashIcon class="size-4" />
       </DialogTrigger>
       <AlertDialog
-        description={t("board.axis.confirmDelete")}
+        description={t("board.sections.confirmDelete")}
         dialogId={dialogId}
         onSave={onSave}
         title={t("common.delete")}

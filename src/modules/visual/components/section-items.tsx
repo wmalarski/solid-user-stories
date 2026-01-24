@@ -1,26 +1,26 @@
 import { createMemo, Index, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { Badge } from "~/ui/badge/badge";
-import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
 import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
-import { DeleteAxisDialog, InsertAxisDialog, UpdateAxisDialog } from "./axis-dialogs";
+import { useSectionConfigsContext, type SectionConfig } from "../contexts/section-configs";
+import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
+import { DeleteSectionDialog, InsertSectionDialog, UpdateSectionDialog } from "./section-dialogs";
 
-export const AxisGroup: Component = () => {
-  const axisConfig = useAxisConfigContext();
+export const SectionItems: Component = () => {
+  const sectionConfigs = useSectionConfigsContext();
 
-  const xLength = createMemo(() => axisConfig().x.length);
-  const yLength = createMemo(() => axisConfig().y.length);
+  const xLength = createMemo(() => sectionConfigs().x.length);
+  const yLength = createMemo(() => sectionConfigs().y.length);
 
   return (
     <>
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
-      <Index each={axisConfig().x}>
+      <Index each={sectionConfigs().x}>
         {(entry) => <HorizontalItemRect totalLength={xLength()} config={entry()} />}
       </Index>
-      <Index each={axisConfig().y}>
+      <Index each={sectionConfigs().y}>
         {(entry) => <VerticalItemRect totalLength={yLength()} config={entry()} />}
       </Index>
       <CenterRect />
@@ -33,13 +33,13 @@ const HorizontalBackgroundRect: Component = () => {
     <>
       <rect
         class="opacity-30"
-        x={AXIS_X_OFFSET}
+        x={SECTION_X_OFFSET}
         y={0}
-        height={AXIS_Y_OFFSET - 2}
+        height={SECTION_Y_OFFSET - 2}
         width="100%"
         filter="url(#task-shadow)"
       />
-      <rect class="fill-base-300" x={0} y={0} height={AXIS_Y_OFFSET} width="100%" />
+      <rect class="fill-base-300" x={0} y={0} height={SECTION_Y_OFFSET} width="100%" />
     </>
   );
 };
@@ -50,76 +50,82 @@ const VerticalBackgroundRect: Component = () => {
       <rect
         class="opacity-40"
         x={0}
-        y={AXIS_Y_OFFSET}
+        y={SECTION_Y_OFFSET}
         height="100%"
-        width={AXIS_X_OFFSET - 2}
+        width={SECTION_X_OFFSET - 2}
         filter="url(#task-shadow)"
       />
-      <rect class="fill-base-300" x={0} y={0} height="100%" width={AXIS_X_OFFSET} />
+      <rect class="fill-base-300" x={0} y={0} height="100%" width={SECTION_X_OFFSET} />
     </>
   );
 };
 
 type HorizontalItemRectProps = {
-  config: AxisConfig;
+  config: SectionConfig;
   totalLength: number;
 };
 
 const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
   const [transform] = useBoardTransformContext();
 
-  const transformed = createMemo(() => translateX(transform(), props.config.start + AXIS_X_OFFSET));
+  const transformed = createMemo(() =>
+    translateX(transform(), props.config.start + SECTION_X_OFFSET),
+  );
 
-  const width = createMemo(() => props.config.axis.size * transform().k);
+  const width = createMemo(() => props.config.section.size * transform().k);
 
   return (
     <>
-      <foreignObject width={width()} x={transformed()} y={0} height={AXIS_Y_OFFSET}>
-        <AxisItemContent config={props.config} totalLength={props.totalLength} />
+      <foreignObject width={width()} x={transformed()} y={0} height={SECTION_Y_OFFSET}>
+        <SectionItemContent config={props.config} totalLength={props.totalLength} />
       </foreignObject>
     </>
   );
 };
 
 type VerticalItemRectProps = {
-  config: AxisConfig;
+  config: SectionConfig;
   totalLength: number;
 };
 
 const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
   const [transform] = useBoardTransformContext();
 
-  const transformed = createMemo(() => translateY(transform(), props.config.start + AXIS_Y_OFFSET));
+  const transformed = createMemo(() =>
+    translateY(transform(), props.config.start + SECTION_Y_OFFSET),
+  );
 
-  const height = createMemo(() => props.config.axis.size * transform().k);
+  const height = createMemo(() => props.config.section.size * transform().k);
 
   return (
     <>
-      <foreignObject height={height()} x={0} y={transformed()} width={AXIS_X_OFFSET}>
-        <AxisItemContent config={props.config} totalLength={props.totalLength} />
+      <foreignObject height={height()} x={0} y={transformed()} width={SECTION_X_OFFSET}>
+        <SectionItemContent config={props.config} totalLength={props.totalLength} />
       </foreignObject>
     </>
   );
 };
 
-type AxisItemContentProps = {
-  config: AxisConfig;
+type SectionItemContentProps = {
+  config: SectionConfig;
   totalLength: number;
 };
 
-const AxisItemContent: Component<AxisItemContentProps> = (props) => {
+const SectionItemContent: Component<SectionItemContentProps> = (props) => {
   const boardState = useBoardStateContext();
 
   const isVertical = createMemo(() => {
-    return props.config.axis.orientation === "vertical";
+    return props.config.section.orientation === "vertical";
   });
 
   const tasks = createMemo(() => {
     const isVerticalValue = isVertical();
-    const axisId = props.config.axis.id;
+    const sectionId = props.config.section.id;
     return boardState
       .tasks()
-      .filter((entry) => (isVerticalValue ? entry.axisY === axisId : entry.axisX === axisId));
+      .filter((entry) =>
+        isVerticalValue ? entry.sectionY === sectionId : entry.sectionX === sectionId,
+      );
   });
 
   const esitmationSum = createMemo(() => {
@@ -128,18 +134,20 @@ const AxisItemContent: Component<AxisItemContentProps> = (props) => {
 
   return (
     <div class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[1fr_auto] p-2">
-      <span class="text-sm truncate font-semibold">{props.config.axis.name}</span>
-      {/* <span>{props.config.axis.id}</span> */}
+      <span class="text-sm truncate font-semibold">{props.config.section.name}</span>
       <div
         class={cx("flex gap-1 justify-end", {
           "flex-col items-end": isVertical(),
           "items-center": !isVertical(),
         })}
       >
-        <InsertAxisDialog orientation={props.config.axis.orientation} index={props.config.index} />
-        <UpdateAxisDialog axis={props.config.axis} />
+        <InsertSectionDialog
+          orientation={props.config.section.orientation}
+          index={props.config.index}
+        />
+        <UpdateSectionDialog section={props.config.section} />
         <Show when={props.totalLength > 1 && tasks().length === 0}>
-          <DeleteAxisDialog axis={props.config.axis} endPosition={props.config.end} />
+          <DeleteSectionDialog section={props.config.section} endPosition={props.config.end} />
         </Show>
         <Badge size="sm" color="accent" class="my-1">
           {esitmationSum()}
@@ -154,7 +162,7 @@ const CenterRect: Component = () => {
 
   return (
     <>
-      <foreignObject x={0} y={0} width={AXIS_X_OFFSET} height={AXIS_Y_OFFSET}>
+      <foreignObject x={0} y={0} width={SECTION_X_OFFSET} height={SECTION_Y_OFFSET}>
         <div class="grid grid-cols-1 grid-rows-[auto_1fr] p-1 bg-base-300 text-base-content w-full h-full">
           <span class="font-semibold truncate">{boardState.board().title}</span>
           <span class="text-sm line-clamp-2 opacity-80">{boardState.board().description}</span>

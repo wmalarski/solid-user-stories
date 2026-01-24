@@ -11,20 +11,20 @@ import {
 
 const enDict = {
   board: {
-    axis: {
-      confirmDelete: "Confirm delete task",
-      deleteAxis: "Delete axis",
-      insertAxis: "Add axis",
-      name: "Name",
-      updateAxis: "Update axis",
-    },
     forms: {
       createBoard: "Create Board",
       description: "Description",
       title: "Title",
       update: "Update board",
-      xAxisDefault: "Sprint 1",
-      yAxisDefault: "Feature 1",
+      xSectionDefault: "Sprint 1",
+      ySectionDefault: "Feature 1",
+    },
+    sections: {
+      confirmDelete: "Confirm delete task",
+      deleteSection: "Delete axis",
+      insertSection: "Add axis",
+      name: "Name",
+      updateSection: "Update axis",
     },
     tasks: {
       confirmDelete: "Confirm delete task",

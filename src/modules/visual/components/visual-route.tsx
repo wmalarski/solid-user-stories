@@ -4,19 +4,19 @@ import { createMemo, createSignal, For, Show, Suspense, type Component } from "s
 import { cx } from "tailwind-variants";
 import { boardsCollection } from "~/integrations/tanstack-db/collections";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
-import { AxisConfigProvider } from "../contexts/axis-config";
 import { BoardStateProvider, useBoardStateContext } from "../contexts/board-state";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgeDragStateProvider } from "../contexts/edge-drag-state";
+import { SectionConfigsProvider } from "../contexts/section-configs";
 import { SelectionStateProvider, useSelectionStateContext } from "../contexts/selection-state";
 import { ToolsStateProvider } from "../contexts/tools-state";
 import { SVG_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
-import { AxisGridPaths, AxisGridStaticPaths } from "./axis-grid-paths";
-import { AxisGroup } from "./axis-group";
 import { DraggedEdge } from "./dragged-edge";
 import { EdgePath } from "./edge-path";
+import { SectionGridPaths, SectionGridStaticPaths } from "./section-grid-paths";
+import { SectionItems } from "./section-items";
 import { InsertTaskDialog } from "./task-dialogs";
 import { TaskGroup } from "./task-group";
 import { ToolsBar, ZoomBar } from "./tools-bar";
@@ -48,7 +48,7 @@ type VisualPanelProps = {
 export const VisualPanel: Component<VisualPanelProps> = (props) => {
   return (
     <BoardStateProvider board={props.board}>
-      <AxisConfigProvider>
+      <SectionConfigsProvider>
         <ToolsStateProvider>
           <DragStateProvider>
             <SelectionStateProvider>
@@ -60,7 +60,7 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
             </SelectionStateProvider>
           </DragStateProvider>
         </ToolsStateProvider>
-      </AxisConfigProvider>
+      </SectionConfigsProvider>
     </BoardStateProvider>
   );
 };
@@ -71,10 +71,10 @@ const BoardContent: Component = () => {
       <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
         <SvgDefinitions />
         <BackgroundRect />
-        <AxisGridStaticPaths />
+        <SectionGridStaticPaths />
         <SelectableGroup />
         <DraggedEdge />
-        <AxisGroup />
+        <SectionItems />
       </svg>
       <ToolsBar />
       <ZoomBar />
@@ -91,7 +91,7 @@ const SelectableGroup: Component = () => {
 
   return (
     <g cursor={isDragging() ? "grabbing" : "grab"}>
-      <AxisGridPaths />
+      <SectionGridPaths />
       <g transform={transform() as unknown as string}>
         <For each={boardState.edges()}>
           {(entry) => <EdgePath edge={entry.edge} source={entry.source} target={entry.target} />}

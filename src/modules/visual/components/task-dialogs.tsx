@@ -31,8 +31,8 @@ import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
-import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { getEdgesByTask, useBoardId, useBoardStateContext } from "../contexts/board-state";
+import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useSelectionStateContext } from "../contexts/selection-state";
 import { useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
@@ -50,7 +50,7 @@ export const InsertTaskDialog: Component = () => {
   const { t } = useI18n();
 
   const boardId = useBoardId();
-  const axisConfig = useAxisConfigContext();
+  const sectionConfigs = useSectionConfigsContext();
 
   const [toolsState, { onToolChage }] = useToolsStateContext();
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
@@ -74,11 +74,9 @@ export const InsertTaskDialog: Component = () => {
     }
 
     const taskId = createId();
-    const axis = mapToAxis(axisConfig(), positionValue);
+    const sectionIds = mapToSections(sectionConfigs(), positionValue);
 
     taskCollection.insert({
-      axisX: axis.axisX,
-      axisY: axis.axisY,
       boardId: boardId(),
       description: parsed.output.description,
       estimate: parsed.output.estimate,
@@ -86,6 +84,8 @@ export const InsertTaskDialog: Component = () => {
       link: parsed.output.link,
       positionX: positionValue.x,
       positionY: positionValue.y,
+      sectionX: sectionIds.sectionX,
+      sectionY: sectionIds.sectionY,
       title: parsed.output.title,
     });
 
@@ -291,7 +291,7 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
         <TrashIcon class="size-4" />
       </DialogTrigger>
       <AlertDialog
-        description={t("board.axis.confirmDelete")}
+        description={t("board.sections.confirmDelete")}
         dialogId={dialogId}
         onSave={onConfirmClick}
         title={t("common.delete")}

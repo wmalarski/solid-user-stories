@@ -4,10 +4,10 @@ import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/colle
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { Badge } from "~/ui/badge/badge";
-import { mapToAxis, useAxisConfigContext } from "../contexts/axis-config";
 import { useBoardId, useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
+import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import {
   TASK_HANDLE_SIZE,
@@ -30,7 +30,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const [shiftX, setShiftX] = createSignal(0);
   const [shiftY, setShiftY] = createSignal(0);
 
-  const axisConfig = useAxisConfigContext();
+  const sectionConfigs = useSectionConfigsContext();
 
   const isSelected = useIsSelected(() => props.task.id);
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
@@ -45,14 +45,14 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       const updatedX = event.x + shiftX();
       const updatedY = event.y + shiftY();
 
-      const axis = mapToAxis(axisConfig(), { x: updatedX, y: updatedY });
+      const sectionIds = mapToSections(sectionConfigs(), { x: updatedX, y: updatedY });
 
       taskCollection.update(props.task.id, (draft) => {
         draft.positionX = updatedX;
         draft.positionY = updatedY;
 
-        draft.axisX = axis.axisX;
-        draft.axisY = axis.axisY;
+        draft.sectionX = sectionIds.sectionX;
+        draft.sectionY = sectionIds.sectionY;
       });
     },
     ref: rectRef,
@@ -82,8 +82,6 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         >
           <span class="text-sm truncate font-semibold">{props.task.title}</span>
           <span class="text-xs line-clamp-3 opacity-80">{props.task.description}</span>
-          {/* <span class="text-xs truncate">X:{props.task.axisX}</span>
-            <span class="text-xs truncate">Y:{props.task.axisY}</span> */}
           <div class="flex gap-1 w-full justify-end items-center">
             <UpdateTaskDialog task={props.task} />
             <DeleteTaskDialog task={props.task} />

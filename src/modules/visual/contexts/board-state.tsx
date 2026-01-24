@@ -8,8 +8,8 @@ import {
   useContext,
 } from "solid-js";
 import {
-  axisCollection,
   edgeCollection,
+  sectionCollection,
   taskCollection,
 } from "~/integrations/tanstack-db/collections";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
@@ -28,7 +28,7 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
   );
 
   const sections = useLiveQuery((q) =>
-    q.from({ axis: axisCollection }).where(({ axis }) => eq(axis.boardId, board().id)),
+    q.from({ section: sectionCollection }).where(({ section }) => eq(section.boardId, board().id)),
   );
 
   return { board, edges, sections, tasks };

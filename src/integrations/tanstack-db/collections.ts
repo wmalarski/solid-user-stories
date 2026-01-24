@@ -1,5 +1,5 @@
 import { createCollection, localStorageCollectionOptions } from "@tanstack/solid-db";
-import { AxisSchema, BoardSchema, EdgeSchema, TaskSchema } from "./schema";
+import { BoardSchema, EdgeSchema, SectionSchema, TaskSchema } from "./schema";
 
 export const boardsCollection = createCollection(
   localStorageCollectionOptions({
@@ -28,11 +28,11 @@ export const edgeCollection = createCollection(
   }),
 );
 
-export const axisCollection = createCollection(
+export const sectionCollection = createCollection(
   localStorageCollectionOptions({
     getKey: (item) => item.id,
-    id: "axis",
-    schema: AxisSchema,
-    storageKey: "app-axis",
+    id: "sections",
+    schema: SectionSchema,
+    storageKey: "app-sections",
   }),
 );

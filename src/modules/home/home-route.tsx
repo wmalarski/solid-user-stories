@@ -3,9 +3,9 @@ import { useLiveQuery } from "@tanstack/solid-db";
 import { For, type Component } from "solid-js";
 import { createLink } from "~/integrations/router/create-link";
 import {
-  axisCollection,
   boardsCollection,
   edgeCollection,
+  sectionCollection,
   taskCollection,
 } from "~/integrations/tanstack-db/collections";
 import { Button } from "~/ui/button/button";
@@ -18,7 +18,7 @@ export const HomeRoute: Component = () => {
       <BoardList />
       <Button
         onClick={() => {
-          axisCollection.utils.clearStorage();
+          sectionCollection.utils.clearStorage();
           boardsCollection.utils.clearStorage();
           taskCollection.utils.clearStorage();
           edgeCollection.utils.clearStorage();

@@ -105,7 +105,7 @@ const DeleteSelectedElementDialog: Component = () => {
         </DialogTrigger>
       </Tooltip>
       <AlertDialog
-        description={t("board.axis.confirmDelete")}
+        description={t("board.sections.confirmDelete")}
         dialogId={dialogId}
         onSave={onConfirmClick}
         title={t("common.delete")}

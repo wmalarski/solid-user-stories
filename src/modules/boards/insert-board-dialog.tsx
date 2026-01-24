@@ -4,7 +4,7 @@ import { createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import { createLink } from "~/integrations/router/create-link";
-import { axisCollection, boardsCollection } from "~/integrations/tanstack-db/collections";
+import { boardsCollection, sectionCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import { Button } from "~/ui/button/button";
 import {
@@ -38,37 +38,37 @@ export const InsertBoardDialog: Component = () => {
     }
 
     const boardId = createId();
-    const axisXId = createId();
-    const axisYId = createId();
+    const sectionXId = createId();
+    const sectionYId = createId();
 
     const boardTx = boardsCollection.insert({
-      axisXOrder: [axisXId],
-      axisYOrder: [axisYId],
       description: parsed.output.description,
       id: boardId,
+      sectionXOrder: [sectionXId],
+      sectionYOrder: [sectionYId],
       title: parsed.output.title,
       user: "1",
     });
 
-    const axisTx = axisCollection.insert([
+    const sectionTx = sectionCollection.insert([
       {
         boardId,
-        id: axisXId,
-        name: t("board.forms.xAxisDefault"),
+        id: sectionXId,
+        name: t("board.forms.xSectionDefault"),
         orientation: "horizontal",
         size: 500,
       },
       {
         boardId,
-        id: axisYId,
-        name: t("board.forms.yAxisDefault"),
+        id: sectionYId,
+        name: t("board.forms.ySectionDefault"),
         orientation: "vertical",
         size: 500,
       },
     ]);
 
     await boardTx.isPersisted.promise;
-    await axisTx.isPersisted.promise;
+    await sectionTx.isPersisted.promise;
 
     navigate(createLink("/board/:boardId", { params: { boardId } }));
   };

@@ -1,9 +1,9 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
-import { axisCollection, taskCollection } from "~/integrations/tanstack-db/collections";
-import { useAxisConfigContext, type AxisConfig } from "../contexts/axis-config";
+import { sectionCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { AXIS_X_OFFSET, AXIS_Y_OFFSET } from "../utils/constants";
+import { useSectionConfigsContext, type SectionConfig } from "../contexts/section-configs";
+import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
 
 const sharedLineProps: ComponentProps<"line"> = {
@@ -13,7 +13,7 @@ const sharedLineProps: ComponentProps<"line"> = {
   "stroke-width": 3,
 };
 
-export const AxisGridStaticPaths: Component = () => {
+export const SectionGridStaticPaths: Component = () => {
   return (
     <>
       <HorizontalZeroPath />
@@ -22,13 +22,13 @@ export const AxisGridStaticPaths: Component = () => {
   );
 };
 
-export const AxisGridPaths: Component = () => {
-  const axisConfig = useAxisConfigContext();
+export const SectionGridPaths: Component = () => {
+  const sectionConfigs = useSectionConfigsContext();
 
   return (
     <>
-      <Index each={axisConfig().y}>{(entry) => <HorizontalPath config={entry()} />}</Index>
-      <Index each={axisConfig().x}>{(entry) => <VerticalPath config={entry()} />}</Index>
+      <Index each={sectionConfigs().y}>{(entry) => <HorizontalPath config={entry()} />}</Index>
+      <Index each={sectionConfigs().x}>{(entry) => <VerticalPath config={entry()} />}</Index>
     </>
   );
 };
@@ -36,7 +36,7 @@ export const AxisGridPaths: Component = () => {
 const HorizontalZeroPath: Component = () => {
   const [transform] = useBoardTransformContext();
 
-  const y = createMemo(() => translateY(transform(), AXIS_Y_OFFSET));
+  const y = createMemo(() => translateY(transform(), SECTION_Y_OFFSET));
 
   return <line {...sharedLineProps} x1={0} x2="100%" y1={y()} y2={y()} />;
 };
@@ -44,13 +44,13 @@ const HorizontalZeroPath: Component = () => {
 const VerticalZeroPath: Component = () => {
   const [transform] = useBoardTransformContext();
 
-  const x = createMemo(() => translateX(transform(), AXIS_X_OFFSET));
+  const x = createMemo(() => translateX(transform(), SECTION_X_OFFSET));
 
   return <line y1={0} y2="100%" x1={x()} x2={x()} {...sharedLineProps} />;
 };
 
 type HorizontalPathProps = {
-  config: AxisConfig;
+  config: SectionConfig;
 };
 
 const HorizontalPath: Component<HorizontalPathProps> = (props) => {
@@ -58,7 +58,9 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
 
   const [transform] = useBoardTransformContext();
 
-  const transformed = createMemo(() => translateY(transform(), props.config.end + AXIS_Y_OFFSET));
+  const transformed = createMemo(() =>
+    translateY(transform(), props.config.end + SECTION_Y_OFFSET),
+  );
 
   const [ref, setRef] = createSignal<SVGCircleElement>();
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
@@ -70,12 +72,12 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       let maxNotDraggedPosition = 0;
       const draggedTasks = new Map<string, number>();
       for (const entry of boardState.tasks()) {
-        if (entry.positionY > props.config.end + AXIS_Y_OFFSET) {
+        if (entry.positionY > props.config.end + SECTION_Y_OFFSET) {
           draggedTasks.set(entry.id, entry.positionY);
         } else {
           maxNotDraggedPosition = Math.max(
             maxNotDraggedPosition,
-            entry.positionY - AXIS_Y_OFFSET + 10,
+            entry.positionY - SECTION_Y_OFFSET + 10,
           );
         }
       }
@@ -86,11 +88,11 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
     },
     onDragged(event) {
       const transformValue = transform();
-      const updatedY = (event.y - transformValue.y) / transformValue.k - AXIS_Y_OFFSET;
+      const updatedY = (event.y - transformValue.y) / transformValue.k - SECTION_Y_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
       const size = withLimit - props.config.start;
 
-      axisCollection.update(props.config.axis.id, (draft) => {
+      sectionCollection.update(props.config.section.id, (draft) => {
         draft.size = size;
       });
 
@@ -126,7 +128,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
 };
 
 type VerticalPathProps = {
-  config: AxisConfig;
+  config: SectionConfig;
 };
 
 const VerticalPath: Component<VerticalPathProps> = (props) => {
@@ -134,7 +136,9 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
 
   const [transform] = useBoardTransformContext();
 
-  const transformed = createMemo(() => translateX(transform(), props.config.end + AXIS_X_OFFSET));
+  const transformed = createMemo(() =>
+    translateX(transform(), props.config.end + SECTION_X_OFFSET),
+  );
 
   const [ref, setRef] = createSignal<SVGElement>();
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
@@ -146,12 +150,12 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       let maxNotDraggedPosition = 0;
       const draggedTasks = new Map<string, number>();
       for (const entry of boardState.tasks()) {
-        if (entry.positionX > props.config.end + AXIS_X_OFFSET) {
+        if (entry.positionX > props.config.end + SECTION_X_OFFSET) {
           draggedTasks.set(entry.id, entry.positionX);
         } else {
           maxNotDraggedPosition = Math.max(
             maxNotDraggedPosition,
-            entry.positionX - AXIS_X_OFFSET + 10,
+            entry.positionX - SECTION_X_OFFSET + 10,
           );
         }
       }
@@ -162,11 +166,11 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
     },
     onDragged(event) {
       const transformValue = transform();
-      const updatedX = (event.x - transformValue.x) / transformValue.k - AXIS_X_OFFSET;
+      const updatedX = (event.x - transformValue.x) / transformValue.k - SECTION_X_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
       const size = withLimit - props.config.start;
 
-      axisCollection.update(props.config.axis.id, (draft) => {
+      sectionCollection.update(props.config.section.id, (draft) => {
         draft.size = size;
       });
 
