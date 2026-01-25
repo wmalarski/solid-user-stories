@@ -19,6 +19,7 @@ import {
   DialogActions,
   DialogBackdrop,
   DialogBox,
+  DialogClose,
   DialogTitle,
   openDialog,
 } from "~/ui/dialog/dialog";
@@ -125,6 +126,7 @@ const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
           <TaskFields />
         </form>
         <DialogActions>
+          <DialogClose />
           <Button color="primary" form={formId} type="submit">
             {t("common.save")}
           </Button>

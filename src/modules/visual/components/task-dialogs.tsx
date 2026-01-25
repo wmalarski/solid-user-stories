@@ -13,6 +13,7 @@ import {
   DialogActions,
   DialogBackdrop,
   DialogBox,
+  DialogClose,
   DialogTitle,
   DialogTrigger,
 } from "~/ui/dialog/dialog";
@@ -84,6 +85,7 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
             <TaskFields initialValues={props.task} />
           </form>
           <DialogActions>
+            <DialogClose />
             <Button color="primary" form={formId} type="submit">
               {t("common.update")}
             </Button>

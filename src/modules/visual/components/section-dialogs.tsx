@@ -17,6 +17,7 @@ import {
   DialogActions,
   DialogBackdrop,
   DialogBox,
+  DialogClose,
   DialogTitle,
   DialogTrigger,
 } from "~/ui/dialog/dialog";
@@ -162,6 +163,7 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
             <SectionFields />
           </form>
           <DialogActions>
+            <DialogClose />
             <Button color="primary" form={formId} type="submit">
               {t("common.save")}
             </Button>
@@ -220,6 +222,7 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
             <SectionFields initialValues={props.section} />
           </form>
           <DialogActions>
+            <DialogClose />
             <Button color="primary" form={formId} type="submit">
               {t("common.update")}
             </Button>

@@ -12,6 +12,7 @@ import {
   DialogActions,
   DialogBackdrop,
   DialogBox,
+  DialogClose,
   DialogTitle,
   DialogTrigger,
 } from "~/ui/dialog/dialog";
@@ -86,6 +87,7 @@ export const InsertBoardDialog: Component = () => {
             <BoardFields />
           </form>
           <DialogActions>
+            <DialogClose />
             <Button color="primary" form={formId} type="submit">
               {t("common.save")}
             </Button>
