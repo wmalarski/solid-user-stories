@@ -1,0 +1,41 @@
+import { A } from "@solidjs/router";
+import { useLiveQuery } from "@tanstack/solid-db";
+import { For, type Component } from "solid-js";
+import { createLink } from "~/integrations/router/create-link";
+import { boardsCollection } from "~/integrations/tanstack-db/collections";
+import type { BoardModel } from "~/integrations/tanstack-db/schema";
+import { List, ListColumn, ListRow } from "~/ui/list/list";
+import { UpdateBoardDialog } from "../boards/update-board-dialog";
+
+export const BoardList: Component = () => {
+  const boards = useLiveQuery((q) => q.from({ board: boardsCollection }));
+
+  return (
+    <List>
+      <For each={boards()}>{(board) => <BoardListItem board={board} />}</For>
+    </List>
+  );
+};
+
+type BoardListItemProps = {
+  board: BoardModel;
+};
+
+const BoardListItem: Component<BoardListItemProps> = (props) => {
+  return (
+    <ListRow>
+      <ListColumn grow class="grid grid-cols-1 justify-items-start">
+        <A
+          class="text-lg"
+          href={createLink("/board/:boardId", { params: { boardId: props.board.id } })}
+        >
+          {props.board.title}
+        </A>
+        <span class="text-sm opacity-70">{props.board.description}</span>
+      </ListColumn>
+      <ListColumn>
+        <UpdateBoardDialog board={props.board} />
+      </ListColumn>
+    </ListRow>
+  );
+};
