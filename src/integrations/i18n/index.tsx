@@ -13,6 +13,7 @@ const enDict = {
   board: {
     forms: {
       createBoard: "Create Board",
+      deleteBoard: "Delete board",
       description: "Description",
       insertDescription: "Enter new board information.",
       title: "Title",

@@ -1,15 +1,6 @@
 import { createCollection, localStorageCollectionOptions } from "@tanstack/solid-db";
 import { BoardSchema, EdgeSchema, SectionSchema, TaskSchema } from "./schema";
 
-export const boardsCollection = createCollection(
-  localStorageCollectionOptions({
-    getKey: (item) => item.id,
-    id: "boards",
-    schema: BoardSchema,
-    storageKey: "app-boards",
-  }),
-);
-
 export const taskCollection = createCollection(
   localStorageCollectionOptions({
     getKey: (item) => item.id,
@@ -34,5 +25,14 @@ export const sectionCollection = createCollection(
     id: "sections",
     schema: SectionSchema,
     storageKey: "app-sections",
+  }),
+);
+
+export const boardsCollection = createCollection(
+  localStorageCollectionOptions({
+    getKey: (item) => item.id,
+    id: "boards",
+    schema: BoardSchema,
+    storageKey: "app-boards",
   }),
 );

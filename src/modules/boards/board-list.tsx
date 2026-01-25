@@ -6,6 +6,7 @@ import { boardsCollection } from "~/integrations/tanstack-db/collections";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { List, ListColumn, ListRow } from "~/ui/list/list";
 import { UpdateBoardDialog } from "../boards/update-board-dialog";
+import { DeleteBoardDialog } from "./delete-board-dialog";
 
 export const BoardList: Component = () => {
   const boards = useLiveQuery((q) => q.from({ board: boardsCollection }));
@@ -33,8 +34,9 @@ const BoardListItem: Component<BoardListItemProps> = (props) => {
         </A>
         <span class="text-sm opacity-70">{props.board.description}</span>
       </ListColumn>
-      <ListColumn>
+      <ListColumn class="flex gap-1">
         <UpdateBoardDialog board={props.board} />
+        <DeleteBoardDialog board={props.board} />
       </ListColumn>
     </ListRow>
   );
