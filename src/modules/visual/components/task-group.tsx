@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { createMemo, createSignal, Show, type Component } from "solid-js";
+import { createMemo, createSignal, createUniqueId, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
 import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
@@ -7,12 +7,14 @@ import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
+import { openDialog } from "~/ui/dialog/dialog";
 import { LinkIcon } from "~/ui/icons/link-icon";
 import { useBoardId, useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
 import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
+import { useDialogBoardToolUtils } from "../contexts/tools-state";
 import {
   TASK_ARROW_OFFSET,
   TASK_HANDLE_SIZE,
@@ -24,8 +26,10 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
-import { useInsertTaskDialogContext } from "./insert-task-dialog";
-import { DeleteTaskDialog, UpdateTaskDialog } from "./task-dialogs";
+import type { Point2D } from "../utils/types";
+import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
+
+type TaskHandleKind = "source" | "target";
 
 type TaskGroupProps = {
   task: TaskModel;
@@ -34,12 +38,19 @@ type TaskGroupProps = {
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const { t } = useI18n();
 
+  const boardId = useBoardId();
+
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
   const [shiftX, setShiftX] = createSignal(0);
   const [shiftY, setShiftY] = createSignal(0);
 
   const sectionConfigs = useSectionConfigsContext();
+
+  const insertTaskDialogId = createUniqueId();
+  const { onClick } = useDialogBoardToolUtils();
+  const [newTaskHandle, setNewTaskHandle] = createSignal<TaskHandleKind>("source");
+  const [newTaskPoint, setNewTaskPoint] = createSignal<Point2D>({ x: 0, y: 0 });
 
   const isSelected = useIsSelected(() => props.task.id);
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
@@ -66,6 +77,25 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
     },
     ref: rectRef,
   });
+
+  const onArrowClick = (point: Point2D, kind: TaskHandleKind) => {
+    setNewTaskPoint(point);
+    onClick();
+    openDialog(insertTaskDialogId);
+    setNewTaskHandle(kind);
+  };
+
+  const onInsertSuccess = (newTaskId: string) => {
+    const kind = newTaskHandle();
+    const edgeId = createId();
+    edgeCollection.insert({
+      boardId: boardId(),
+      breakX: (newTaskPoint().x + TASK_RECT_WIDTH + props.task.positionX) / 2,
+      id: edgeId,
+      source: kind === "source" ? props.task.id : newTaskId,
+      target: kind === "source" ? newTaskId : props.task.id,
+    });
+  };
 
   return (
     <>
@@ -108,6 +138,11 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
             </Show>
             <UpdateTaskDialog task={props.task} />
             <DeleteTaskDialog task={props.task} />
+            <InsertTaskDialog
+              dialogId={insertTaskDialogId}
+              position={newTaskPoint()}
+              onInsertSuccess={onInsertSuccess}
+            />
             <Badge size="sm" color="accent">
               {props.task.estimate}
             </Badge>
@@ -127,7 +162,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
           y={props.task.positionY}
           taskId={props.task.id}
         />
-        <TaskArrows task={props.task} />
+        <TaskArrows task={props.task} onArrowClick={onArrowClick} />
       </Show>
     </>
   );
@@ -136,7 +171,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
 type TaskHandleProps = {
   x: number;
   y: number;
-  kind: "source" | "target";
+  kind: TaskHandleKind;
   taskId: string;
 };
 
@@ -232,30 +267,35 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
 
 type TaskArrowsProps = {
   task: TaskModel;
+  onArrowClick: (taskPoint: Point2D, orientation: TaskHandleKind) => void;
 };
 
 const TaskArrows: Component<TaskArrowsProps> = (props) => {
   const [rightPathRef, setRightPathRef] = createSignal<SVGElement>();
   const [leftPathRef, setLeftPathRef] = createSignal<SVGElement>();
 
-  const insertTaskDialog = useInsertTaskDialogContext();
-
   createD3ClickListener({
     onClick() {
-      insertTaskDialog.openInsertDialog({
-        x: props.task.positionX + TASK_RECT_WIDTH + 400,
-        y: props.task.positionY,
-      });
+      props.onArrowClick(
+        {
+          x: props.task.positionX + TASK_RECT_WIDTH + 400,
+          y: props.task.positionY,
+        },
+        "source",
+      );
     },
     ref: rightPathRef,
   });
 
   createD3ClickListener({
     onClick() {
-      insertTaskDialog.openInsertDialog({
-        x: props.task.positionX - 400,
-        y: props.task.positionY,
-      });
+      props.onArrowClick(
+        {
+          x: props.task.positionX - 400,
+          y: props.task.positionY,
+        },
+        "target",
+      );
     },
     ref: leftPathRef,
   });
