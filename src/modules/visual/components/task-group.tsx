@@ -329,7 +329,13 @@ const ChevronRightPath: Component<ChevronPathProps> = (props) => {
   });
 
   return (
-    <path ref={props.ref} d={path()} class="stroke-base-content" fill="none" stroke-width={3} />
+    <path
+      ref={props.ref}
+      d={path()}
+      class="stroke-base-content"
+      fill="transparent"
+      stroke-width={4}
+    />
   );
 };
 
@@ -346,6 +352,12 @@ const ChevronLeftPath: Component<ChevronPathProps> = (props) => {
   });
 
   return (
-    <path ref={props.ref} d={path()} class="stroke-base-content" fill="none" stroke-width={3} />
+    <path
+      ref={props.ref}
+      d={path()}
+      class="stroke-base-content"
+      fill="transparent"
+      stroke-width={4}
+    />
   );
 };

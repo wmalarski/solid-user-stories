@@ -1,6 +1,9 @@
 import { createMemo, Index, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
+import { createLink } from "~/integrations/router/create-link";
 import { Badge } from "~/ui/badge/badge";
+import { LinkButton } from "~/ui/button/button";
+import { ChevronLeftIcon } from "~/ui/icons/chevron-left-icon";
 import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useSectionConfigsContext, type SectionConfig } from "../contexts/section-configs";
@@ -163,9 +166,14 @@ const CenterRect: Component = () => {
   return (
     <>
       <foreignObject x={0} y={0} width={SECTION_X_OFFSET} height={SECTION_Y_OFFSET}>
-        <div class="grid grid-cols-1 grid-rows-[auto_1fr] p-1 bg-base-300 text-base-content w-full h-full">
-          <span class="font-semibold truncate">{boardState.board().title}</span>
-          <span class="text-sm line-clamp-2 opacity-80">{boardState.board().description}</span>
+        <div class="grid grid-cols-[auto_1fr] gap-1 p-1 bg-base-300 w-full h-full">
+          <LinkButton href={createLink("/", {})} class="mt-1" shape="circle" size="xs">
+            <ChevronLeftIcon class="size-4" />
+          </LinkButton>
+          <div class="grid grid-cols-1 grid-rows-[auto_1fr] text-base-content">
+            <span class="font-semibold truncate">{boardState.board().title}</span>
+            <span class="text-sm line-clamp-2 opacity-80">{boardState.board().description}</span>
+          </div>
         </div>
       </foreignObject>
     </>
