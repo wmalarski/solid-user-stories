@@ -78,8 +78,7 @@ const DeleteSelectedElementDialog: Component = () => {
   const dialogId = createUniqueId();
 
   const boardState = useBoardStateContext();
-
-  const [selectionState] = useSelectionStateContext();
+  const [selectionState, { onSelectionChange }] = useSelectionStateContext();
 
   const onConfirmClick = () => {
     closeDialog(dialogId);
@@ -96,6 +95,8 @@ const DeleteSelectedElementDialog: Component = () => {
     } else {
       edgeCollection.delete(selection.id);
     }
+
+    onSelectionChange(null);
   };
 
   return (
@@ -188,7 +189,7 @@ type ToolContainerProps = ParentProps<{
 
 const ToolContainer: Component<ToolContainerProps> = (props) => {
   return (
-    <div class={cx("flex gap-1 rounded-3xl bg-base-300 p-1 shadow-lg", props.class)}>
+    <div class={cx("flex gap-1 rounded-3xl bg-base-200 p-1 shadow-lg", props.class)}>
       {props.children}
     </div>
   );

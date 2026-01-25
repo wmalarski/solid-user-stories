@@ -35,7 +35,7 @@ import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import { getEdgesByTask, useBoardId, useBoardStateContext } from "../contexts/board-state";
 import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
-import { useSelectionStateContext } from "../contexts/selection-state";
+import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
@@ -304,13 +304,19 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const dialogId = createUniqueId();
 
   const boardState = useBoardStateContext();
+  const isSelected = useIsSelected(() => props.task.id);
   const { onClick, onClose } = useDialogBoardToolUtils();
+  const [_selectoion, { onSelectionChange }] = useSelectionStateContext();
 
   const onConfirmClick = () => {
     closeDialog(dialogId);
 
     const edges = getEdgesByTask(boardState.edges(), props.task.id);
     deleteTaskWithDependencies(props.task.id, edges);
+
+    if (isSelected()) {
+      onSelectionChange(null);
+    }
   };
 
   return (
