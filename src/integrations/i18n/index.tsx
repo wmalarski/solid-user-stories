@@ -44,6 +44,7 @@ const enDict = {
     },
     tools: {
       delete: "Delete",
+      export: "Export as PNG",
       pane: "Hand (panning tool)",
       task: "Task",
     },

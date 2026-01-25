@@ -114,6 +114,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         y={props.task.positionY}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
+        class="stroke-base-300 border-0"
       >
         <div
           data-selected={isSelected()}

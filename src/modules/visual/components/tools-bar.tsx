@@ -8,6 +8,7 @@ import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import { closeDialog, DialogTrigger } from "~/ui/dialog/dialog";
+import { DownloadIcon } from "~/ui/icons/download-icon";
 import { HandIcon } from "~/ui/icons/hand-icon";
 import { MinusIcon } from "~/ui/icons/minus-icon";
 import { PlusIcon } from "~/ui/icons/plus-icon";
@@ -22,6 +23,7 @@ import {
   useToolsStateContext,
   type ToolType,
 } from "../contexts/tools-state";
+import { SVG_SELECTOR } from "../utils/constants";
 
 export const ToolsBar: Component = () => {
   const { t } = useI18n();
@@ -63,6 +65,7 @@ export const ToolsBar: Component = () => {
           </Button>
         </Tooltip>
         <DeleteSelectedElementDialog />
+        <ExportToPngButton />
         <Tooltip data-tip={t("board.forms.update")} placement="top">
           <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
         </Tooltip>
@@ -119,6 +122,50 @@ const DeleteSelectedElementDialog: Component = () => {
         title={t("common.delete")}
       />
     </>
+  );
+};
+
+const ExportToPngButton: Component = () => {
+  const { t } = useI18n();
+
+  const boardState = useBoardStateContext();
+
+  const onClick = async () => {
+    const svgElement = document.querySelector(SVG_SELECTOR);
+
+    if (!svgElement) {
+      return;
+    }
+
+    const { snapdom } = await import("@zumer/snapdom");
+    const result = await snapdom(svgElement, {
+      filter(element) {
+        if (element.nodeName === "BUTTON") {
+          return false;
+        }
+
+        console.log("element", element.nodeName);
+
+        // return element.nodeName !== "foreignObject";
+        return true;
+      },
+      filterMode: "remove",
+      height: 1000,
+      outerTransforms: true,
+      width: 1000,
+    });
+    const filename = `${boardState.board().title}.webp`;
+    await result.download({
+      filename,
+    });
+  };
+
+  return (
+    <Tooltip data-tip={t("board.tools.export")} placement="top">
+      <Button aria-label={t("board.tools.export")} shape="circle" size="sm" onClick={onClick}>
+        <DownloadIcon class="size-5" />
+      </Button>
+    </Tooltip>
   );
 };
 

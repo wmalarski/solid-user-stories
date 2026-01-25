@@ -114,7 +114,7 @@ const BackgroundRect: Component = () => {
     ref: rectRef,
   });
 
-  return <rect ref={setRectRef} x={0} y={0} width="100%" height="100%" fill="transparent" />;
+  return <rect ref={setRectRef} x={0} y={0} width="100%" height="100%" class="fill-base-100" />;
 };
 
 const SvgDefinitions: Component = () => {

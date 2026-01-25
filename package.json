@@ -19,6 +19,7 @@
     "@solidjs/router": "^0.15.4",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/solid-db": "^0.2.3",
+    "@zumer/snapdom": "^2.0.2",
     "d3": "^7.9.0",
     "decode-formdata": "^0.9.0",
     "solid-js": "^1.9.11",

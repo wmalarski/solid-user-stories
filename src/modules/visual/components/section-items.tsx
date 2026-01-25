@@ -165,7 +165,13 @@ const CenterRect: Component = () => {
 
   return (
     <>
-      <foreignObject x={0} y={0} width={SECTION_X_OFFSET} height={SECTION_Y_OFFSET}>
+      <foreignObject
+        class="stroke-0 border-0 overflow-hidden"
+        x={0}
+        y={0}
+        width={SECTION_X_OFFSET}
+        height={SECTION_Y_OFFSET}
+      >
         <div class="grid grid-cols-[auto_1fr] gap-1 p-1 bg-base-300 w-full h-full">
           <LinkButton href={createLink("/", {})} class="mt-1" shape="circle" size="xs">
             <ChevronLeftIcon class="size-4" />
