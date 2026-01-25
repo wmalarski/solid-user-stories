@@ -18,6 +18,7 @@ import {
   DialogBackdrop,
   DialogBox,
   DialogClose,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "~/ui/dialog/dialog";
@@ -159,6 +160,7 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
       <Dialog id={dialogId} onClose={onClose}>
         <DialogBox>
           <DialogTitle>{t("board.sections.insertSection")}</DialogTitle>
+          <DialogDescription>{t("board.sections.insertDescription")}</DialogDescription>
           <form id={formId} onSubmit={onSubmit}>
             <SectionFields />
           </form>
@@ -217,7 +219,8 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
       </DialogTrigger>
       <Dialog id={dialogId} onClose={onClose}>
         <DialogBox>
-          <DialogTitle>{t("common.update")}</DialogTitle>
+          <DialogTitle>{t("board.sections.updateSection")}</DialogTitle>
+          <DialogDescription>{t("board.sections.updateDescription")}</DialogDescription>
           <form id={formId} onSubmit={onSubmit}>
             <SectionFields initialValues={props.section} />
           </form>
@@ -315,7 +318,7 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
       </DialogTrigger>
       <AlertDialog
         onClose={onClose}
-        description={t("board.sections.confirmDelete")}
+        description={t("common.confirm")}
         dialogId={dialogId}
         onSave={onSave}
         title={t("common.delete")}

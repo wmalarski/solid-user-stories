@@ -21,6 +21,7 @@ import {
   DialogBackdrop,
   DialogBox,
   DialogClose,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
   openDialog,
@@ -135,6 +136,7 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
     <Dialog id={props.dialogId} onClose={onClose}>
       <DialogBox>
         <DialogTitle>{t("board.tasks.insertTask")}</DialogTitle>
+        <DialogDescription>{t("board.tasks.insertDescription")}</DialogDescription>
         <form id={formId} onSubmit={onSubmit}>
           <TaskFields />
         </form>
@@ -196,7 +198,8 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
       </DialogTrigger>
       <Dialog id={dialogId} onClose={onClose}>
         <DialogBox>
-          <DialogTitle>{t("common.update")}</DialogTitle>
+          <DialogTitle>{t("board.tasks.updateTask")}</DialogTitle>
+          <DialogDescription>{t("board.tasks.updateDescription")}</DialogDescription>
           <form id={formId} onSubmit={onSubmit}>
             <TaskFields initialValues={props.task} />
           </form>
@@ -313,7 +316,7 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   return (
     <>
       <DialogTrigger
-        aria-label={t("board.tools.delete")}
+        aria-label={t("common.delete")}
         for={dialogId}
         onClick={onClick}
         shape="circle"
@@ -322,7 +325,7 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
         <TrashIcon class="size-4" />
       </DialogTrigger>
       <AlertDialog
-        description={t("board.sections.confirmDelete")}
+        description={t("common.confirm")}
         dialogId={dialogId}
         onClose={onClose}
         onSave={onConfirmClick}

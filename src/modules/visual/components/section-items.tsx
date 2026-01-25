@@ -137,7 +137,7 @@ const SectionItemContent: Component<SectionItemContentProps> = (props) => {
 
   return (
     <div class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[1fr_auto] p-2">
-      <span class="text-sm truncate font-semibold">{props.config.section.name}</span>
+      <span class="text-sm truncate font-semibold min-h-4">{props.config.section.name}</span>
       <div
         class={cx("flex gap-1 justify-end", {
           "flex-col items-end": isVertical(),

@@ -12,6 +12,7 @@ import {
   DialogBackdrop,
   DialogBox,
   DialogClose,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "~/ui/dialog/dialog";
@@ -52,7 +53,7 @@ export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
   return (
     <>
       <DialogTrigger
-        aria-label={t("board.tasks.updateTask")}
+        aria-label={t("board.forms.update")}
         shape="circle"
         size="sm"
         for={dialogId}
@@ -62,7 +63,8 @@ export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
       </DialogTrigger>
       <Dialog onClose={props.onClose} id={dialogId}>
         <DialogBox>
-          <DialogTitle>{t("common.update")}</DialogTitle>
+          <DialogTitle>{t("board.forms.update")}</DialogTitle>
+          <DialogDescription>{t("board.forms.updateDescription")}</DialogDescription>
           <form id={formId} onSubmit={onSubmit}>
             <BoardFields initialValues={props.board} />
           </form>

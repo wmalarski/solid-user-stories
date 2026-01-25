@@ -13,6 +13,7 @@ import {
   DialogBackdrop,
   DialogBox,
   DialogClose,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "~/ui/dialog/dialog";
@@ -83,6 +84,7 @@ export const InsertBoardDialog: Component = () => {
       <Dialog id={dialogId}>
         <DialogBox>
           <DialogTitle>{t("board.forms.createBoard")}</DialogTitle>
+          <DialogDescription>{t("board.forms.insertDescription")}</DialogDescription>
           <form id={formId} onSubmit={onSubmit}>
             <BoardFields />
           </form>

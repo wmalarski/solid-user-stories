@@ -7,6 +7,7 @@ import {
   DialogBackdrop,
   DialogBox,
   DialogClose,
+  DialogDescription,
   DialogTitle,
 } from "../dialog/dialog";
 
@@ -26,6 +27,7 @@ export const AlertDialog: Component<AlertDialogProps> = (props) => {
     <Dialog open={props.open} onClose={props.onClose} id={props.dialogId}>
       <DialogBox>
         <DialogTitle>{props.title}</DialogTitle>
+        <DialogDescription>{props.description}</DialogDescription>
         <DialogActions>
           <DialogClose />
           <Button color="primary" type="button" onClick={props.onSave}>

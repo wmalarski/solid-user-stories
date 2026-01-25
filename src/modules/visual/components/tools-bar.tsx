@@ -100,9 +100,9 @@ const DeleteSelectedElementDialog: Component = () => {
 
   return (
     <>
-      <Tooltip data-tip={t("board.tools.delete")} placement="top">
+      <Tooltip data-tip={t("common.delete")} placement="top">
         <DialogTrigger
-          aria-label={t("board.tools.delete")}
+          aria-label={t("common.delete")}
           for={dialogId}
           shape="circle"
           size="sm"
@@ -112,7 +112,7 @@ const DeleteSelectedElementDialog: Component = () => {
         </DialogTrigger>
       </Tooltip>
       <AlertDialog
-        description={t("board.sections.confirmDelete")}
+        description={t("common.confirm")}
         dialogId={dialogId}
         onSave={onConfirmClick}
         title={t("common.delete")}

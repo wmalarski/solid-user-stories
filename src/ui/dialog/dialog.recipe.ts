@@ -25,4 +25,6 @@ export const modalBackdropRecipe = tv({ base: "modal-backdrop" });
 
 export const modalActionRecipe = tv({ base: "modal-action" });
 
-export const modalTitleRecipe = tv({ base: "pb-6 text-xl" });
+export const modalTitleRecipe = tv({ base: "pb-4 text-xl" });
+
+export const modalDescriptionRecipe = tv({ base: "pb-4 text-sm opacity-70" });

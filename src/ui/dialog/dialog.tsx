@@ -6,6 +6,7 @@ import {
   modalActionRecipe,
   modalBackdropRecipe,
   modalBoxRecipe,
+  modalDescriptionRecipe,
   modalRecipe,
   modalTitleRecipe,
 } from "./dialog.recipe";
@@ -50,6 +51,12 @@ export type DialogTitleProps = ComponentProps<"h3">;
 export const DialogTitle: Component<DialogTitleProps> = (props) => {
   // oxlint-disable-next-line heading-has-content
   return <h3 {...props} class={modalTitleRecipe({ class: props.class })} />;
+};
+
+export type DialogDescriptionProps = ComponentProps<"p">;
+
+export const DialogDescription: Component<DialogDescriptionProps> = (props) => {
+  return <p {...props} class={modalDescriptionRecipe({ class: props.class })} />;
 };
 
 export type DialogBackdropProps = Record<string, never>;

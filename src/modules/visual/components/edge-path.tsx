@@ -51,17 +51,6 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
   return (
     <>
       <path
-        ref={setRef}
-        d={path()}
-        fill="none"
-        class={cx({
-          "stroke-accent opacity-5": isSelected(),
-          "stroke-transparent": !isSelected(),
-        })}
-        filter="url(#task-shadow)"
-        stroke-width={16}
-      />
-      <path
         d={path()}
         fill="none"
         class="stroke-accent"
@@ -78,6 +67,17 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
           repeatCount="indefinite"
         />
       </path>
+      <path
+        ref={setRef}
+        d={path()}
+        fill="none"
+        class={cx({
+          "stroke-accent opacity-5": isSelected(),
+          "stroke-transparent": !isSelected(),
+        })}
+        filter="url(#task-shadow)"
+        stroke-width={16}
+      />
       <Show when={isSelected()}>
         <EdgeHandle edge={props.edge} source={props.source} target={props.target} />
       </Show>
