@@ -1,6 +1,10 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
-import { sectionCollection, taskCollection } from "~/integrations/tanstack-db/collections";
-import { useBoardStateContext } from "../contexts/board-state";
+import { sectionCollection } from "~/integrations/tanstack-db/collections";
+import {
+  getDragStartTaskState,
+  updateTaskPositions,
+  useBoardStateContext,
+} from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useSectionConfigsContext, type SectionConfig } from "../contexts/section-configs";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
@@ -69,18 +73,12 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
 
   createD3DragElement({
     onDragStarted() {
-      let maxNotDraggedPosition = 0;
-      const draggedTasks = new Map<string, number>();
-      for (const entry of boardState.tasks()) {
-        if (entry.positionY > props.config.end + SECTION_Y_OFFSET) {
-          draggedTasks.set(entry.id, entry.positionY);
-        } else {
-          maxNotDraggedPosition = Math.max(
-            maxNotDraggedPosition,
-            entry.positionY - SECTION_Y_OFFSET + 10,
-          );
-        }
-      }
+      const { draggedTasks, maxNotDraggedPosition } = getDragStartTaskState({
+        attribute: "positionY",
+        offset: SECTION_Y_OFFSET,
+        position: props.config.end,
+        tasks: boardState.tasks(),
+      });
 
       setMaxNotDraggedPosition(maxNotDraggedPosition);
       setStartPosition(props.config.end);
@@ -88,6 +86,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
     },
     onDragged(event) {
       const transformValue = transform();
+
       const updatedY = (event.y - transformValue.y) / transformValue.k - SECTION_Y_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
       const size = withLimit - props.config.start;
@@ -99,14 +98,11 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       const shift = withLimit - startPosition();
       const draggedTasksValue = draggedTasks();
 
-      if (draggedTasksValue.size > 0) {
-        taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
-          for (const draft of drafts) {
-            const position = draggedTasksValue.get(draft.id) ?? draft.positionY;
-            draft.positionY = position + shift;
-          }
-        });
-      }
+      updateTaskPositions({
+        attribute: "positionY",
+        shift,
+        update: draggedTasksValue,
+      });
     },
     ref,
   });
@@ -147,18 +143,12 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
 
   createD3DragElement({
     onDragStarted() {
-      let maxNotDraggedPosition = 0;
-      const draggedTasks = new Map<string, number>();
-      for (const entry of boardState.tasks()) {
-        if (entry.positionX > props.config.end + SECTION_X_OFFSET) {
-          draggedTasks.set(entry.id, entry.positionX);
-        } else {
-          maxNotDraggedPosition = Math.max(
-            maxNotDraggedPosition,
-            entry.positionX - SECTION_X_OFFSET + 10,
-          );
-        }
-      }
+      const { draggedTasks, maxNotDraggedPosition } = getDragStartTaskState({
+        attribute: "positionX",
+        offset: SECTION_X_OFFSET,
+        position: props.config.end,
+        tasks: boardState.tasks(),
+      });
 
       setMaxNotDraggedPosition(maxNotDraggedPosition);
       setStartPosition(props.config.end);
@@ -166,6 +156,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
     },
     onDragged(event) {
       const transformValue = transform();
+
       const updatedX = (event.x - transformValue.x) / transformValue.k - SECTION_X_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
       const size = withLimit - props.config.start;
@@ -177,14 +168,11 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       const shift = withLimit - startPosition();
       const draggedTasksValue = draggedTasks();
 
-      if (draggedTasksValue.size > 0) {
-        taskCollection.update([...draggedTasksValue.keys()], (drafts) => {
-          for (const draft of drafts) {
-            const position = draggedTasksValue.get(draft.id) ?? draft.positionX;
-            draft.positionX = position + shift;
-          }
-        });
-      }
+      updateTaskPositions({
+        attribute: "positionX",
+        shift,
+        update: draggedTasksValue,
+      });
     },
     ref,
   });
