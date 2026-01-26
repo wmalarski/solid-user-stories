@@ -1,7 +1,9 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
 import { sectionCollection } from "~/integrations/tanstack-db/collections";
 import {
+  getDragStartEdgeState,
   getDragStartTaskState,
+  updateEdgePositions,
   updateTaskPositions,
   useBoardStateContext,
 } from "../contexts/board-state";
@@ -138,6 +140,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
 
   const [ref, setRef] = createSignal<SVGElement>();
   const [draggedTasks, setDraggedTasks] = createSignal<Map<string, number>>(new Map());
+  const [draggedEdges, setDraggedEdges] = createSignal<Map<string, number>>(new Map());
   const [maxNotDraggedPosition, setMaxNotDraggedPosition] = createSignal(0);
   const [startPosition, setStartPosition] = createSignal<number>(0);
 
@@ -150,9 +153,16 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
         tasks: boardState.tasks(),
       });
 
+      const { draggedEdges } = getDragStartEdgeState({
+        edges: boardState.edges(),
+        offset: SECTION_X_OFFSET,
+        position: props.config.end,
+      });
+
       setMaxNotDraggedPosition(maxNotDraggedPosition);
       setStartPosition(props.config.end);
       setDraggedTasks(draggedTasks);
+      setDraggedEdges(draggedEdges);
     },
     onDragged(event) {
       const transformValue = transform();
@@ -166,13 +176,9 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       });
 
       const shift = withLimit - startPosition();
-      const draggedTasksValue = draggedTasks();
 
-      updateTaskPositions({
-        attribute: "positionX",
-        shift,
-        update: draggedTasksValue,
-      });
+      updateTaskPositions({ attribute: "positionX", shift, update: draggedTasks() });
+      updateEdgePositions({ shift, update: draggedEdges() });
     },
     ref,
   });

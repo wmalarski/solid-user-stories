@@ -107,6 +107,25 @@ export const getDragStartTaskState = ({
   return { draggedTasks, maxNotDraggedPosition };
 };
 
+type GetDragStartEdgeStateArgs = {
+  position: number;
+  edges: EdgeEntry[];
+  offset: number;
+};
+
+export const getDragStartEdgeState = ({ position, edges, offset }: GetDragStartEdgeStateArgs) => {
+  const draggedEdges = new Map<string, number>();
+
+  for (const entry of edges) {
+    const entryPosition = entry.edge.breakX;
+    if (entryPosition > position + offset) {
+      draggedEdges.set(entry.edge.id, entryPosition);
+    }
+  }
+
+  return { draggedEdges };
+};
+
 type UpdateTaskPositionsArgs = {
   update: Map<string, number>;
   shift: number;
