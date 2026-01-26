@@ -1,5 +1,5 @@
 import { decode } from "decode-formdata";
-import { createUniqueId, type Component, type ComponentProps } from "solid-js";
+import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import {
@@ -29,7 +29,7 @@ import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { PlusIcon } from "~/ui/icons/plus-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
-import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
+import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
 import { useBoardId, useBoardStateContext } from "../contexts/board-state";
 import { useSectionConfigsContext, type SectionConfigs } from "../contexts/section-configs";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
@@ -90,6 +90,8 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
 
+  const [issues, setIssues] = createSignal<FormIssues>();
+
   const shiftHorizontalSections = ({ index, sectionId, sectionConfigs }: ShiftSectionArgs) => {
     const sectionIds = sectionConfigs.x.map((config) => config.section.id);
     sectionIds.splice(index + 1, 0, sectionId);
@@ -115,6 +117,7 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
     const parsed = await v.safeParseAsync(SectionFieldsSchema, decode(formData));
 
     if (!parsed.success) {
+      setIssues(parseFormValidationError(parsed.issues));
       return;
     }
 
@@ -162,7 +165,7 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
           <DialogTitle>{t("board.sections.insertSection")}</DialogTitle>
           <DialogDescription>{t("board.sections.insertDescription")}</DialogDescription>
           <form id={formId} onSubmit={onSubmit}>
-            <SectionFields />
+            <SectionFields issues={issues()} />
           </form>
           <DialogActions>
             <DialogClose />
@@ -186,6 +189,9 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
+
+  const [issues, setIssues] = createSignal<FormIssues>();
+
   const { onClick, onClose } = useDialogBoardToolUtils();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
@@ -198,6 +204,7 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
     const parsed = await v.safeParseAsync(SectionFieldsSchema, decode(formData));
 
     if (!parsed.success) {
+      setIssues(parseFormValidationError(parsed.issues));
       return;
     }
 
@@ -222,7 +229,7 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
           <DialogTitle>{t("board.sections.updateSection")}</DialogTitle>
           <DialogDescription>{t("board.sections.updateDescription")}</DialogDescription>
           <form id={formId} onSubmit={onSubmit}>
-            <SectionFields initialValues={props.section} />
+            <SectionFields initialValues={props.section} issues={issues()} />
           </form>
           <DialogActions>
             <DialogClose />

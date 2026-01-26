@@ -144,7 +144,7 @@ const ExportToPngButton: Component = () => {
           return false;
         }
 
-        console.log("element", element.nodeName);
+        // console.log("element", element.nodeName);
 
         // return element.nodeName !== "foreignObject";
         return true;

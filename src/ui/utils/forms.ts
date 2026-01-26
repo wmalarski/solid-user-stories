@@ -1,5 +1,3 @@
-import { type Action, useAction } from "@solidjs/router";
-import type { ComponentProps } from "solid-js";
 import type * as v from "valibot";
 
 export type FormIssues = {
@@ -16,11 +14,6 @@ export type FormSuccess<T = any> = {
 
 // oxlint-disable-next-line no-explicit-any
 export type FormResult<T = any> = FormIssues | FormSuccess<T>;
-
-// oxlint-disable-next-line no-explicit-any
-export const parseFormSuccessResult = <T = any>(data: T): FormSuccess<T> => {
-  return { data, success: true };
-};
 
 export const parseFormValidationError = (issues: v.BaseIssue<unknown>[]): FormIssues => {
   return {
@@ -52,33 +45,4 @@ export const getInvalidStateProps = ({ errorMessageId, isInvalid }: GetInvalidSt
     "aria-describedby": errorMessageId,
     "aria-invalid": true,
   };
-};
-
-type UseActionOnSubmitArgs = {
-  onSuccess: () => void;
-  resetOnSuccess?: boolean;
-  action: Action<[form: FormData], FormResult, [form: FormData]>;
-};
-
-export const useActionOnSubmit = (args: UseActionOnSubmitArgs) => {
-  const action = useAction(args.action);
-
-  const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
-    event.preventDefault();
-
-    const formData = new FormData(event.currentTarget);
-    const result = await action(formData);
-
-    if (!result?.success) {
-      return;
-    }
-
-    args.onSuccess();
-
-    if (args.resetOnSuccess) {
-      event.currentTarget.reset();
-    }
-  };
-
-  return onSubmit;
 };

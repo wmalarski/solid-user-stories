@@ -1,5 +1,5 @@
 import { decode } from "decode-formdata";
-import { createUniqueId, type Component, type ComponentProps } from "solid-js";
+import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import { boardsCollection } from "~/integrations/tanstack-db/collections";
@@ -17,6 +17,7 @@ import {
   DialogTrigger,
 } from "~/ui/dialog/dialog";
 import { SettingsIcon } from "~/ui/icons/settings-icon";
+import { parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
 import { BoardFields, BoardFieldsSchema } from "./board-fields";
 
 type UpdateBoardDialogProps = {
@@ -31,6 +32,8 @@ export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
   const formId = createUniqueId();
   const dialogId = createUniqueId();
 
+  const [issues, setIssues] = createSignal<FormIssues>();
+
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
 
@@ -39,6 +42,7 @@ export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
     const parsed = await v.safeParseAsync(BoardFieldsSchema, decode(formData));
 
     if (!parsed.success) {
+      setIssues(parseFormValidationError(parsed.issues));
       return;
     }
 
@@ -66,7 +70,7 @@ export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
           <DialogTitle>{t("board.forms.update")}</DialogTitle>
           <DialogDescription>{t("board.forms.updateDescription")}</DialogDescription>
           <form id={formId} onSubmit={onSubmit}>
-            <BoardFields initialValues={props.board} />
+            <BoardFields initialValues={props.board} issues={issues()} />
           </form>
           <DialogActions>
             <DialogClose />

@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { decode } from "decode-formdata";
-import { createUniqueId, type Component, type ComponentProps } from "solid-js";
+import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import { createLink } from "~/integrations/router/create-link";
@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "~/ui/dialog/dialog";
 import { PlusIcon } from "~/ui/icons/plus-icon";
+import { parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
 import { BoardFields, BoardFieldsSchema } from "./board-fields";
 
 export const InsertBoardDialog: Component = () => {
@@ -28,6 +29,8 @@ export const InsertBoardDialog: Component = () => {
   const formId = createUniqueId();
   const dialogId = createUniqueId();
 
+  const [issues, setIssues] = createSignal<FormIssues>();
+
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
 
@@ -36,6 +39,7 @@ export const InsertBoardDialog: Component = () => {
     const parsed = await v.safeParseAsync(BoardFieldsSchema, decode(formData));
 
     if (!parsed.success) {
+      setIssues(parseFormValidationError(parsed.issues));
       return;
     }
 
@@ -86,7 +90,7 @@ export const InsertBoardDialog: Component = () => {
           <DialogTitle>{t("board.forms.createBoard")}</DialogTitle>
           <DialogDescription>{t("board.forms.insertDescription")}</DialogDescription>
           <form id={formId} onSubmit={onSubmit}>
-            <BoardFields />
+            <BoardFields issues={issues()} />
           </form>
           <DialogActions>
             <DialogClose />

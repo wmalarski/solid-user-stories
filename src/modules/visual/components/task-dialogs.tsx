@@ -32,7 +32,7 @@ import { FormError } from "~/ui/form-error/form-error";
 import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
-import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
+import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
 import { getEdgesByTask, useBoardId, useBoardStateContext } from "../contexts/board-state";
 import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
@@ -95,6 +95,8 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
 
   const formId = createUniqueId();
 
+  const [issues, setIssues] = createSignal<FormIssues>();
+
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
 
@@ -104,6 +106,7 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
     const positionValue = props.position;
 
     if (!parsed.success) {
+      setIssues(parseFormValidationError(parsed.issues));
       return;
     }
 
@@ -138,7 +141,7 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
         <DialogTitle>{t("board.tasks.insertTask")}</DialogTitle>
         <DialogDescription>{t("board.tasks.insertDescription")}</DialogDescription>
         <form id={formId} onSubmit={onSubmit}>
-          <TaskFields />
+          <TaskFields issues={issues()} />
         </form>
         <DialogActions>
           <DialogClose />
@@ -161,6 +164,7 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
+  const [issues, setIssues] = createSignal<FormIssues>();
 
   const { onClick, onClose } = useDialogBoardToolUtils();
 
@@ -172,6 +176,7 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
     const parsed = await v.safeParseAsync(TaskFieldsSchema, decode(formData));
 
     if (!parsed.success) {
+      setIssues(parseFormValidationError(parsed.issues));
       return;
     }
 
@@ -201,7 +206,7 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
           <DialogTitle>{t("board.tasks.updateTask")}</DialogTitle>
           <DialogDescription>{t("board.tasks.updateDescription")}</DialogDescription>
           <form id={formId} onSubmit={onSubmit}>
-            <TaskFields initialValues={props.task} />
+            <TaskFields initialValues={props.task} issues={issues()} />
           </form>
           <DialogActions>
             <DialogClose />
