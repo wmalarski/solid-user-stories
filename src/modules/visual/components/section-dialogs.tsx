@@ -4,6 +4,7 @@ import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import {
   boardsCollection,
+  edgeCollection,
   sectionCollection,
   taskCollection,
 } from "~/integrations/tanstack-db/collections";
@@ -30,7 +31,7 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
-import { useBoardId, useBoardStateContext } from "../contexts/board-state";
+import { useBoardId, useBoardStateContext, type EdgeEntry } from "../contexts/board-state";
 import { useSectionConfigsContext, type SectionConfigs } from "../contexts/section-configs";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
 
@@ -38,45 +39,9 @@ const SectionFieldsSchema = v.object({
   name: v.string(),
 });
 
-type ShiftSectionArgs = {
-  index: number;
-  sectionId: string;
-  sectionConfigs: SectionConfigs;
-};
-
-type ShiftTasksArgs = {
-  shift: number;
-  position: number;
-  tasks: TaskModel[];
-};
-
 type InsertSectionDialogProps = {
   orientation: SectionModel["orientation"];
   index: number;
-};
-
-const shiftHorizontalTasks = ({ shift, tasks, position }: ShiftTasksArgs) => {
-  const tasksToMove = tasks.filter((entry) => entry.positionX > position).map((entry) => entry.id);
-
-  if (tasksToMove.length > 0) {
-    taskCollection.update(tasksToMove, (drafts) => {
-      for (const draft of drafts) {
-        draft.positionX += shift;
-      }
-    });
-  }
-};
-
-const shiftVerticalTasks = ({ shift, tasks, position }: ShiftTasksArgs) => {
-  const tasksToMove = tasks.filter((entry) => entry.positionY > position).map((entry) => entry.id);
-
-  if (tasksToMove.length > 0) {
-    taskCollection.update(tasksToMove, (drafts) => {
-      for (const draft of drafts) {
-        draft.positionY += shift;
-      }
-    });
-  }
 };
 
 export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) => {
@@ -91,22 +56,6 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
   const dialogId = createUniqueId();
 
   const [issues, setIssues] = createSignal<FormIssues>();
-
-  const shiftHorizontalSections = ({ index, sectionId, sectionConfigs }: ShiftSectionArgs) => {
-    const sectionIds = sectionConfigs.x.map((config) => config.section.id);
-    sectionIds.splice(index + 1, 0, sectionId);
-    boardsCollection.update(boardId(), (draft) => {
-      draft.sectionXOrder = sectionIds;
-    });
-  };
-
-  const shiftVerticalSections = ({ index, sectionId, sectionConfigs }: ShiftSectionArgs) => {
-    const sectionIds = sectionConfigs.y.map((config) => config.section.id);
-    sectionIds.splice(index + 1, 0, sectionId);
-    boardsCollection.update(boardId(), (draft) => {
-      draft.sectionYOrder = sectionIds;
-    });
-  };
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -123,6 +72,7 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
 
     const sectionConfigsValue = sectionConfigs();
     const tasks = boardState.tasks();
+    const edges = boardState.edges();
 
     const shift = 500;
     const sectionId = createId();
@@ -135,15 +85,24 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
     });
 
     if (props.orientation === "horizontal") {
+      const position = sectionConfigsValue.x[props.index].end;
+      shiftHorizontalTasks({ position, shift, tasks });
+      shiftHorizontalEdges({ edges, position, shift });
       shiftHorizontalSections({
+        boardId: boardId(),
         index: props.index,
-        sectionConfigs: sectionConfigsValue,
+        sectionConfigsValue,
         sectionId,
       });
-      shiftHorizontalTasks({ position: sectionConfigsValue.x[props.index].end, shift, tasks });
     } else {
-      shiftVerticalSections({ index: props.index, sectionConfigs: sectionConfigsValue, sectionId });
-      shiftVerticalTasks({ position: sectionConfigsValue.y[props.index].end, shift, tasks });
+      const position = sectionConfigsValue.y[props.index].end;
+      shiftVerticalTasks({ position, shift, tasks });
+      shiftVerticalSections({
+        boardId: boardId(),
+        index: props.index,
+        sectionConfigsValue,
+        sectionId,
+      });
     }
 
     event.currentTarget.reset();
@@ -297,6 +256,7 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
     const orientation = props.section.orientation;
     const endPosition = props.endPosition;
     const tasks = boardState.tasks();
+    const edges = boardState.edges();
 
     boardsCollection.update(boardId(), (draft) => {
       draft.sectionXOrder = draft.sectionXOrder.filter((id) => id !== sectionId);
@@ -305,6 +265,7 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
 
     if (orientation === "horizontal") {
       shiftHorizontalTasks({ position: endPosition, shift, tasks });
+      shiftHorizontalEdges({ edges, position: endPosition, shift });
     } else {
       shiftVerticalTasks({ position: endPosition, shift, tasks });
     }
@@ -332,4 +293,87 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
       />
     </>
   );
+};
+
+type ShiftSectionArgs = {
+  index: number;
+  sectionId: string;
+  boardId: string;
+  sectionConfigsValue: SectionConfigs;
+};
+
+const shiftHorizontalSections = ({
+  index,
+  boardId,
+  sectionId,
+  sectionConfigsValue,
+}: ShiftSectionArgs) => {
+  const sectionIds = sectionConfigsValue.x.map((config) => config.section.id);
+  sectionIds.splice(index + 1, 0, sectionId);
+  boardsCollection.update(boardId, (draft) => {
+    draft.sectionXOrder = sectionIds;
+  });
+};
+
+const shiftVerticalSections = ({
+  index,
+  boardId,
+  sectionId,
+  sectionConfigsValue,
+}: ShiftSectionArgs) => {
+  const sectionIds = sectionConfigsValue.y.map((config) => config.section.id);
+  sectionIds.splice(index + 1, 0, sectionId);
+  boardsCollection.update(boardId, (draft) => {
+    draft.sectionYOrder = sectionIds;
+  });
+};
+
+type ShiftTasksArgs = {
+  shift: number;
+  position: number;
+  tasks: TaskModel[];
+};
+
+const shiftHorizontalTasks = ({ shift, tasks, position }: ShiftTasksArgs) => {
+  const tasksToMove = tasks.filter((entry) => entry.positionX > position).map((entry) => entry.id);
+
+  if (tasksToMove.length > 0) {
+    taskCollection.update(tasksToMove, (drafts) => {
+      for (const draft of drafts) {
+        draft.positionX += shift;
+      }
+    });
+  }
+};
+
+const shiftVerticalTasks = ({ shift, tasks, position }: ShiftTasksArgs) => {
+  const tasksToMove = tasks.filter((entry) => entry.positionY > position).map((entry) => entry.id);
+
+  if (tasksToMove.length > 0) {
+    taskCollection.update(tasksToMove, (drafts) => {
+      for (const draft of drafts) {
+        draft.positionY += shift;
+      }
+    });
+  }
+};
+
+type ShiftEdgesArgs = {
+  shift: number;
+  position: number;
+  edges: EdgeEntry[];
+};
+
+const shiftHorizontalEdges = ({ shift, edges, position }: ShiftEdgesArgs) => {
+  const egesToMove = edges
+    .filter((entry) => entry.edge.breakX > position)
+    .map((entry) => entry.edge.id);
+
+  if (egesToMove.length > 0) {
+    edgeCollection.update(egesToMove, (drafts) => {
+      for (const draft of drafts) {
+        draft.breakX += shift;
+      }
+    });
+  }
 };

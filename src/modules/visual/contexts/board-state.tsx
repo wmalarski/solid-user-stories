@@ -37,6 +37,7 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
 const BoardStateContext = createContext<ReturnType<typeof createBoardStateContext> | null>(null);
 
 type EdgeEntries = ReturnType<ReturnType<typeof createBoardStateContext>["edges"]>;
+export type EdgeEntry = EdgeEntries[0];
 
 export const useBoardStateContext = () => {
   const context = useContext(BoardStateContext);
@@ -61,8 +62,16 @@ export const BoardStateProvider: Component<BoardStateProviderProps> = (props) =>
   return <BoardStateContext.Provider value={value}>{props.children}</BoardStateContext.Provider>;
 };
 
-export const getEdgesByTask = (edges: EdgeEntries, taskId: string) => {
+const getEdgesByTask = (edges: EdgeEntries, taskId: string) => {
   return edges
     .map((entry) => entry.edge)
     .filter((edge) => edge.source === taskId || edge.target === taskId);
+};
+
+export const deleteTaskWithDependencies = (taskId: string, edges: EdgeEntries) => {
+  const taskEdges = getEdgesByTask(edges, taskId);
+  if (edges.length > 0) {
+    edgeCollection.delete(taskEdges.map((edge) => edge.id));
+  }
+  taskCollection.delete(taskId);
 };

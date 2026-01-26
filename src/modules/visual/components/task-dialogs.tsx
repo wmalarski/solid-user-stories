@@ -11,7 +11,6 @@ import { useI18n } from "~/integrations/i18n";
 import { taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
-import { deleteTaskWithDependencies } from "~/integrations/tanstack-db/utils";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
@@ -33,7 +32,11 @@ import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
-import { getEdgesByTask, useBoardId, useBoardStateContext } from "../contexts/board-state";
+import {
+  deleteTaskWithDependencies,
+  useBoardId,
+  useBoardStateContext,
+} from "../contexts/board-state";
 import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
@@ -316,8 +319,7 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const onConfirmClick = () => {
     closeDialog(dialogId);
 
-    const edges = getEdgesByTask(boardState.edges(), props.task.id);
-    deleteTaskWithDependencies(props.task.id, edges);
+    deleteTaskWithDependencies(props.task.id, boardState.edges());
 
     if (isSelected()) {
       onSelectionChange(null);

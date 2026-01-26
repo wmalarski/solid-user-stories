@@ -2,7 +2,6 @@ import { createUniqueId, type Component, type ParentProps } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
 import { edgeCollection } from "~/integrations/tanstack-db/collections";
-import { deleteTaskWithDependencies } from "~/integrations/tanstack-db/utils";
 import { ThemeToggle } from "~/integrations/theme/theme-toggle";
 import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
@@ -15,7 +14,7 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Tooltip } from "~/ui/tooltip/tooltip";
-import { getEdgesByTask, useBoardStateContext } from "../contexts/board-state";
+import { deleteTaskWithDependencies, useBoardStateContext } from "../contexts/board-state";
 import { useBoardTransformContext } from "../contexts/board-transform";
 import { useSelectionStateContext } from "../contexts/selection-state";
 import {
@@ -93,8 +92,7 @@ const DeleteSelectedElementDialog: Component = () => {
     }
 
     if (selection.kind === "task") {
-      const edges = getEdgesByTask(boardState.edges(), selection.id);
-      deleteTaskWithDependencies(selection.id, edges);
+      deleteTaskWithDependencies(selection.id, boardState.edges());
     } else {
       edgeCollection.delete(selection.id);
     }
