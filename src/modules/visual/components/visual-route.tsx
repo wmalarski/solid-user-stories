@@ -21,7 +21,7 @@ import {
   SectionGridPaths,
   SectionGridStaticPaths,
 } from "./section-grid-paths";
-import { SectionItems } from "./section-items";
+import { ExportableSectionItems, SectionItems } from "./section-items";
 import { InsertTaskByToolDialog } from "./task-dialogs";
 import { ExportableTaskGroup, TaskGroup } from "./task-group";
 import { ToolsBar, ZoomBar } from "./tools-bar";
@@ -142,6 +142,17 @@ const SvgDefinitions: Component = () => {
         <feGaussianBlur stdDeviation="10" />
         <feBlend in="SourceGraphic" in2="blurOut" />
       </filter>
+      <filter id="dropshadow">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+        <feOffset dx="2" dy="2" />
+        <feComponentTransfer>
+          <feFuncA type="linear" slope="0.2" />
+        </feComponentTransfer>
+        <feMerge>
+          <feMergeNode />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
     </defs>
   );
 };
@@ -171,6 +182,7 @@ const ExportableBoard: Component = () => {
         <ExportableSectionGridPaths />
         <For each={boardState.tasks()}>{(task) => <ExportableTaskGroup task={task} />}</For>
         <For each={boardState.edges()}>{(entry) => <ExportableEdgePath entry={entry} />}</For>
+        <ExportableSectionItems />
       </svg>
     </Show>
   );

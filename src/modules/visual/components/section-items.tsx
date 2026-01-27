@@ -31,11 +31,41 @@ export const SectionItems: Component = () => {
   );
 };
 
+export const ExportableSectionItems: Component = () => {
+  const sectionConfigs = useSectionConfigsContext();
+
+  return (
+    <>
+      <rect
+        class="fill-base-300"
+        x={0}
+        y={0}
+        height={SECTION_Y_OFFSET}
+        width="100%"
+        filter="url(#dropshadow)"
+      />
+      <rect
+        class="fill-base-300"
+        x={0}
+        y={0}
+        height="100%"
+        width={SECTION_X_OFFSET}
+        filter="url(#dropshadow)"
+      />
+      <Index each={sectionConfigs().x}>
+        {(entry) => <ExportableHorizontalItemRect config={entry()} />}
+      </Index>
+      <Index each={sectionConfigs().y}>
+        {(entry) => <ExportableVerticalItemRect config={entry()} />}
+      </Index>
+    </>
+  );
+};
+
 const HorizontalBackgroundRect: Component = () => {
   return (
     <>
       <rect
-        class="opacity-30"
         x={SECTION_X_OFFSET}
         y={0}
         height={SECTION_Y_OFFSET - 2}
@@ -78,11 +108,9 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
   const width = createMemo(() => props.config.section.size * transform().k);
 
   return (
-    <>
-      <foreignObject width={width()} x={transformed()} y={0} height={SECTION_Y_OFFSET}>
-        <SectionItemContent config={props.config} totalLength={props.totalLength} />
-      </foreignObject>
-    </>
+    <foreignObject width={width()} x={transformed()} y={0} height={SECTION_Y_OFFSET}>
+      <SectionItemContent config={props.config} totalLength={props.totalLength} />
+    </foreignObject>
   );
 };
 
@@ -101,11 +129,9 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
   const height = createMemo(() => props.config.section.size * transform().k);
 
   return (
-    <>
-      <foreignObject height={height()} x={0} y={transformed()} width={SECTION_X_OFFSET}>
-        <SectionItemContent config={props.config} totalLength={props.totalLength} />
-      </foreignObject>
-    </>
+    <foreignObject height={height()} x={0} y={transformed()} width={SECTION_X_OFFSET}>
+      <SectionItemContent config={props.config} totalLength={props.totalLength} />
+    </foreignObject>
   );
 };
 
@@ -164,24 +190,54 @@ const CenterRect: Component = () => {
   const boardState = useBoardStateContext();
 
   return (
-    <>
-      <foreignObject
-        class="stroke-0 border-0 overflow-hidden"
-        x={0}
-        y={0}
-        width={SECTION_X_OFFSET}
-        height={SECTION_Y_OFFSET}
-      >
-        <div class="grid grid-cols-[auto_1fr] gap-1 p-1 bg-base-300 w-full h-full">
-          <LinkButton href={createLink("/", {})} class="mt-1" shape="circle" size="xs">
-            <ChevronLeftIcon class="size-4" />
-          </LinkButton>
-          <div class="grid grid-cols-1 grid-rows-[auto_1fr] text-base-content">
-            <span class="font-semibold truncate">{boardState.board().title}</span>
-            <span class="text-sm line-clamp-2 opacity-80">{boardState.board().description}</span>
-          </div>
+    <foreignObject
+      class="stroke-0 border-0 overflow-hidden"
+      x={0}
+      y={0}
+      width={SECTION_X_OFFSET}
+      height={SECTION_Y_OFFSET}
+    >
+      <div class="grid grid-cols-[auto_1fr] gap-1 p-1 bg-base-300 w-full h-full">
+        <LinkButton href={createLink("/", {})} class="mt-1" shape="circle" size="xs">
+          <ChevronLeftIcon class="size-4" />
+        </LinkButton>
+        <div class="grid grid-cols-1 grid-rows-[auto_1fr] text-base-content">
+          <span class="font-semibold truncate">{boardState.board().title}</span>
+          <span class="text-sm line-clamp-2 opacity-80">{boardState.board().description}</span>
         </div>
-      </foreignObject>
-    </>
+      </div>
+    </foreignObject>
+  );
+};
+
+type ExportableHorizontalItemRectProps = {
+  config: SectionConfig;
+};
+
+const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps> = (props) => {
+  return (
+    <rect
+      width={props.config.section.size}
+      x={props.config.start + SECTION_X_OFFSET}
+      y={0}
+      height={SECTION_Y_OFFSET}
+      class="fill-base-200"
+    />
+  );
+};
+
+type ExportableVerticalItemRectProps = {
+  config: SectionConfig;
+};
+
+const ExportableVerticalItemRect: Component<ExportableVerticalItemRectProps> = (props) => {
+  return (
+    <rect
+      height={props.config.section.size}
+      x={0}
+      y={props.config.start + SECTION_Y_OFFSET}
+      width={SECTION_X_OFFSET}
+      class="fill-base-200"
+    />
   );
 };

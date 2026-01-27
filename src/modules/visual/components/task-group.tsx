@@ -180,7 +180,8 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
       y={props.task.positionY}
       width={TASK_RECT_WIDTH}
       height={TASK_RECT_HEIGHT}
-      filter="url(#task-shadow)"
+      filter="url(#dropshadow)"
+      class="fill-base-200"
     />
   );
 };

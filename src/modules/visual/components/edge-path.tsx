@@ -77,7 +77,15 @@ type ExportableEdgePathProps = {
 export const ExportableEdgePath: Component<ExportableEdgePathProps> = (props) => {
   const path = createEdgePath(() => props.entry);
 
-  return <path d={path()} fill="none" class="stroke-accent" stroke-width={2} />;
+  return (
+    <path
+      d={path()}
+      fill="none"
+      class="stroke-accent opacity-90"
+      stroke-width={2}
+      marker-end="url(#arrow)"
+    />
+  );
 };
 
 export const createEdgePath = (entry: Accessor<EdgeEntry>) => {

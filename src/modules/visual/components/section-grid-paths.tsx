@@ -44,8 +44,6 @@ export const ExportableSectionGridPaths: Component = () => {
 
   return (
     <>
-      <ExportableHorizontalPath position={0} />
-      <ExportableVerticalPath position={0} />
       <Index each={sectionConfigs().y}>
         {(entry) => <ExportableHorizontalPath position={entry().end} />}
       </Index>
