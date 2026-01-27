@@ -1,4 +1,4 @@
-import { createMemo, Index, Show, type Component } from "solid-js";
+import { createMemo, Index, Show, type Accessor, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { createLink } from "~/integrations/router/create-link";
 import { Badge } from "~/ui/badge/badge";
@@ -7,7 +7,7 @@ import { ChevronLeftIcon } from "~/ui/icons/chevron-left-icon";
 import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useSectionConfigsContext, type SectionConfig } from "../contexts/section-configs";
-import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
+import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TEXT_HEIGHT, TEXT_PADDING } from "../utils/constants";
 import { DeleteSectionDialog, InsertSectionDialog, UpdateSectionDialog } from "./section-dialogs";
 
 export const SectionItems: Component = () => {
@@ -66,6 +66,7 @@ const HorizontalBackgroundRect: Component = () => {
   return (
     <>
       <rect
+        class="opacity-40"
         x={SECTION_X_OFFSET}
         y={0}
         height={SECTION_Y_OFFSET - 2}
@@ -141,25 +142,11 @@ type SectionItemContentProps = {
 };
 
 const SectionItemContent: Component<SectionItemContentProps> = (props) => {
-  const boardState = useBoardStateContext();
-
   const isVertical = createMemo(() => {
     return props.config.section.orientation === "vertical";
   });
 
-  const tasks = createMemo(() => {
-    const isVerticalValue = isVertical();
-    const sectionId = props.config.section.id;
-    return boardState
-      .tasks()
-      .filter((entry) =>
-        isVerticalValue ? entry.sectionY === sectionId : entry.sectionX === sectionId,
-      );
-  });
-
-  const esitmationSum = createMemo(() => {
-    return tasks().reduce((previous, current) => previous + current.estimate, 0);
-  });
+  const { esitmationSum, tasks } = createSectionItemValues(() => props.config);
 
   return (
     <div class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[1fr_auto] p-2">
@@ -184,6 +171,27 @@ const SectionItemContent: Component<SectionItemContentProps> = (props) => {
       </div>
     </div>
   );
+};
+
+const createSectionItemValues = (config: Accessor<SectionConfig>) => {
+  const boardState = useBoardStateContext();
+
+  const tasks = createMemo(() => {
+    const configValue = config();
+    const isVerticalValue = configValue.section.orientation === "vertical";
+    const sectionId = configValue.section.id;
+    return boardState
+      .tasks()
+      .filter((entry) =>
+        isVerticalValue ? entry.sectionY === sectionId : entry.sectionX === sectionId,
+      );
+  });
+
+  const esitmationSum = createMemo(() => {
+    return tasks().reduce((previous, current) => previous + current.estimate, 0);
+  });
+
+  return { esitmationSum, tasks };
 };
 
 const CenterRect: Component = () => {
@@ -215,14 +223,33 @@ type ExportableHorizontalItemRectProps = {
 };
 
 const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps> = (props) => {
+  const { esitmationSum } = createSectionItemValues(() => props.config);
+
   return (
-    <rect
-      width={props.config.section.size}
-      x={props.config.start + SECTION_X_OFFSET}
-      y={0}
-      height={SECTION_Y_OFFSET}
-      class="fill-base-200"
-    />
+    <>
+      <rect
+        width={props.config.section.size}
+        x={props.config.start + SECTION_X_OFFSET}
+        y={0}
+        height={SECTION_Y_OFFSET}
+        class="fill-base-200"
+      />
+      <text
+        x={props.config.start + SECTION_X_OFFSET + TEXT_PADDING}
+        y={TEXT_PADDING + TEXT_HEIGHT}
+        font-weight={600}
+        class="fill-base-content"
+      >
+        {props.config.section.name}
+      </text>
+      <text
+        x={props.config.start + SECTION_X_OFFSET + TEXT_PADDING}
+        y={2 * (TEXT_PADDING + TEXT_HEIGHT)}
+        class="fill-base-content"
+      >
+        {esitmationSum()}
+      </text>
+    </>
   );
 };
 
@@ -231,13 +258,32 @@ type ExportableVerticalItemRectProps = {
 };
 
 const ExportableVerticalItemRect: Component<ExportableVerticalItemRectProps> = (props) => {
+  const { esitmationSum } = createSectionItemValues(() => props.config);
+
   return (
-    <rect
-      height={props.config.section.size}
-      x={0}
-      y={props.config.start + SECTION_Y_OFFSET}
-      width={SECTION_X_OFFSET}
-      class="fill-base-200"
-    />
+    <>
+      <rect
+        height={props.config.section.size}
+        x={0}
+        y={props.config.start + SECTION_Y_OFFSET}
+        width={SECTION_X_OFFSET}
+        class="fill-base-200"
+      />
+      <text
+        x={TEXT_PADDING}
+        y={props.config.start + SECTION_Y_OFFSET + (TEXT_PADDING + TEXT_HEIGHT)}
+        font-weight={600}
+        class="fill-base-content"
+      >
+        {props.config.section.name}
+      </text>
+      <text
+        x={TEXT_PADDING}
+        y={props.config.start + SECTION_Y_OFFSET + 2 * (TEXT_PADDING + TEXT_HEIGHT)}
+        class="fill-base-content"
+      >
+        {esitmationSum()}
+      </text>
+    </>
   );
 };

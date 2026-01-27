@@ -13,3 +13,5 @@ export const SVG_CLASS = "cs-svg-select";
 export const SVG_SELECTOR = `.${SVG_CLASS}`;
 export const SVG_EXPORT_CLASS = "cs-svg-export";
 export const SVG_EXPORT_SELECTOR = `#${SVG_EXPORT_CLASS}`;
+export const TEXT_PADDING = 8;
+export const TEXT_HEIGHT = 10;

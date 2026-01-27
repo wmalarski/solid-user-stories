@@ -23,6 +23,8 @@ import {
   TASK_RECT_HEIGHT,
   TASK_RECT_HEIGHT_HALF,
   TASK_RECT_WIDTH,
+  TEXT_HEIGHT,
+  TEXT_PADDING,
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
@@ -175,14 +177,38 @@ type ExportableTaskGroupProps = {
 
 export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) => {
   return (
-    <rect
-      x={props.task.positionX}
-      y={props.task.positionY}
-      width={TASK_RECT_WIDTH}
-      height={TASK_RECT_HEIGHT}
-      filter="url(#dropshadow)"
-      class="fill-base-200"
-    />
+    <>
+      <rect
+        x={props.task.positionX}
+        y={props.task.positionY}
+        width={TASK_RECT_WIDTH}
+        height={TASK_RECT_HEIGHT}
+        filter="url(#dropshadow)"
+        class="fill-base-200"
+      />
+      <text
+        x={props.task.positionX + TEXT_PADDING}
+        y={props.task.positionY + TEXT_PADDING + TEXT_HEIGHT}
+        font-weight={600}
+        class="fill-base-content"
+      >
+        {props.task.title}
+      </text>
+      <text
+        x={props.task.positionX + TEXT_PADDING}
+        y={props.task.positionY + 2 * (TEXT_PADDING + TEXT_HEIGHT)}
+        class="fill-base-content"
+      >
+        {props.task.description}
+      </text>
+      <text
+        x={props.task.positionX + TEXT_PADDING}
+        y={props.task.positionY + TASK_RECT_HEIGHT - TEXT_PADDING}
+        class="fill-base-content"
+      >
+        {props.task.estimate}
+      </text>
+    </>
   );
 };
 
