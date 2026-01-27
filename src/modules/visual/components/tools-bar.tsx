@@ -16,13 +16,13 @@ import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Tooltip } from "~/ui/tooltip/tooltip";
 import { deleteTaskWithDependencies, useBoardStateContext } from "../contexts/board-state";
 import { useBoardTransformContext } from "../contexts/board-transform";
+import { useExportStateContext } from "../contexts/export-state";
 import { useSelectionStateContext } from "../contexts/selection-state";
 import {
   useDialogBoardToolUtils,
   useToolsStateContext,
   type ToolType,
 } from "../contexts/tools-state";
-import { SVG_SELECTOR } from "../utils/constants";
 
 export const ToolsBar: Component = () => {
   const { t } = useI18n();
@@ -126,36 +126,44 @@ const DeleteSelectedElementDialog: Component = () => {
 const ExportToPngButton: Component = () => {
   const { t } = useI18n();
 
-  const boardState = useBoardStateContext();
+  // const boardState = useBoardStateContext();
 
-  const onClick = async () => {
-    const svgElement = document.querySelector(SVG_SELECTOR);
+  const [_exportState, { onIsExportingChage }] = useExportStateContext();
 
-    if (!svgElement) {
-      return;
-    }
+  const onClick = () => {
+    onIsExportingChage((current) => !current);
 
-    const { snapdom } = await import("@zumer/snapdom");
-    const result = await snapdom(svgElement, {
-      filter(element) {
-        if (element.nodeName === "BUTTON") {
-          return false;
-        }
+    // onIsExportingChage(true);
 
-        // console.log("element", element.nodeName);
+    // const svgElement = document.querySelector(SVG_EXPORT_CLASS);
 
-        // return element.nodeName !== "foreignObject";
-        return true;
-      },
-      filterMode: "remove",
-      height: 1000,
-      outerTransforms: true,
-      width: 1000,
-    });
-    const filename = `${boardState.board().title}.webp`;
-    await result.download({
-      filename,
-    });
+    // if (!svgElement) {
+    //   return;
+    // }
+
+    // const { snapdom } = await import("@zumer/snapdom");
+    // const result = await snapdom(svgElement, {
+    //   filter(element) {
+    //     if (element.nodeName === "BUTTON") {
+    //       return false;
+    //     }
+
+    //     // console.log("element", element.nodeName);
+
+    //     // return element.nodeName !== "foreignObject";
+    //     return true;
+    //   },
+    //   filterMode: "remove",
+    //   height: 1000,
+    //   outerTransforms: true,
+    //   width: 1000,
+    // });
+    // const filename = `${boardState.board().title}.webp`;
+    // await result.download({
+    //   filename,
+    // });
+
+    // onIsExportingChage(false);
   };
 
   return (

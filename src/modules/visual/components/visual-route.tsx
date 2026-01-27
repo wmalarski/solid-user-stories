@@ -8,17 +8,18 @@ import { BoardStateProvider, useBoardStateContext } from "../contexts/board-stat
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgeDragStateProvider } from "../contexts/edge-drag-state";
+import { ExportStateProvider, useExportStateContext } from "../contexts/export-state";
 import { SectionConfigsProvider } from "../contexts/section-configs";
 import { SelectionStateProvider, useSelectionStateContext } from "../contexts/selection-state";
 import { ToolsStateProvider } from "../contexts/tools-state";
 import { SVG_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { DraggedEdge } from "./dragged-edge";
-import { EdgePath } from "./edge-path";
+import { EdgePath, ExportableEdgePath } from "./edge-path";
 import { SectionGridPaths, SectionGridStaticPaths } from "./section-grid-paths";
 import { SectionItems } from "./section-items";
 import { InsertTaskByToolDialog } from "./task-dialogs";
-import { TaskGroup } from "./task-group";
+import { ExportableTaskGroup, TaskGroup } from "./task-group";
 import { ToolsBar, ZoomBar } from "./tools-bar";
 
 export const VisualRoute: Component = () => {
@@ -54,7 +55,9 @@ export const VisualPanel: Component<VisualPanelProps> = (props) => {
             <SelectionStateProvider>
               <BoardTransformProvider>
                 <EdgeDragStateProvider>
-                  <BoardContent />
+                  <ExportStateProvider>
+                    <BoardContent />
+                  </ExportStateProvider>
                 </EdgeDragStateProvider>
               </BoardTransformProvider>
             </SelectionStateProvider>
@@ -79,6 +82,7 @@ const BoardContent: Component = () => {
       <ToolsBar />
       <ZoomBar />
       <InsertTaskByToolDialog />
+      <ExportableBoard />
     </>
   );
 };
@@ -93,9 +97,7 @@ const SelectableGroup: Component = () => {
     <g cursor={isDragging() ? "grabbing" : "grab"}>
       <SectionGridPaths />
       <g transform={transform() as unknown as string}>
-        <For each={boardState.edges()}>
-          {(entry) => <EdgePath edge={entry.edge} source={entry.source} target={entry.target} />}
-        </For>
+        <For each={boardState.edges()}>{(entry) => <EdgePath entry={entry} />}</For>
         <For each={boardState.tasks()}>{(task) => <TaskGroup task={task} />}</For>
       </g>
     </g>
@@ -137,5 +139,20 @@ const SvgDefinitions: Component = () => {
         <feBlend in="SourceGraphic" in2="blurOut" />
       </filter>
     </defs>
+  );
+};
+
+const ExportableBoard: Component = () => {
+  const boardState = useBoardStateContext();
+
+  const [exportState] = useExportStateContext();
+
+  return (
+    <Show when={exportState()}>
+      <svg width={2000} height={2000}>
+        <For each={boardState.tasks()}>{(task) => <ExportableTaskGroup task={task} />}</For>
+        <For each={boardState.edges()}>{(entry) => <ExportableEdgePath entry={entry} />}</For>
+      </svg>
+    </Show>
   );
 };

@@ -1,8 +1,8 @@
 import * as d3 from "d3";
-import { createMemo, createSignal, Show, type Component } from "solid-js";
+import { createMemo, createSignal, Show, type Accessor, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { edgeCollection } from "~/integrations/tanstack-db/collections";
-import type { EdgeModel, TaskModel } from "~/integrations/tanstack-db/schema";
+import type { EdgeEntry } from "../contexts/board-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import {
   EDGE_HANDLE_SIZE,
@@ -14,9 +14,7 @@ import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
 
 type EdgePathProps = {
-  edge: EdgeModel;
-  source: TaskModel;
-  target: TaskModel;
+  entry: EdgeEntry;
 };
 
 export const EdgePath: Component<EdgePathProps> = (props) => {
@@ -24,26 +22,13 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
 
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
-  const isSelected = useIsSelected(() => props.edge.id);
+  const isSelected = useIsSelected(() => props.entry.edge.id);
 
-  const path = createMemo(() => {
-    const startX = props.source.positionX + TASK_RECT_WIDTH;
-    const endX = props.target.positionX;
-
-    const startY = props.source.positionY + TASK_RECT_HEIGHT_HALF;
-    const endY = props.target.positionY + TASK_RECT_HEIGHT_HALF;
-
-    const context = d3.path();
-    context.moveTo(startX, startY);
-    context.lineTo(props.edge.breakX, startY);
-    context.lineTo(props.edge.breakX, endY);
-    context.lineTo(endX, endY);
-    return context.toString();
-  });
+  const path = createEdgePath(() => props.entry);
 
   createD3ClickListener({
     onClick() {
-      onSelectionChange({ id: props.edge.id, kind: "edge" });
+      onSelectionChange({ id: props.entry.edge.id, kind: "edge" });
     },
     ref,
   });
@@ -79,16 +64,43 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
         stroke-width={16}
       />
       <Show when={isSelected()}>
-        <EdgeHandle edge={props.edge} source={props.source} target={props.target} />
+        <EdgeHandle entry={props.entry} />
       </Show>
     </>
   );
 };
 
+type ExportableEdgePathProps = {
+  entry: EdgeEntry;
+};
+
+export const ExportableEdgePath: Component<ExportableEdgePathProps> = (props) => {
+  const path = createEdgePath(() => props.entry);
+
+  return <path d={path()} fill="none" class="stroke-accent" stroke-width={2} />;
+};
+
+export const createEdgePath = (entry: Accessor<EdgeEntry>) => {
+  return createMemo(() => {
+    const value = entry();
+
+    const startX = value.source.positionX + TASK_RECT_WIDTH;
+    const endX = value.target.positionX;
+
+    const startY = value.source.positionY + TASK_RECT_HEIGHT_HALF;
+    const endY = value.target.positionY + TASK_RECT_HEIGHT_HALF;
+
+    const context = d3.path();
+    context.moveTo(startX, startY);
+    context.lineTo(value.edge.breakX, startY);
+    context.lineTo(value.edge.breakX, endY);
+    context.lineTo(endX, endY);
+    return context.toString();
+  });
+};
+
 type EdgeHandleProps = {
-  edge: EdgeModel;
-  source: TaskModel;
-  target: TaskModel;
+  entry: EdgeEntry;
 };
 
 const EdgeHandle: Component<EdgeHandleProps> = (props) => {
@@ -96,7 +108,7 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
 
   createD3DragElement({
     onDragged(event) {
-      edgeCollection.update(props.edge.id, (draft) => {
+      edgeCollection.update(props.entry.edge.id, (draft) => {
         draft.breakX = event.x;
       });
     },
@@ -106,9 +118,9 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
   return (
     <rect
       ref={setRectRef}
-      x={props.edge.breakX - EDGE_HANDLE_SIZE_HALF}
+      x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF}
       y={
-        (props.source.positionY + props.target.positionY) / 2 +
+        (props.entry.source.positionY + props.entry.target.positionY) / 2 +
         TASK_RECT_HEIGHT_HALF -
         EDGE_HANDLE_SIZE_HALF
       }

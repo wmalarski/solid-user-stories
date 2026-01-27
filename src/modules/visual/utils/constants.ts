@@ -11,3 +11,5 @@ export const SECTION_X_OFFSET = 125;
 export const SECTION_Y_OFFSET = 75;
 export const SVG_CLASS = "cs-svg-select";
 export const SVG_SELECTOR = `.${SVG_CLASS}`;
+export const SVG_EXPORT_CLASS = "cs-svg-export";
+export const SVG_EXPORT_SELECTOR = `.${SVG_EXPORT_CLASS}`;

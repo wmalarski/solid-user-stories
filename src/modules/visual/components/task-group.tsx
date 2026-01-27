@@ -169,6 +169,22 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   );
 };
 
+type ExportableTaskGroupProps = {
+  task: TaskModel;
+};
+
+export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) => {
+  return (
+    <rect
+      x={props.task.positionX}
+      y={props.task.positionY}
+      width={TASK_RECT_WIDTH}
+      height={TASK_RECT_HEIGHT}
+      filter="url(#task-shadow)"
+    />
+  );
+};
+
 type TaskHandleProps = {
   x: number;
   y: number;
