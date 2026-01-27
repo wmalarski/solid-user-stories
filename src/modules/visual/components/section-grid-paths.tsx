@@ -39,6 +39,23 @@ export const SectionGridPaths: Component = () => {
   );
 };
 
+export const ExportableSectionGridPaths: Component = () => {
+  const sectionConfigs = useSectionConfigsContext();
+
+  return (
+    <>
+      <ExportableHorizontalPath position={0} />
+      <ExportableVerticalPath position={0} />
+      <Index each={sectionConfigs().y}>
+        {(entry) => <ExportableHorizontalPath position={entry().end} />}
+      </Index>
+      <Index each={sectionConfigs().x}>
+        {(entry) => <ExportableVerticalPath position={entry().end} />}
+      </Index>
+    </>
+  );
+};
+
 const HorizontalZeroPath: Component = () => {
   const [transform] = useBoardTransformContext();
 
@@ -197,4 +214,24 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       />
     </>
   );
+};
+
+type ExportableHorizontalPathProps = {
+  position: number;
+};
+
+const ExportableHorizontalPath: Component<ExportableHorizontalPathProps> = (props) => {
+  const y = createMemo(() => props.position + SECTION_Y_OFFSET);
+
+  return <line x1={0} x2="100%" y1={y()} y2={y()} {...sharedLineProps} />;
+};
+
+type ExportableVerticalPathProps = {
+  position: number;
+};
+
+const ExportableVerticalPath: Component<ExportableVerticalPathProps> = (props) => {
+  const x = createMemo(() => props.position + SECTION_X_OFFSET);
+
+  return <line y1={0} y2="100%" x1={x()} x2={x()} {...sharedLineProps} />;
 };

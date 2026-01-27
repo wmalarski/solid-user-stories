@@ -16,7 +16,11 @@ import { SVG_CLASS, SVG_EXPORT_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { DraggedEdge } from "./dragged-edge";
 import { EdgePath, ExportableEdgePath } from "./edge-path";
-import { SectionGridPaths, SectionGridStaticPaths } from "./section-grid-paths";
+import {
+  ExportableSectionGridPaths,
+  SectionGridPaths,
+  SectionGridStaticPaths,
+} from "./section-grid-paths";
 import { SectionItems } from "./section-items";
 import { InsertTaskByToolDialog } from "./task-dialogs";
 import { ExportableTaskGroup, TaskGroup } from "./task-group";
@@ -162,8 +166,9 @@ const ExportableBoard: Component = () => {
         width={boardBox().width}
         height={boardBox().height}
         id={SVG_EXPORT_CLASS}
-        class="bg-base-300"
+        class="bg-base-100"
       >
+        <ExportableSectionGridPaths />
         <For each={boardState.tasks()}>{(task) => <ExportableTaskGroup task={task} />}</For>
         <For each={boardState.edges()}>{(entry) => <ExportableEdgePath entry={entry} />}</For>
       </svg>
