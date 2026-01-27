@@ -21,8 +21,8 @@ importers:
         specifier: ^4.1.18
         version: 4.1.18(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2))
       '@tanstack/solid-db':
-        specifier: ^0.2.3
-        version: 0.2.3(solid-js@1.9.11)(typescript@5.9.3)
+        specifier: ^0.2.4
+        version: 0.2.4(solid-js@1.9.11)(typescript@5.9.3)
       '@zumer/snapdom':
         specifier: ^2.0.2
         version: 2.0.2
@@ -909,8 +909,8 @@ packages:
     peerDependencies:
       typescript: '>=4.7'
 
-  '@tanstack/db@0.5.23':
-    resolution: {integrity: sha512-/zO2K2hjkupL0DYHyPLnzEf3gFBlznUyZ+RLWBSFX4Dsf6jhjoGnAVZe6W25fZYyoZ5adb/PlhedHDqKO1u2rg==}
+  '@tanstack/db@0.5.24':
+    resolution: {integrity: sha512-hlmTG3k9e1NE8pzIQgwV9e/W/Nwe36aENrXJ+KhTuy6jLJ6F+PmnOzfc2z7Vx9YUz1jepRQ61rxnIuq5w0bxmQ==}
     peerDependencies:
       typescript: '>=4.7'
 
@@ -918,8 +918,8 @@ packages:
     resolution: {integrity: sha512-3PouiFjR4B6x1c969/Pl4ZIJleof1M0n6fNX8NRiC9Sqv1g06CVDlEaXUR4212ycGFyfq4q+t8Gi37Xy+z34iQ==}
     engines: {node: '>=18'}
 
-  '@tanstack/solid-db@0.2.3':
-    resolution: {integrity: sha512-m0Y2qeKQOBYliXcxN3/oo2YC+cf87EPDA/he6O1oRWQh2Jtey05WZ9A1wuTCKRGk+KtE/fWhZN60kjg86cR25Q==}
+  '@tanstack/solid-db@0.2.4':
+    resolution: {integrity: sha512-W/IcMg2VJd0ymHW+/wj9NAO8Iw4pdsM8NsZyMWHdDpl1EAO1fsekU1G+0BXAKdUEXrmNNWXEW/QHZu/HthspQA==}
     peerDependencies:
       solid-js: '>=1.9.0'
 
@@ -2352,7 +2352,7 @@ snapshots:
       sorted-btree: 1.8.1
       typescript: 5.9.3
 
-  '@tanstack/db@0.5.23(typescript@5.9.3)':
+  '@tanstack/db@0.5.24(typescript@5.9.3)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@tanstack/db-ivm': 0.1.17(typescript@5.9.3)
@@ -2361,10 +2361,10 @@ snapshots:
 
   '@tanstack/pacer-lite@0.2.1': {}
 
-  '@tanstack/solid-db@0.2.3(solid-js@1.9.11)(typescript@5.9.3)':
+  '@tanstack/solid-db@0.2.4(solid-js@1.9.11)(typescript@5.9.3)':
     dependencies:
       '@solid-primitives/map': 0.7.2(solid-js@1.9.11)
-      '@tanstack/db': 0.5.23(typescript@5.9.3)
+      '@tanstack/db': 0.5.24(typescript@5.9.3)
       solid-js: 1.9.11
     transitivePeerDependencies:
       - typescript
