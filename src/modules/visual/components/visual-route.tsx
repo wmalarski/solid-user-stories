@@ -4,15 +4,15 @@ import { createMemo, createSignal, For, Show, Suspense, type Component } from "s
 import { cx } from "tailwind-variants";
 import { boardsCollection } from "~/integrations/tanstack-db/collections";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
-import { BoardStateProvider, useBoardStateContext } from "../contexts/board-state";
+import { BoardStateProvider, getBoardBox, useBoardStateContext } from "../contexts/board-state";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgeDragStateProvider } from "../contexts/edge-drag-state";
 import { ExportStateProvider, useExportStateContext } from "../contexts/export-state";
-import { SectionConfigsProvider } from "../contexts/section-configs";
+import { SectionConfigsProvider, useSectionConfigsContext } from "../contexts/section-configs";
 import { SelectionStateProvider, useSelectionStateContext } from "../contexts/selection-state";
 import { ToolsStateProvider } from "../contexts/tools-state";
-import { SVG_CLASS } from "../utils/constants";
+import { SVG_CLASS, SVG_EXPORT_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { DraggedEdge } from "./dragged-edge";
 import { EdgePath, ExportableEdgePath } from "./edge-path";
@@ -144,12 +144,26 @@ const SvgDefinitions: Component = () => {
 
 const ExportableBoard: Component = () => {
   const boardState = useBoardStateContext();
+  const sectionConfigs = useSectionConfigsContext();
 
   const [exportState] = useExportStateContext();
 
+  const boardBox = createMemo(() =>
+    getBoardBox({
+      edges: boardState.edges(),
+      sections: sectionConfigs(),
+      tasks: boardState.tasks(),
+    }),
+  );
+
   return (
     <Show when={exportState()}>
-      <svg width={2000} height={2000}>
+      <svg
+        width={boardBox().width}
+        height={boardBox().height}
+        id={SVG_EXPORT_CLASS}
+        class="bg-base-300"
+      >
         <For each={boardState.tasks()}>{(task) => <ExportableTaskGroup task={task} />}</For>
         <For each={boardState.edges()}>{(entry) => <ExportableEdgePath entry={entry} />}</For>
       </svg>

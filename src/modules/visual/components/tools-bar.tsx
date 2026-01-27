@@ -23,6 +23,7 @@ import {
   useToolsStateContext,
   type ToolType,
 } from "../contexts/tools-state";
+import { SVG_EXPORT_SELECTOR } from "../utils/constants";
 
 export const ToolsBar: Component = () => {
   const { t } = useI18n();
@@ -126,52 +127,49 @@ const DeleteSelectedElementDialog: Component = () => {
 const ExportToPngButton: Component = () => {
   const { t } = useI18n();
 
-  // const boardState = useBoardStateContext();
+  const boardState = useBoardStateContext();
 
   const [_exportState, { onIsExportingChage }] = useExportStateContext();
 
-  const onClick = () => {
+  const onToggle = () => {
     onIsExportingChage((current) => !current);
+  };
 
-    // onIsExportingChage(true);
+  const onClick = async () => {
+    onIsExportingChage(true);
 
-    // const svgElement = document.querySelector(SVG_EXPORT_CLASS);
+    const svgElement = document.querySelector(SVG_EXPORT_SELECTOR);
 
-    // if (!svgElement) {
-    //   return;
-    // }
+    if (!svgElement) {
+      return;
+    }
 
-    // const { snapdom } = await import("@zumer/snapdom");
-    // const result = await snapdom(svgElement, {
-    //   filter(element) {
-    //     if (element.nodeName === "BUTTON") {
-    //       return false;
-    //     }
+    const { snapdom } = await import("@zumer/snapdom");
+    const result = await snapdom(svgElement, {
+      height: Number(svgElement.getAttribute("height")),
+      width: Number(svgElement.getAttribute("width")),
+    });
+    const filename = `${boardState.board().title}.png`;
+    await result.download({
+      filename,
+    });
 
-    //     // console.log("element", element.nodeName);
-
-    //     // return element.nodeName !== "foreignObject";
-    //     return true;
-    //   },
-    //   filterMode: "remove",
-    //   height: 1000,
-    //   outerTransforms: true,
-    //   width: 1000,
-    // });
-    // const filename = `${boardState.board().title}.webp`;
-    // await result.download({
-    //   filename,
-    // });
-
-    // onIsExportingChage(false);
+    onIsExportingChage(false);
   };
 
   return (
-    <Tooltip data-tip={t("board.tools.export")} placement="top">
-      <Button aria-label={t("board.tools.export")} shape="circle" size="sm" onClick={onClick}>
-        <DownloadIcon class="size-5" />
-      </Button>
-    </Tooltip>
+    <>
+      <Tooltip data-tip={t("board.tools.export")} placement="top">
+        <Button aria-label={t("board.tools.export")} shape="circle" size="sm" onClick={onToggle}>
+          <DownloadIcon class="size-5" />
+        </Button>
+      </Tooltip>
+      <Tooltip data-tip={t("board.tools.export")} placement="top">
+        <Button aria-label={t("board.tools.export")} shape="circle" size="sm" onClick={onClick}>
+          <DownloadIcon class="size-5" />
+        </Button>
+      </Tooltip>
+    </>
   );
 };
 
