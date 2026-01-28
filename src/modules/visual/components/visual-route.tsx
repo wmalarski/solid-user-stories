@@ -50,7 +50,7 @@ type VisualPanelProps = {
   board: BoardModel;
 };
 
-export const VisualPanel: Component<VisualPanelProps> = (props) => {
+const VisualPanel: Component<VisualPanelProps> = (props) => {
   return (
     <BoardStateProvider board={props.board}>
       <SectionConfigsProvider>
