@@ -243,9 +243,12 @@ const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps>
         {props.config.section.name}
       </text>
       <text
-        x={props.config.start + SECTION_X_OFFSET + TEXT_PADDING}
-        y={2 * (TEXT_PADDING + TEXT_HEIGHT)}
+        x={props.config.end + SECTION_X_OFFSET - TEXT_PADDING}
+        y={SECTION_Y_OFFSET - TEXT_PADDING}
         class="fill-base-content"
+        text-anchor="end"
+        font-size="20"
+        font-weight={600}
       >
         {esitmationSum()}
       </text>
@@ -278,9 +281,12 @@ const ExportableVerticalItemRect: Component<ExportableVerticalItemRectProps> = (
         {props.config.section.name}
       </text>
       <text
-        x={TEXT_PADDING}
-        y={props.config.start + SECTION_Y_OFFSET + 2 * (TEXT_PADDING + TEXT_HEIGHT)}
+        x={SECTION_X_OFFSET - TEXT_PADDING}
+        y={props.config.end + SECTION_Y_OFFSET - TEXT_PADDING}
         class="fill-base-content"
+        text-anchor="end"
+        font-size="20"
+        font-weight={600}
       >
         {esitmationSum()}
       </text>

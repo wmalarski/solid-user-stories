@@ -189,22 +189,21 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
       <text
         x={props.task.positionX + TEXT_PADDING}
         y={props.task.positionY + TEXT_PADDING + TEXT_HEIGHT}
-        font-weight={600}
         class="fill-base-content"
+        dy={0}
       >
-        {props.task.title}
+        <tspan font-weight={600}>{props.task.title}</tspan>
+        <tspan x={props.task.positionX + TEXT_PADDING} dy="1.2em">
+          {props.task.description}
+        </tspan>
       </text>
       <text
-        x={props.task.positionX + TEXT_PADDING}
-        y={props.task.positionY + 2 * (TEXT_PADDING + TEXT_HEIGHT)}
-        class="fill-base-content"
-      >
-        {props.task.description}
-      </text>
-      <text
-        x={props.task.positionX + TEXT_PADDING}
+        x={props.task.positionX + TASK_RECT_WIDTH - TEXT_PADDING}
         y={props.task.positionY + TASK_RECT_HEIGHT - TEXT_PADDING}
         class="fill-base-content"
+        text-anchor="end"
+        font-size="20"
+        font-weight={600}
       >
         {props.task.estimate}
       </text>
