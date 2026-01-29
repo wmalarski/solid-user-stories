@@ -7,6 +7,7 @@ import { ChevronLeftIcon } from "~/ui/icons/chevron-left-icon";
 import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useSectionConfigsContext, type SectionConfig } from "../contexts/section-configs";
+import { MultilineText } from "../ui/multiline-text";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TEXT_HEIGHT, TEXT_PADDING } from "../utils/constants";
 import { DeleteSectionDialog, InsertSectionDialog, UpdateSectionDialog } from "./section-dialogs";
 
@@ -234,14 +235,16 @@ const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps>
         height={SECTION_Y_OFFSET}
         class="fill-base-200"
       />
-      <text
+      <MultilineText
         x={props.config.start + SECTION_X_OFFSET + TEXT_PADDING}
         y={TEXT_PADDING + TEXT_HEIGHT}
         font-weight={600}
         class="fill-base-content"
-      >
-        {props.config.section.name}
-      </text>
+        content={props.config.section.name}
+        maxWidth={props.config.section.size - 2 * TEXT_PADDING}
+        maxLines={3}
+        font-size="12"
+      />
       <text
         x={props.config.end + SECTION_X_OFFSET - TEXT_PADDING}
         y={SECTION_Y_OFFSET - TEXT_PADDING}
@@ -272,14 +275,18 @@ const ExportableVerticalItemRect: Component<ExportableVerticalItemRectProps> = (
         width={SECTION_X_OFFSET}
         class="fill-base-200"
       />
-      <text
+
+      <MultilineText
         x={TEXT_PADDING}
         y={props.config.start + SECTION_Y_OFFSET + (TEXT_PADDING + TEXT_HEIGHT)}
         font-weight={600}
         class="fill-base-content"
-      >
-        {props.config.section.name}
-      </text>
+        content={props.config.section.name}
+        font-size="12"
+        maxWidth={SECTION_X_OFFSET - 2 * TEXT_PADDING}
+        maxLines={3}
+      />
+
       <text
         x={SECTION_X_OFFSET - TEXT_PADDING}
         y={props.config.end + SECTION_Y_OFFSET - TEXT_PADDING}

@@ -15,6 +15,7 @@ import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
 import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
+import { MultilineText } from "../ui/multiline-text";
 import {
   TASK_ARROW_OFFSET,
   TASK_HANDLE_SIZE,
@@ -28,7 +29,6 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
-import { MultilineText } from "../utils/create-d3-text-wrap";
 import type { Point2D } from "../utils/types";
 import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 
@@ -187,29 +187,24 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
         filter="url(#dropshadow)"
         class="fill-base-200"
       />
-      <text
+
+      <MultilineText
         x={props.task.positionX + TEXT_PADDING}
         y={props.task.positionY + TEXT_PADDING + TEXT_HEIGHT}
         class="fill-base-content"
         font-weight={600}
-      >
-        {props.task.title}
-      </text>
-
-      <text
-        x={props.task.positionX + TEXT_PADDING}
-        y={props.task.positionY + 2 * (TEXT_PADDING + TEXT_HEIGHT)}
-        class="fill-base-content"
-      >
-        {props.task.description}
-      </text>
+        content={props.task.title}
+        maxWidth={TASK_RECT_WIDTH - 2 * TEXT_PADDING}
+      />
 
       <MultilineText
-        lineHeight={20}
-        maxWidth={TASK_RECT_WIDTH}
+        maxWidth={TASK_RECT_WIDTH - 2 * TEXT_PADDING}
         x={props.task.positionX + TEXT_PADDING}
-        y={props.task.positionY + 3 * (TEXT_PADDING + TEXT_HEIGHT)}
+        y={props.task.positionY + 2 * (TEXT_PADDING + TEXT_HEIGHT)}
         content={props.task.description}
+        maxLines={3}
+        font-size="12"
+        class="opacity-75"
       />
 
       <text
