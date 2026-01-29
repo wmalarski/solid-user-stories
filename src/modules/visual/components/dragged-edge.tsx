@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import { createMemo, Show, type Component } from "solid-js";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
+import { AnimatedPath } from "../ui/animated-path";
 
 export const DraggedEdge: Component = () => {
   const [edgeDragState] = useEdgeDragStateContext();
@@ -31,21 +32,5 @@ const DraggedEdgeWithTask: Component = () => {
     return context.toString();
   });
 
-  return (
-    <path
-      d={path()}
-      stroke-width={3}
-      class="stroke-accent"
-      fill="none"
-      stroke-dasharray="5,5"
-      marker-end="url(#arrow)"
-    >
-      <animate
-        attributeName="stroke-dashoffset"
-        values="10;0"
-        dur="0.5s"
-        repeatCount="indefinite"
-      />
-    </path>
-  );
+  return <AnimatedPath stroke-width={3} d={path()} />;
 };

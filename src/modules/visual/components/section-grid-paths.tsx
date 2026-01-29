@@ -9,15 +9,9 @@ import {
 } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useSectionConfigsContext, type SectionConfig } from "../contexts/section-configs";
+import { DottedLine } from "../ui/dotted-line";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
-
-const sharedLineProps: ComponentProps<"line"> = {
-  class: "stroke-base-content",
-  "stroke-dasharray": "5,5",
-  "stroke-opacity": 0.2,
-  "stroke-width": 3,
-};
 
 export const SectionGridStaticPaths: Component = () => {
   return (
@@ -59,7 +53,7 @@ const HorizontalZeroPath: Component = () => {
 
   const y = createMemo(() => translateY(transform(), SECTION_Y_OFFSET));
 
-  return <line {...sharedLineProps} x1={0} x2="100%" y1={y()} y2={y()} />;
+  return <DottedLine x1={0} x2="100%" y1={y()} y2={y()} />;
 };
 
 const VerticalZeroPath: Component = () => {
@@ -67,7 +61,7 @@ const VerticalZeroPath: Component = () => {
 
   const x = createMemo(() => translateX(transform(), SECTION_X_OFFSET));
 
-  return <line y1={0} y2="100%" x1={x()} x2={x()} {...sharedLineProps} />;
+  return <DottedLine y1={0} y2="100%" x1={x()} x2={x()} />;
 };
 
 type HorizontalPathProps = {
@@ -126,16 +120,8 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
 
   return (
     <>
-      <line x1={0} x2="100%" y1={transformed()} y2={transformed()} {...sharedLineProps} />
-      <line
-        ref={setRef}
-        x1={0}
-        x2="100%"
-        y1={transformed()}
-        y2={transformed()}
-        stroke="transparent"
-        stroke-width={16}
-      />
+      <DottedLine x1={0} x2="100%" y1={transformed()} y2={transformed()} />
+      <ClickableLine ref={setRef} x1={0} x2="100%" y1={transformed()} y2={transformed()} />
     </>
   );
 };
@@ -200,16 +186,8 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
 
   return (
     <>
-      <line y1={0} y2="100%" x1={transformed()} x2={transformed()} {...sharedLineProps} />
-      <line
-        ref={setRef}
-        y1={0}
-        y2="100%"
-        x1={transformed()}
-        x2={transformed()}
-        stroke="transparent"
-        stroke-width={16}
-      />
+      <DottedLine y1={0} y2="100%" x1={transformed()} x2={transformed()} />
+      <ClickableLine ref={setRef} y1={0} y2="100%" x1={transformed()} x2={transformed()} />
     </>
   );
 };
@@ -221,7 +199,7 @@ type ExportableHorizontalPathProps = {
 const ExportableHorizontalPath: Component<ExportableHorizontalPathProps> = (props) => {
   const y = createMemo(() => props.position + SECTION_Y_OFFSET);
 
-  return <line x1={0} x2="100%" y1={y()} y2={y()} {...sharedLineProps} />;
+  return <DottedLine x1={0} x2="100%" y1={y()} y2={y()} />;
 };
 
 type ExportableVerticalPathProps = {
@@ -231,5 +209,9 @@ type ExportableVerticalPathProps = {
 const ExportableVerticalPath: Component<ExportableVerticalPathProps> = (props) => {
   const x = createMemo(() => props.position + SECTION_X_OFFSET);
 
-  return <line y1={0} y2="100%" x1={x()} x2={x()} {...sharedLineProps} />;
+  return <DottedLine y1={0} y2="100%" x1={x()} x2={x()} />;
+};
+
+const ClickableLine: Component<ComponentProps<"line">> = (props) => {
+  return <line stroke="transparent" stroke-width={16} {...props} />;
 };

@@ -4,6 +4,7 @@ import { cx } from "tailwind-variants";
 import { edgeCollection } from "~/integrations/tanstack-db/collections";
 import type { EdgeEntry } from "../contexts/board-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
+import { AnimatedPath } from "../ui/animated-path";
 import {
   EDGE_HANDLE_SIZE,
   EDGE_HANDLE_SIZE_HALF,
@@ -35,32 +36,16 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
 
   return (
     <>
-      <path
-        d={path()}
-        fill="none"
-        class="stroke-accent"
-        marker-end="url(#arrow)"
-        stroke-width={2}
-        stroke-dasharray="5,5"
-        stroke-opacity={0.7}
-        stroke-dashoffset={0}
-      >
-        <animate
-          attributeName="stroke-dashoffset"
-          values="10;0"
-          dur="0.5s"
-          repeatCount="indefinite"
-        />
-      </path>
+      <AnimatedPath d={path()} stroke-width={2} stroke-opacity={0.7} />
       <path
         ref={setRef}
         d={path()}
         fill="none"
+        stroke-width={16}
         class={cx({
           "stroke-accent opacity-5": isSelected(),
           "stroke-transparent": !isSelected(),
         })}
-        stroke-width={16}
       />
       <Show when={isSelected()}>
         <EdgeHandle entry={props.entry} />

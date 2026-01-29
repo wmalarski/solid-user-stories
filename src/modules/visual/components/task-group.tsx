@@ -39,10 +39,6 @@ type TaskGroupProps = {
 };
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
-  const { t } = useI18n();
-
-  const boardId = useBoardId();
-
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
   const [shiftX, setShiftX] = createSignal(0);
@@ -88,18 +84,6 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
     setNewTaskHandle(kind);
   };
 
-  const onInsertSuccess = (newTaskId: string) => {
-    const kind = newTaskHandle();
-    const edgeId = createId();
-    edgeCollection.insert({
-      boardId: boardId(),
-      breakX: (newTaskPoint().x + TASK_RECT_WIDTH + props.task.positionX) / 2,
-      id: edgeId,
-      source: kind === "source" ? props.task.id : newTaskId,
-      target: kind === "source" ? newTaskId : props.task.id,
-    });
-  };
-
   return (
     <>
       <rect
@@ -119,39 +103,11 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         height={TASK_RECT_HEIGHT}
         class="stroke-base-300 border-0"
       >
-        <div
-          data-selected={isSelected()}
-          class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[auto_1fr_auto] py-2 px-3"
-        >
-          <span class="text-sm truncate font-semibold">{props.task.title}</span>
-          <span class="text-xs line-clamp-3 opacity-80">{props.task.description}</span>
-          <div class="flex gap-1 w-full justify-end items-center">
-            <Show when={props.task.link}>
-              {(link) => (
-                <LinkButton
-                  size="sm"
-                  shape="circle"
-                  href={link()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={t("board.tasks.link")}
-                >
-                  <LinkIcon class="size-4" />
-                </LinkButton>
-              )}
-            </Show>
-            <UpdateTaskDialog task={props.task} />
-            <DeleteTaskDialog task={props.task} />
-            <InsertTaskDialog
-              dialogId={insertTaskDialogId}
-              position={newTaskPoint()}
-              onInsertSuccess={onInsertSuccess}
-            />
-            <Badge size="sm" color="accent">
-              {props.task.estimate}
-            </Badge>
-          </div>
-        </div>
+        <TaskContent
+          newTaskHandle={newTaskHandle()}
+          newTaskPoint={newTaskPoint()}
+          task={props.task}
+        />
       </foreignObject>
       <Show when={isSelected()}>
         <TaskHandle
@@ -169,6 +125,70 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         <TaskArrows task={props.task} onArrowClick={onArrowClick} />
       </Show>
     </>
+  );
+};
+
+type TaskContentProps = {
+  task: TaskModel;
+  newTaskPoint: Point2D;
+  newTaskHandle: TaskHandleKind;
+};
+
+const TaskContent: Component<TaskContentProps> = (props) => {
+  const { t } = useI18n();
+
+  const boardId = useBoardId();
+
+  const insertTaskDialogId = createUniqueId();
+
+  const isSelected = useIsSelected(() => props.task.id);
+
+  const onInsertSuccess = (newTaskId: string) => {
+    const kind = props.newTaskHandle;
+    const edgeId = createId();
+    edgeCollection.insert({
+      boardId: boardId(),
+      breakX: (props.newTaskPoint.x + TASK_RECT_WIDTH + props.task.positionX) / 2,
+      id: edgeId,
+      source: kind === "source" ? props.task.id : newTaskId,
+      target: kind === "source" ? newTaskId : props.task.id,
+    });
+  };
+
+  return (
+    <div
+      data-selected={isSelected()}
+      class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[auto_1fr_auto] py-2 px-3"
+    >
+      <span class="text-sm truncate font-semibold">{props.task.title}</span>
+      <span class="text-xs line-clamp-3 opacity-80">{props.task.description}</span>
+      <div class="flex gap-1 w-full justify-end items-center">
+        <Show when={props.task.link}>
+          {(link) => (
+            <LinkButton
+              size="sm"
+              shape="circle"
+              href={link()}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t("board.tasks.link")}
+            >
+              <LinkIcon class="size-4" />
+            </LinkButton>
+          )}
+        </Show>
+        <UpdateTaskDialog task={props.task} />
+        <DeleteTaskDialog task={props.task} />
+        <InsertTaskDialog
+          dialogId={insertTaskDialogId}
+          position={props.newTaskPoint}
+          onInsertSuccess={onInsertSuccess}
+        />
+        <Badge size="sm" color="accent">
+          {props.task.estimate}
+        </Badge>
+      </div>
+    </div>
   );
 };
 
