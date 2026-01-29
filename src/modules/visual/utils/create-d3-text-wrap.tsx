@@ -1,4 +1,67 @@
 import * as d3 from "d3";
+import { createEffect, createSignal, onCleanup, type Component } from "solid-js";
+
+type MultilineTextProps = {
+  x: number;
+  y: number;
+  content: string;
+  maxWidth: number;
+  lineHeight: number;
+  class?: string;
+};
+
+export const MultilineText: Component<MultilineTextProps> = (props) => {
+  const [ref, setRef] = createSignal<SVGTextElement>();
+
+  createEffect(() => {
+    const text = ref();
+
+    if (!text) {
+      return;
+    }
+
+    const x = props.x;
+    const y = props.y;
+    const maxWidth = props.maxWidth;
+    const lineHeight = props.lineHeight;
+    const words = props.content.split(/\s+/).toReversed();
+
+    let word = words.pop();
+    let lineNumber = 0;
+    let line: string[] = [];
+    let element = (<tspan x={x} y={y} />) as SVGTSpanElement;
+
+    text.append(element);
+
+    while (word) {
+      line.push(word);
+      element.textContent = line.join(" ");
+
+      const textWidth = element.getComputedTextLength();
+
+      if (textWidth > maxWidth) {
+        lineNumber += 1;
+        line.pop();
+        element.textContent = line.join(" ");
+        line = [word];
+        element = (
+          <tspan x={x} y={y + lineNumber * lineHeight}>
+            {word}
+          </tspan>
+        ) as SVGTSpanElement;
+        text.append(element);
+      }
+
+      word = words.pop();
+    }
+
+    onCleanup(() => {
+      text.replaceChildren();
+    });
+  });
+
+  return <text ref={setRef} class={props.class} x={props.x} y={props.y} />;
+};
 
 export const wrapText = (ref: SVGTextElement) => {
   const text = d3.select(ref);

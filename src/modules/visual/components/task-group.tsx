@@ -28,6 +28,7 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
+import { MultilineText } from "../utils/create-d3-text-wrap";
 import type { Point2D } from "../utils/types";
 import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 
@@ -202,6 +203,14 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
       >
         {props.task.description}
       </text>
+
+      <MultilineText
+        lineHeight={20}
+        maxWidth={TASK_RECT_WIDTH}
+        x={props.task.positionX + TEXT_PADDING}
+        y={props.task.positionY + 3 * (TEXT_PADDING + TEXT_HEIGHT)}
+        content={props.task.description}
+      />
 
       <text
         x={props.task.positionX + TASK_RECT_WIDTH - TEXT_PADDING}
