@@ -131,10 +131,6 @@ const ExportToPngButton: Component = () => {
 
   const [_exportState, { onIsExportingChage }] = useExportStateContext();
 
-  const onToggle = () => {
-    onIsExportingChage((current) => !current);
-  };
-
   const onClick = async () => {
     onIsExportingChage(true);
 
@@ -158,18 +154,11 @@ const ExportToPngButton: Component = () => {
   };
 
   return (
-    <>
-      <Tooltip data-tip={t("board.tools.export")} placement="top">
-        <Button aria-label={t("board.tools.export")} shape="circle" size="sm" onClick={onToggle}>
-          <DownloadIcon class="size-5" />
-        </Button>
-      </Tooltip>
-      <Tooltip data-tip={t("board.tools.export")} placement="top">
-        <Button aria-label={t("board.tools.export")} shape="circle" size="sm" onClick={onClick}>
-          <DownloadIcon class="size-5" />
-        </Button>
-      </Tooltip>
-    </>
+    <Tooltip data-tip={t("board.tools.export")} placement="top">
+      <Button aria-label={t("board.tools.export")} shape="circle" size="sm" onClick={onClick}>
+        <DownloadIcon class="size-5" />
+      </Button>
+    </Tooltip>
   );
 };
 
