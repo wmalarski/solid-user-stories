@@ -72,7 +72,7 @@ const HorizontalBackgroundRect: Component = () => {
         y={0}
         height={SECTION_Y_OFFSET - 2}
         width="100%"
-        filter="url(#task-shadow)"
+        filter="url(#dropshadow)"
       />
       <rect class="fill-base-300" x={0} y={0} height={SECTION_Y_OFFSET} width="100%" />
     </>
@@ -88,7 +88,7 @@ const VerticalBackgroundRect: Component = () => {
         y={SECTION_Y_OFFSET}
         height="100%"
         width={SECTION_X_OFFSET - 2}
-        filter="url(#task-shadow)"
+        filter="url(#dropshadow)"
       />
       <rect class="fill-base-300" x={0} y={0} height="100%" width={SECTION_X_OFFSET} />
     </>

@@ -107,7 +107,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         y={props.task.positionY}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
-        filter="url(#task-shadow)"
+        filter="url(#dropshadow)"
         stroke-width={5}
         class={cx("opacity-15", { "stroke-accent opacity-40": isSelected() })}
       />
@@ -382,13 +382,7 @@ const ChevronRightPath: Component<ChevronPathProps> = (props) => {
   });
 
   return (
-    <path
-      ref={props.ref}
-      d={path()}
-      class="stroke-base-content"
-      fill="transparent"
-      stroke-width={4}
-    />
+    <path ref={props.ref} d={path()} class="stroke-accent" fill="transparent" stroke-width={4} />
   );
 };
 
@@ -405,12 +399,6 @@ const ChevronLeftPath: Component<ChevronPathProps> = (props) => {
   });
 
   return (
-    <path
-      ref={props.ref}
-      d={path()}
-      class="stroke-base-content"
-      fill="transparent"
-      stroke-width={4}
-    />
+    <path ref={props.ref} d={path()} class="stroke-accent" fill="transparent" stroke-width={4} />
   );
 };

@@ -60,7 +60,6 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
           "stroke-accent opacity-5": isSelected(),
           "stroke-transparent": !isSelected(),
         })}
-        filter="url(#task-shadow)"
         stroke-width={16}
       />
       <Show when={isSelected()}>
