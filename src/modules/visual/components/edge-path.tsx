@@ -1,10 +1,12 @@
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Accessor, type Component } from "solid-js";
-import { cx } from "tailwind-variants";
 import { edgeCollection } from "~/integrations/tanstack-db/collections";
 import type { EdgeEntry } from "../contexts/board-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { AnimatedPath } from "../ui/animated-path";
+import { HandleRect } from "../ui/handle-rect";
+import { SelectablePath } from "../ui/selectable-path";
+import { SimplePath } from "../ui/simple-path";
 import {
   EDGE_HANDLE_SIZE,
   EDGE_HANDLE_SIZE_HALF,
@@ -37,16 +39,7 @@ export const EdgePath: Component<EdgePathProps> = (props) => {
   return (
     <>
       <AnimatedPath d={path()} stroke-width={2} stroke-opacity={0.7} />
-      <path
-        ref={setRef}
-        d={path()}
-        fill="none"
-        stroke-width={16}
-        class={cx({
-          "stroke-accent opacity-5": isSelected(),
-          "stroke-transparent": !isSelected(),
-        })}
-      />
+      <SelectablePath ref={setRef} d={path()} isSelected={isSelected()} />
       <Show when={isSelected()}>
         <EdgeHandle entry={props.entry} />
       </Show>
@@ -61,15 +54,7 @@ type ExportableEdgePathProps = {
 export const ExportableEdgePath: Component<ExportableEdgePathProps> = (props) => {
   const path = createEdgePath(() => props.entry);
 
-  return (
-    <path
-      d={path()}
-      fill="none"
-      class="stroke-accent opacity-90"
-      stroke-width={2}
-      marker-end="url(#arrow)"
-    />
-  );
+  return <SimplePath d={path()} />;
 };
 
 export const createEdgePath = (entry: Accessor<EdgeEntry>) => {
@@ -108,7 +93,7 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
   });
 
   return (
-    <rect
+    <HandleRect
       ref={setRectRef}
       x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF}
       y={
@@ -118,7 +103,6 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
       }
       width={EDGE_HANDLE_SIZE}
       height={EDGE_HANDLE_SIZE}
-      class="fill-accent"
     />
   );
 };
