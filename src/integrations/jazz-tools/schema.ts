@@ -1,45 +1,44 @@
-import { co } from "jazz-tools";
-import * as v from "valibot";
+import { co, z } from "jazz-tools";
 
 export const TaskSchema = co.map({
-  boardId: v.string(),
-  description: v.string(),
-  estimate: v.number(),
-  id: v.string(),
-  link: v.optional(v.string()),
-  positionX: v.number(),
-  positionY: v.number(),
-  sectionX: v.nullable(v.string()),
-  sectionY: v.nullable(v.string()),
-  title: v.string(),
+  boardId: z.string(),
+  description: z.string(),
+  estimate: z.number(),
+  id: z.string(),
+  link: z.optional(z.string()),
+  positionX: z.number(),
+  positionY: z.number(),
+  sectionX: z.string().nullable(),
+  sectionY: z.string().nullable(),
+  title: z.string(),
 });
 
 export const EdgeSchema = co.map({
-  boardId: v.string(),
-  breakX: v.number(),
-  id: v.string(),
-  source: v.string(),
-  target: v.string(),
+  boardId: z.string(),
+  breakX: z.number(),
+  id: z.string(),
+  source: z.string(),
+  target: z.string(),
 });
 
 export const SectionSchema = co.map({
-  boardId: v.string(),
-  id: v.string(),
-  name: v.string(),
-  orientation: v.union([v.literal("horizontal"), v.literal("vertical")]),
-  size: v.number(),
+  boardId: z.string(),
+  id: z.string(),
+  name: z.string(),
+  orientation: z.union([z.literal("horizontal"), z.literal("vertical")]),
+  size: z.number(),
 });
 
 export const BoardSchema = co.map({
-  description: v.string(),
+  description: z.string(),
   edges: co.list(EdgeSchema),
-  id: v.string(),
-  sectionXOrder: v.array(v.string()),
-  sectionYOrder: v.array(v.string()),
+  id: z.string(),
+  sectionXOrder: z.array(z.string()),
+  sectionYOrder: z.array(z.string()),
   sections: co.list(SectionSchema),
   tasks: co.list(TaskSchema),
-  title: v.string(),
-  user: v.string(),
+  title: z.string(),
+  user: z.string(),
 });
 
 export const BoardsRoot = co.list(BoardSchema);

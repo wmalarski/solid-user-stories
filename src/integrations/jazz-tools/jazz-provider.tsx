@@ -2,11 +2,12 @@ import { JazzBrowserContextManager } from "jazz-tools/browser";
 import {
   createContext,
   createResource,
+  Show,
   useContext,
   type Component,
   type ParentProps,
 } from "solid-js";
-import type { BoardAccount } from "./schema";
+import { BoardAccount } from "./schema";
 
 const createJazzContext = () => {
   const context = new JazzBrowserContextManager<typeof BoardAccount>();
@@ -48,12 +49,29 @@ export const useIsJazzLoaded = () => {
   return value.isLoaded;
 };
 
+export const WithJazz: Component<ParentProps> = (props) => {
+  const isLoaded = useIsJazzLoaded();
+
+  return <Show when={isLoaded()}>{props.children}</Show>;
+};
+
 export const useJazzCurrentAccount = () => {
   const jazzContext = useJazzContext();
+  const currentValue = jazzContext.getCurrentValue();
 
-  if (!jazzContext || !("me" in jazzContext)) {
+  if (!currentValue || !("me" in currentValue)) {
     throw new Error("Error");
   }
 
-  return jazzContext.me;
+  const me = currentValue.me as { $jazz: { id: string } };
+
+  const [account] = createResource(
+    () => ({ id: me.$jazz.id }),
+    async () => {
+      const model = await BoardAccount.load(me.$jazz.id);
+      return model.$isLoaded ? model : null;
+    },
+  );
+
+  return account;
 };

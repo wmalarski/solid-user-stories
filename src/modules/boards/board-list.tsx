@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import { useLiveQuery } from "@tanstack/solid-db";
-import { For, type Component } from "solid-js";
+import { createEffect, For, type Component } from "solid-js";
+import { useJazzCurrentAccount, WithJazz } from "~/integrations/jazz-tools/jazz-provider";
 import { createLink } from "~/integrations/router/create-link";
 import { boardsCollection } from "~/integrations/tanstack-db/collections";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
@@ -12,9 +13,38 @@ export const BoardList: Component = () => {
   const boards = useLiveQuery((q) => q.from({ board: boardsCollection }));
 
   return (
-    <List>
-      <For each={boards()}>{(board) => <BoardListItem board={board} />}</For>
-    </List>
+    <>
+      <List>
+        <For each={boards()}>{(board) => <BoardListItem board={board} />}</For>
+      </List>
+      <WithJazz>
+        <JazzBoardList />
+      </WithJazz>
+    </>
+  );
+};
+
+const JazzBoardList: Component = () => {
+  // const boards = useLiveQuery((q) => q.from({ board: boardsCollection }));
+
+  const account = useJazzCurrentAccount();
+
+  // account()?.$jazz.loadingState
+
+  createEffect(() => {
+    const value = account();
+    if (value?.root?.$isLoaded && value.root.boards?.$isLoaded) {
+      value.root.boards.$jazz.subscribe((value) => {
+        console.log("[value]", value);
+      });
+    }
+  });
+
+  return (
+    <pre>
+      {/* oxlint-disable-next-line typescript/no-explicit-any */}
+      {JSON.stringify(account(), null, 2)}
+    </pre>
   );
 };
 
