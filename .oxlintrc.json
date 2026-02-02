@@ -32,7 +32,9 @@
     "crypto": "readonly",
     "Response": "readonly",
     "navigator": "readonly",
-    "setTimeout": "readonly"
+    "setTimeout": "readonly",
+    "WebSocketPair": "readonly",
+    "WebSocketRequestResponsePair": "readonly"
   },
   "rules": {
     "eslint/arrow-body-style": "off",
