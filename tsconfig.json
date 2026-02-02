@@ -14,9 +14,14 @@
     "noEmit": true,
     // Type Checking & Safety
     "strict": true,
-    "types": ["vite/client"],
+    "types": [
+      "./worker-configuration.d.ts",
+      "vite/client"
+    ],
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": [
+        "./src/*"
+      ]
     }
   }
 }

@@ -1,3 +1,4 @@
+import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import devtools from "solid-devtools/vite";
 import sonda from "sonda/vite";
@@ -17,6 +18,7 @@ export default defineConfig({
     viteTsConfigPaths(),
     solidPlugin(),
     tailwindcss(),
+    cloudflare(),
   ],
   server: {
     port: 3000,

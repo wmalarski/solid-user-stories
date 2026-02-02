@@ -1,5 +1,5 @@
 {
-  "name": "vite-template-solid",
+  "name": "solid-user-stories",
   "version": "0.0.0",
   "description": "",
   "license": "MIT",
@@ -11,7 +11,8 @@
     "serve": "vite preview",
     "lint": "oxlint --type-aware --fix --fix-suggestions",
     "format": "oxfmt --write .",
-    "knip": "knip"
+    "knip": "knip",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
     "@solid-primitives/i18n": "^2.2.1",
@@ -29,6 +30,7 @@
     "valibot": "^1.2.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.22.1",
     "@types/d3": "^7.4.3",
     "daisyui": "^5.5.16",
     "knip": "^5.83.0",
@@ -40,6 +42,7 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-solid": "^2.11.10",
-    "vite-tsconfig-paths": "^6.0.5"
+    "vite-tsconfig-paths": "^6.0.5",
+    "wrangler": "^4.61.1"
   }
 }
