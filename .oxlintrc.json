@@ -31,7 +31,8 @@
     "AbortController": "readonly",
     "crypto": "readonly",
     "Response": "readonly",
-    "navigator": "readonly"
+    "navigator": "readonly",
+    "setTimeout": "readonly"
   },
   "rules": {
     "eslint/arrow-body-style": "off",
