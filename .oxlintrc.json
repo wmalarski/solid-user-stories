@@ -34,7 +34,9 @@
     "navigator": "readonly",
     "setTimeout": "readonly",
     "WebSocketPair": "readonly",
-    "WebSocketRequestResponsePair": "readonly"
+    "WebSocketRequestResponsePair": "readonly",
+    "WebSocket": "readonly",
+    "clearTimeout": "readonly"
   },
   "rules": {
     "eslint/arrow-body-style": "off",

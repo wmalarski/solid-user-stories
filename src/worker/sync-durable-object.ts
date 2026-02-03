@@ -15,7 +15,7 @@ export class SyncDurableObject extends DurableObject<Env> {
 
     // oxlint-disable-next-line unicorn/no-array-for-each
     this.ctx.getWebSockets().forEach((ws) => {
-      let attachment = ws.deserializeAttachment();
+      const attachment = ws.deserializeAttachment();
       if (attachment) {
         // If we previously attached state to our WebSocket,
         // let's add it to `sessions` map to restore the state of the connection.
@@ -73,7 +73,7 @@ export class SyncDurableObject extends DurableObject<Env> {
 
     // Send a message to all WebSocket connections, loop over all the connected WebSockets.
     // oxlint-disable-next-line unicorn/no-array-for-each
-    this.sessions.forEach((attachment, connectedWs) => {
+    this.sessions.forEach((_attachment, connectedWs) => {
       connectedWs.send(
         `[Durable Object] message: ${message}, from: ${session.id}, to: all clients. Total connections: ${this.sessions.size}`,
       );
@@ -82,7 +82,7 @@ export class SyncDurableObject extends DurableObject<Env> {
     // Send a message to all WebSocket connections except the connection (ws),
     // loop over all the connected WebSockets and filter out the connection (ws).
     // oxlint-disable-next-line unicorn/no-array-for-each
-    this.sessions.forEach((attachment, connectedWs) => {
+    this.sessions.forEach((_attachment, connectedWs) => {
       if (connectedWs !== ws) {
         connectedWs.send(
           `[Durable Object] message: ${message}, from: ${session.id}, to: all clients except the initiating client. Total connections: ${this.sessions.size}`,
