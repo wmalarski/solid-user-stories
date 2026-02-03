@@ -41,7 +41,7 @@ export const MultilineText: Component<MultilineTextProps> = (props) => {
     let line: string[] = [];
     let element = (<tspan x={x} y={y} />) as SVGTSpanElement;
 
-    text.append(element);
+    text.appendChild(element);
 
     while (word) {
       line.push(word);
@@ -64,7 +64,7 @@ export const MultilineText: Component<MultilineTextProps> = (props) => {
             {word}
           </tspan>
         ) as SVGTSpanElement;
-        text.append(element);
+        text.appendChild(element);
       }
 
       word = words.pop();
@@ -72,7 +72,7 @@ export const MultilineText: Component<MultilineTextProps> = (props) => {
 
     if (lineNumber >= maxLines) {
       element.textContent = line.join(" ") + ellipsis;
-      let textWidth = element.getComputedTextLength();
+      const textWidth = element.getComputedTextLength();
 
       while (textWidth > maxWidth) {
         line.pop();
