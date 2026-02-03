@@ -6,8 +6,9 @@ import type {
   UpdateMutationFnParams,
   UtilsRecord,
 } from "@tanstack/solid-db";
+import type * as v from "valibot";
 
-interface WebSocketMessage<T> {
+type WebSocketMessage<T> = {
   type: "insert" | "update" | "delete" | "sync" | "transaction" | "ack";
   data?: T | T[];
   mutations?: {
@@ -17,28 +18,41 @@ interface WebSocketMessage<T> {
   }[];
   transactionId?: string;
   id?: string;
-}
+};
 
-interface WebSocketCollectionConfig<TItem extends object> extends Omit<
-  CollectionConfig<TItem>,
-  "onInsert" | "onUpdate" | "onDelete" | "sync"
-> {
-  url: string;
-  reconnectInterval?: number;
-
-  // Note: onInsert/onUpdate/onDelete are handled by the WebSocket connection
-  // Users don't provide these handlers
-}
-
-interface WebSocketUtils extends UtilsRecord {
+type WebSocketUtils = UtilsRecord & {
   reconnect: () => void;
   getConnectionState: () => "connected" | "disconnected" | "connecting";
-}
+};
+
+// oxlint-disable-next-line typescript/no-explicit-any
+type AnyObjectSchema = v.ObjectSchema<any, any>;
+
+type WebSocketCollectionConfig<
+  TSchema extends AnyObjectSchema,
+  TKey extends string | number = string | number,
+> = Omit<
+  CollectionConfig<v.InferOutput<TSchema>, TKey, TSchema, WebSocketUtils>,
+  "onInsert" | "onUpdate" | "onDelete" | "sync" | "schema"
+> & {
+  schema: TSchema;
+  url: string;
+  reconnectInterval?: number;
+};
+// Note: onInsert/onUpdate/onDelete are handled by the WebSocket connection
+// Users don't provide these handlers
 
 // oxlint-disable-next-line func-style
-export function webSocketCollectionOptions<TItem extends object>(
-  config: WebSocketCollectionConfig<TItem>,
-): CollectionConfig<TItem> & { utils: WebSocketUtils } {
+export function webSocketCollectionOptions<
+  TSchema extends AnyObjectSchema,
+  TKey extends string | number = string | number,
+>(
+  config: WebSocketCollectionConfig<TSchema, TKey>,
+): CollectionConfig<v.InferOutput<TSchema>, TKey, never, WebSocketUtils> & {
+  utils: WebSocketUtils;
+} {
+  type TItem = v.InferOutput<TSchema>;
+
   let websocket: WebSocket | null = null;
   let reconnectTimer: NodeJS.Timeout | null = null;
   let connectionState: "connected" | "disconnected" | "connecting" = "disconnected";
@@ -53,7 +67,7 @@ export function webSocketCollectionOptions<TItem extends object>(
     }
   >();
 
-  const sync: SyncConfig<TItem>["sync"] = (params) => {
+  const sync: SyncConfig<TItem, TKey>["sync"] = (params) => {
     const { begin, write, commit, markReady } = params;
 
     // oxlint-disable-next-line func-style
@@ -170,9 +184,9 @@ export function webSocketCollectionOptions<TItem extends object>(
   // oxlint-disable-next-line require-await
   const sendTransaction = async (
     params:
-      | InsertMutationFnParams<TItem>
-      | UpdateMutationFnParams<TItem>
-      | DeleteMutationFnParams<TItem>,
+      | InsertMutationFnParams<TItem, TKey, WebSocketUtils>
+      | UpdateMutationFnParams<TItem, TKey, WebSocketUtils>
+      | DeleteMutationFnParams<TItem, TKey, WebSocketUtils>,
   ): Promise<void> => {
     if (websocket?.readyState !== WebSocket.OPEN) {
       throw new Error("WebSocket not connected");
@@ -221,15 +235,15 @@ export function webSocketCollectionOptions<TItem extends object>(
   };
 
   // All mutation handlers use the same transaction sender
-  const onInsert = async (params: InsertMutationFnParams<TItem>) => {
+  const onInsert = async (params: InsertMutationFnParams<TItem, TKey, WebSocketUtils>) => {
     await sendTransaction(params);
   };
 
-  const onUpdate = async (params: UpdateMutationFnParams<TItem>) => {
+  const onUpdate = async (params: UpdateMutationFnParams<TItem, TKey, WebSocketUtils>) => {
     await sendTransaction(params);
   };
 
-  const onDelete = async (params: DeleteMutationFnParams<TItem>) => {
+  const onDelete = async (params: DeleteMutationFnParams<TItem, TKey, WebSocketUtils>) => {
     await sendTransaction(params);
   };
 
@@ -239,7 +253,8 @@ export function webSocketCollectionOptions<TItem extends object>(
     onDelete,
     onInsert,
     onUpdate,
-    schema: config.schema,
+    // oxlint-disable-next-line typescript/no-explicit-any
+    schema: config.schema as any,
     sync: { sync },
     utils: {
       getConnectionState: () => connectionState,

@@ -1,5 +1,6 @@
 import { createCollection, localStorageCollectionOptions } from "@tanstack/solid-db";
 import { BoardSchema, EdgeSchema, SectionSchema, TaskSchema } from "./schema";
+import { webSocketCollectionOptions } from "./websocket-collection";
 
 export const taskCollection = createCollection(
   localStorageCollectionOptions({
@@ -34,5 +35,14 @@ export const boardsCollection = createCollection(
     id: "boards",
     schema: BoardSchema,
     storageKey: "app-boards",
+  }),
+);
+
+export const gamesCollection = createCollection(
+  webSocketCollectionOptions({
+    getKey: (item) => item.id,
+    id: "boards",
+    schema: BoardSchema,
+    url: "",
   }),
 );
