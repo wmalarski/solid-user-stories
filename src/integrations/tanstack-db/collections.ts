@@ -41,8 +41,8 @@ export const boardsCollection = createCollection(
 export const gamesCollection = createCollection(
   webSocketCollectionOptions({
     getKey: (item) => item.id,
-    id: "boards",
+    id: "games",
     schema: BoardSchema,
-    url: "",
+    url: "/websocket/games",
   }),
 );

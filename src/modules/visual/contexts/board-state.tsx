@@ -256,10 +256,10 @@ export const getBoardBox = ({ tasks, edges, sections }: GetBoardBoxArgs) => {
   xValues.sort(numberSortAscending);
   yValues.sort(numberSortAscending);
 
-  const maxX = xValues.at(-1) || 0;
-  const maxY = yValues.at(-1) || 0;
-  const minX = xValues.at(0) || 0;
-  const minY = yValues.at(0) || 0;
+  const maxX = xValues.at(-1) ?? 0;
+  const maxY = yValues.at(-1) ?? 0;
+  const minX = xValues.at(0) ?? 0;
+  const minY = yValues.at(0) ?? 0;
 
   return {
     height: maxY - minY,

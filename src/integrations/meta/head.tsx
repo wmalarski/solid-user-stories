@@ -12,7 +12,9 @@ export const Head: Component<HeadProps> = (props) => {
   const { t } = useI18n();
 
   const title = createMemo(() => {
-    return props.title ? `${props.title} - ${t("seo.title")}` : t("seo.title");
+    return props.title && props.title.length > 0
+      ? `${props.title} - ${t("seo.title")}`
+      : t("seo.title");
   });
 
   const description = createMemo(() => {

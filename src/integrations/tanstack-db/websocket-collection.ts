@@ -155,12 +155,10 @@ export function webSocketCollectionOptions<
       websocket.onclose = () => {
         connectionState = "disconnected";
         // Auto-reconnect
-        if (!reconnectTimer) {
-          reconnectTimer = setTimeout(() => {
+        reconnectTimer ??= setTimeout(() => {
             reconnectTimer = null;
             connect();
-          }, config.reconnectInterval || 5000);
-        }
+          }, config.reconnectInterval ?? 5000);
       };
     }
 

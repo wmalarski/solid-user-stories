@@ -58,6 +58,7 @@
     "import/max-dependencies": "off",
     "import/no-named-export": "off",
     "import/no-namespace": "off",
+    "import/no-relative-parent-imports": "off",
     "import/no-unassigned-import": "off",
     "import/prefer-default-export": "off",
     "oxc/no-async-await": "off",
@@ -67,11 +68,17 @@
     "typescript/consistent-type-definitions": "off",
     "typescript/explicit-function-return-type": "off",
     "typescript/explicit-module-boundary-types": "off",
+    "typescript/no-misused-promises": [
+      "error",
+      {
+        "checksVoidReturn": false
+      }
+    ],
     "unicorn/no-array-reduce": "off",
     "unicorn/no-null": "off",
     "unicorn/number-literal-case": "off",
     "unicorn/numeric-separators-style": "off",
-    "unicorn/prefer-dom-node-remove": "off",
-    "unicorn/prefer-dom-node-append": "off"
+    "unicorn/prefer-dom-node-append": "off",
+    "unicorn/prefer-dom-node-remove": "off"
   }
 }

@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 
-export class SyncDurableObject extends DurableObject<Env> {
+export class SyncDurableObject extends DurableObject {
   sessions: Map<WebSocket, Record<string, string>>;
 
   constructor(ctx: DurableObjectState, env: Env) {
