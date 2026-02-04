@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Accessor, type Component } from "solid-js";
-import { edgeCollection } from "~/integrations/tanstack-db/collections";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { EdgeEntry } from "../contexts/board-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { AnimatedPath } from "../ui/animated-path";
@@ -82,6 +82,8 @@ type EdgeHandleProps = {
 
 const EdgeHandle: Component<EdgeHandleProps> = (props) => {
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
+
+  const { edgeCollection } = useTanstackDbContext();
 
   createD3DragElement({
     onDragged(event) {

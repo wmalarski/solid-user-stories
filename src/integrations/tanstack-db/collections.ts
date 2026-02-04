@@ -46,3 +46,9 @@ export const gamesCollection = createCollection(
     url: "/websocket/games",
   }),
 );
+
+export type TaskCollection = typeof taskCollection;
+export type EdgeCollection = typeof edgeCollection;
+export type SectionCollection = typeof sectionCollection;
+export type BoardsCollection = typeof boardsCollection;
+export type GamesCollection = typeof gamesCollection;

@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 import { eq, useLiveQuery } from "@tanstack/solid-db";
 import { createMemo, createSignal, For, Show, Suspense, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
-import { boardsCollection } from "~/integrations/tanstack-db/collections";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { BoardStateProvider, getBoardBox, useBoardStateContext } from "../contexts/board-state";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
@@ -27,6 +27,8 @@ import { ExportableTaskGroup, TaskGroup } from "./task-group";
 import { ToolsBar, ZoomBar } from "./tools-bar";
 
 export const VisualRoute: Component = () => {
+  const { boardsCollection } = useTanstackDbContext();
+
   const params = useParams();
   const boardId = createMemo(() => params.boardId ?? "");
 

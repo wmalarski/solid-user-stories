@@ -2,7 +2,7 @@ import { decode } from "decode-formdata";
 import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import { boardsCollection } from "~/integrations/tanstack-db/collections";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { Button } from "~/ui/button/button";
 import {
@@ -28,6 +28,8 @@ type UpdateBoardDialogProps = {
 
 export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
   const { t } = useI18n();
+
+  const { boardsCollection } = useTanstackDbContext();
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();

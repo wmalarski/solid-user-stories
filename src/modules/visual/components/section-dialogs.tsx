@@ -2,8 +2,8 @@ import { decode } from "decode-formdata";
 import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import { boardsCollection, sectionCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { SectionModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
@@ -48,6 +48,9 @@ type InsertSectionDialogProps = {
 export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) => {
   const { t } = useI18n();
 
+  const { taskCollection, edgeCollection, sectionCollection, boardsCollection } =
+    useTanstackDbContext();
+
   const boardId = useBoardId();
   const boardState = useBoardStateContext();
   const sectionConfigs = useSectionConfigsContext();
@@ -87,21 +90,23 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
 
     if (props.orientation === "horizontal") {
       const position = sectionConfigsValue.x[props.index].end;
-      shiftTasks({ attribute: "positionX", position, shift, tasks });
-      shiftEdges({ edges, position, shift });
+      shiftTasks({ attribute: "positionX", position, shift, taskCollection, tasks });
+      shiftEdges({ edgeCollection, edges, position, shift });
       shiftSections({
         attribute: "x",
         boardId: boardId(),
+        boardsCollection,
         index: props.index,
         sectionConfigsValue,
         sectionId,
       });
     } else {
       const position = sectionConfigsValue.y[props.index].end;
-      shiftTasks({ attribute: "positionY", position, shift, tasks });
+      shiftTasks({ attribute: "positionY", position, shift, taskCollection, tasks });
       shiftSections({
         attribute: "y",
         boardId: boardId(),
+        boardsCollection,
         index: props.index,
         sectionConfigsValue,
         sectionId,
@@ -148,6 +153,8 @@ type UpdateSectionDialogProps = {
 
 export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) => {
   const { t } = useI18n();
+
+  const { sectionCollection } = useTanstackDbContext();
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
@@ -245,6 +252,9 @@ type DeleteSectionDialogProps = {
 export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) => {
   const { t } = useI18n();
 
+  const { taskCollection, edgeCollection, sectionCollection, boardsCollection } =
+    useTanstackDbContext();
+
   const boardId = useBoardId();
   const boardState = useBoardStateContext();
   const { onClick, onClose } = useDialogBoardToolUtils();
@@ -267,10 +277,10 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
     });
 
     if (orientation === "horizontal") {
-      shiftTasks({ attribute: "positionX", position: endPosition, shift, tasks });
-      shiftEdges({ edges, position: endPosition, shift });
+      shiftTasks({ attribute: "positionX", position: endPosition, shift, taskCollection, tasks });
+      shiftEdges({ edgeCollection, edges, position: endPosition, shift });
     } else {
-      shiftTasks({ attribute: "positionY", position: endPosition, shift, tasks });
+      shiftTasks({ attribute: "positionY", position: endPosition, shift, taskCollection, tasks });
     }
 
     sectionCollection.delete(sectionId);

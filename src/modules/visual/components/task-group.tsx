@@ -2,8 +2,8 @@ import * as d3 from "d3";
 import { createMemo, createSignal, createUniqueId, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
-import { edgeCollection, taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
@@ -39,6 +39,8 @@ type TaskGroupProps = {
 };
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
+  const { taskCollection } = useTanstackDbContext();
+
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
   const [shiftX, setShiftX] = createSignal(0);
@@ -136,6 +138,8 @@ type TaskContentProps = {
 
 const TaskContent: Component<TaskContentProps> = (props) => {
   const { t } = useI18n();
+
+  const { edgeCollection } = useTanstackDbContext();
 
   const boardId = useBoardId();
 
@@ -249,6 +253,8 @@ type TaskHandleProps = {
 };
 
 const TaskHandle: Component<TaskHandleProps> = (props) => {
+  const { edgeCollection } = useTanstackDbContext();
+
   const boardId = useBoardId();
 
   const boardState = useBoardStateContext();

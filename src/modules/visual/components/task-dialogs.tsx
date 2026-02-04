@@ -8,8 +8,8 @@ import {
 } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import { taskCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
@@ -89,6 +89,8 @@ type InsertTaskDialogProps = {
 export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
   const { t } = useI18n();
 
+  const { taskCollection } = useTanstackDbContext();
+
   const boardId = useBoardId();
   const sectionConfigs = useSectionConfigsContext();
 
@@ -164,6 +166,8 @@ type UpdateTaskDialogProps = {
 
 export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
   const { t } = useI18n();
+
+  const { taskCollection } = useTanstackDbContext();
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
@@ -309,6 +313,8 @@ type DeleteTaskDialogProps = {
 export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const { t } = useI18n();
 
+  const { taskCollection, edgeCollection } = useTanstackDbContext();
+
   const dialogId = createUniqueId();
 
   const boardState = useBoardStateContext();
@@ -319,7 +325,12 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const onConfirmClick = () => {
     closeDialog(dialogId);
 
-    deleteTaskWithDependencies(props.task.id, boardState.edges());
+    deleteTaskWithDependencies({
+      edgeCollection,
+      edges: boardState.edges(),
+      taskCollection,
+      taskId: props.task.id,
+    });
 
     if (isSelected()) {
       onSelectionChange(null);

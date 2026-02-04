@@ -1,7 +1,7 @@
 import { createUniqueId, type Component, type ParentProps } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
-import { edgeCollection } from "~/integrations/tanstack-db/collections";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import { ThemeToggle } from "~/integrations/theme/theme-toggle";
 import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
@@ -78,6 +78,8 @@ export const ToolsBar: Component = () => {
 const DeleteSelectedElementDialog: Component = () => {
   const { t } = useI18n();
 
+  const { taskCollection, edgeCollection } = useTanstackDbContext();
+
   const dialogId = createUniqueId();
 
   const boardState = useBoardStateContext();
@@ -93,7 +95,12 @@ const DeleteSelectedElementDialog: Component = () => {
     }
 
     if (selection.kind === "task") {
-      deleteTaskWithDependencies(selection.id, boardState.edges());
+      deleteTaskWithDependencies({
+        edgeCollection,
+        edges: boardState.edges(),
+        taskCollection,
+        taskId: selection.id,
+      });
     } else {
       edgeCollection.delete(selection.id);
     }

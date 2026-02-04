@@ -1,5 +1,5 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
-import { sectionCollection } from "~/integrations/tanstack-db/collections";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import {
   getDragStartEdgeState,
   getDragStartTaskState,
@@ -69,6 +69,8 @@ type HorizontalPathProps = {
 };
 
 const HorizontalPath: Component<HorizontalPathProps> = (props) => {
+  const { taskCollection, sectionCollection } = useTanstackDbContext();
+
   const boardState = useBoardStateContext();
 
   const [transform] = useBoardTransformContext();
@@ -112,6 +114,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       updateTaskPositions({
         attribute: "positionY",
         shift,
+        taskCollection,
         update: draggedTasksValue,
       });
     },
@@ -131,6 +134,8 @@ type VerticalPathProps = {
 };
 
 const VerticalPath: Component<VerticalPathProps> = (props) => {
+  const { taskCollection, edgeCollection, sectionCollection } = useTanstackDbContext();
+
   const boardState = useBoardStateContext();
 
   const [transform] = useBoardTransformContext();
@@ -178,8 +183,13 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
 
       const shift = withLimit - startPosition();
 
-      updateTaskPositions({ attribute: "positionX", shift, update: draggedTasks() });
-      updateEdgePositions({ shift, update: draggedEdges() });
+      updateTaskPositions({
+        attribute: "positionX",
+        shift,
+        taskCollection,
+        update: draggedTasks(),
+      });
+      updateEdgePositions({ edgeCollection, shift, update: draggedEdges() });
     },
     ref,
   });

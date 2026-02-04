@@ -1,6 +1,6 @@
 import { createUniqueId, type Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
-import { boardsCollection } from "~/integrations/tanstack-db/collections";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { closeDialog, DialogTrigger } from "~/ui/dialog/dialog";
@@ -13,16 +13,15 @@ type DeleteBoardDialogProps = {
 export const DeleteBoardDialog: Component<DeleteBoardDialogProps> = (props) => {
   const { t } = useI18n();
 
+  const { boardsCollection } = useTanstackDbContext();
+
   const dialogId = createUniqueId();
 
   const onSave = () => {
     closeDialog(dialogId);
 
     // taskCollection.
-
     boardsCollection.delete(props.board.id);
-
-    // taskCollection.
   };
 
   return (

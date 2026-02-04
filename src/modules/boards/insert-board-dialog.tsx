@@ -4,8 +4,8 @@ import { createSignal, createUniqueId, type Component, type ComponentProps } fro
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import { createLink } from "~/integrations/router/create-link";
-import { boardsCollection, sectionCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import { Button } from "~/ui/button/button";
 import {
   Dialog,
@@ -23,6 +23,8 @@ import { BoardFields, BoardFieldsSchema } from "./board-fields";
 
 export const InsertBoardDialog: Component = () => {
   const { t } = useI18n();
+
+  const { sectionCollection, boardsCollection } = useTanstackDbContext();
 
   const navigate = useNavigate();
 

@@ -2,13 +2,15 @@ import { A } from "@solidjs/router";
 import { useLiveQuery } from "@tanstack/solid-db";
 import { For, type Component } from "solid-js";
 import { createLink } from "~/integrations/router/create-link";
-import { boardsCollection } from "~/integrations/tanstack-db/collections";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { List, ListColumn, ListRow } from "~/ui/list/list";
 import { UpdateBoardDialog } from "../boards/update-board-dialog";
 import { DeleteBoardDialog } from "./delete-board-dialog";
 
 export const BoardList: Component = () => {
+  const { boardsCollection } = useTanstackDbContext();
+
   const boards = useLiveQuery((q) => q.from({ board: boardsCollection }));
 
   return (

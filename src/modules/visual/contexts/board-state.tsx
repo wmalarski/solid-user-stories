@@ -7,12 +7,12 @@ import {
   createMemo,
   useContext,
 } from "solid-js";
-import {
-  boardsCollection,
-  edgeCollection,
-  sectionCollection,
-  taskCollection,
+import type {
+  BoardsCollection,
+  EdgeCollection,
+  TaskCollection,
 } from "~/integrations/tanstack-db/collections";
+import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { BoardModel, TaskModel } from "~/integrations/tanstack-db/schema";
 import {
   SECTION_X_OFFSET,
@@ -23,6 +23,8 @@ import {
 import type { SectionConfigs } from "./section-configs";
 
 const createBoardStateContext = (board: Accessor<BoardModel>) => {
+  const { taskCollection, edgeCollection, sectionCollection } = useTanstackDbContext();
+
   const tasks = useLiveQuery((q) =>
     q.from({ tasks: taskCollection }).where(({ tasks }) => eq(tasks.boardId, board().id)),
   );
@@ -76,7 +78,19 @@ const getEdgesByTask = (edges: EdgeEntries, taskId: string) => {
     .filter((edge) => edge.source === taskId || edge.target === taskId);
 };
 
-export const deleteTaskWithDependencies = (taskId: string, edges: EdgeEntries) => {
+type DeleteTaskWithDependenciesArgs = {
+  taskId: string;
+  edges: EdgeEntries;
+  taskCollection: TaskCollection;
+  edgeCollection: EdgeCollection;
+};
+
+export const deleteTaskWithDependencies = ({
+  edges,
+  taskId,
+  taskCollection,
+  edgeCollection,
+}: DeleteTaskWithDependenciesArgs) => {
   const taskEdges = getEdgesByTask(edges, taskId);
   if (edges.length > 0) {
     edgeCollection.delete(taskEdges.map((edge) => edge.id));
@@ -136,9 +150,15 @@ type UpdateTaskPositionsArgs = {
   update: Map<string, number>;
   shift: number;
   attribute: "positionY" | "positionX";
+  taskCollection: TaskCollection;
 };
 
-export const updateTaskPositions = ({ update, shift, attribute }: UpdateTaskPositionsArgs) => {
+export const updateTaskPositions = ({
+  update,
+  shift,
+  attribute,
+  taskCollection,
+}: UpdateTaskPositionsArgs) => {
   if (update.size > 0) {
     taskCollection.update([...update.keys()], (drafts) => {
       for (const draft of drafts) {
@@ -152,9 +172,10 @@ export const updateTaskPositions = ({ update, shift, attribute }: UpdateTaskPosi
 type UpdateEdgePositionsArgs = {
   update: Map<string, number>;
   shift: number;
+  edgeCollection: EdgeCollection;
 };
 
-export const updateEdgePositions = ({ update, shift }: UpdateEdgePositionsArgs) => {
+export const updateEdgePositions = ({ edgeCollection, update, shift }: UpdateEdgePositionsArgs) => {
   if (update.size > 0) {
     edgeCollection.update([...update.keys()], (drafts) => {
       for (const draft of drafts) {
@@ -171,6 +192,7 @@ type ShiftSectionArgs = {
   boardId: string;
   sectionConfigsValue: SectionConfigs;
   attribute: "x" | "y";
+  boardsCollection: BoardsCollection;
 };
 
 export const shiftSections = ({
@@ -178,6 +200,7 @@ export const shiftSections = ({
   index,
   boardId,
   sectionId,
+  boardsCollection,
   sectionConfigsValue,
 }: ShiftSectionArgs) => {
   const sectionIds = sectionConfigsValue[attribute].map((config) => config.section.id);
@@ -193,9 +216,16 @@ type ShiftTasksArgs = {
   position: number;
   tasks: TaskModel[];
   attribute: "positionY" | "positionX";
+  taskCollection: TaskCollection;
 };
 
-export const shiftTasks = ({ shift, tasks, position, attribute }: ShiftTasksArgs) => {
+export const shiftTasks = ({
+  shift,
+  tasks,
+  position,
+  attribute,
+  taskCollection,
+}: ShiftTasksArgs) => {
   const tasksToMove = tasks.filter((entry) => entry[attribute] > position).map((entry) => entry.id);
 
   if (tasksToMove.length > 0) {
@@ -211,9 +241,10 @@ type ShiftEdgesArgs = {
   shift: number;
   position: number;
   edges: EdgeEntry[];
+  edgeCollection: EdgeCollection;
 };
 
-export const shiftEdges = ({ shift, edges, position }: ShiftEdgesArgs) => {
+export const shiftEdges = ({ shift, edges, position, edgeCollection }: ShiftEdgesArgs) => {
   const egesToMove = edges
     .filter((entry) => entry.edge.breakX > position)
     .map((entry) => entry.edge.id);
