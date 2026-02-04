@@ -2,14 +2,12 @@ import * as d3 from "d3";
 import { createMemo, createSignal, createUniqueId, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
-import { createId } from "~/integrations/tanstack-db/create-id";
-import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
 import { openDialog } from "~/ui/dialog/dialog";
 import { LinkIcon } from "~/ui/icons/link-icon";
-import { useBoardId, useBoardStateContext } from "../contexts/board-state";
+import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
 import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
@@ -39,13 +37,12 @@ type TaskGroupProps = {
 };
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
-  const { taskCollection } = useTanstackDbContext();
-
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
   const [shiftX, setShiftX] = createSignal(0);
   const [shiftY, setShiftY] = createSignal(0);
 
+  const boardState = useBoardStateContext();
   const sectionConfigs = useSectionConfigsContext();
 
   const insertTaskDialogId = createUniqueId();
@@ -68,12 +65,12 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
 
       const sectionIds = mapToSections(sectionConfigs(), { x: updatedX, y: updatedY });
 
-      taskCollection.update(props.task.id, (draft) => {
-        draft.positionX = updatedX;
-        draft.positionY = updatedY;
-
-        draft.sectionX = sectionIds.sectionX;
-        draft.sectionY = sectionIds.sectionY;
+      boardState.updateTaskPosition({
+        id: props.task.id,
+        positionX: updatedX,
+        positionY: updatedY,
+        sectionX: sectionIds.sectionX,
+        sectionY: sectionIds.sectionY,
       });
     },
     ref: rectRef,
@@ -139,23 +136,17 @@ type TaskContentProps = {
 const TaskContent: Component<TaskContentProps> = (props) => {
   const { t } = useI18n();
 
-  const { edgeCollection } = useTanstackDbContext();
-
-  const boardId = useBoardId();
+  const boardState = useBoardStateContext();
 
   const insertTaskDialogId = createUniqueId();
 
   const isSelected = useIsSelected(() => props.task.id);
 
   const onInsertSuccess = (newTaskId: string) => {
-    const kind = props.newTaskHandle;
-    const edgeId = createId();
-    edgeCollection.insert({
-      boardId: boardId(),
-      breakX: (props.newTaskPoint.x + TASK_RECT_WIDTH + props.task.positionX) / 2,
-      id: edgeId,
-      source: kind === "source" ? props.task.id : newTaskId,
-      target: kind === "source" ? newTaskId : props.task.id,
+    boardState.insertEdgeToTask({
+      isSource: props.newTaskHandle === "source",
+      secondTaskId: newTaskId,
+      taskId: props.task.id,
     });
   };
 
@@ -253,10 +244,6 @@ type TaskHandleProps = {
 };
 
 const TaskHandle: Component<TaskHandleProps> = (props) => {
-  const { edgeCollection } = useTanstackDbContext();
-
-  const boardId = useBoardId();
-
   const boardState = useBoardStateContext();
   const [transform] = useBoardTransformContext();
 
@@ -273,47 +260,16 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
     onDragEnded(event) {
       onDragEnd();
 
-      const task = boardState
-        .tasks()
-        .find(
-          (task) =>
-            task.positionX < event.x &&
-            event.x < task.positionX + TASK_RECT_WIDTH &&
-            task.positionY < event.y &&
-            event.y < task.positionY + TASK_RECT_HEIGHT,
-        );
-
-      if (!task || task.id === props.taskId) {
-        return;
-      }
-
-      const source = props.kind === "source" ? props.taskId : task.id;
-      const target = props.kind === "source" ? task.id : props.taskId;
-
-      const hasTheSameConnection = boardState
-        .edges()
-        .some(
-          (entry) =>
-            (entry.edge.source === source && entry.edge.target === target) ||
-            (entry.edge.source === target && entry.edge.target === source),
-        );
-
-      if (hasTheSameConnection) {
-        return;
-      }
-
-      const breakX = (props.x + task.positionX + TASK_RECT_WIDTH) / 2;
-
-      const edgeId = createId();
-      edgeCollection.insert({
-        boardId: boardId(),
-        breakX,
-        id: edgeId,
-        source: props.kind === "source" ? props.taskId : task.id,
-        target: props.kind === "source" ? task.id : props.taskId,
+      const edgeId = boardState.insertEdgeToPoint({
+        isSource: props.kind === "source",
+        taskId: props.taskId,
+        x: event.x,
+        y: event.y,
       });
 
-      onSelectionChange({ id: edgeId, kind: "edge" });
+      if (edgeId) {
+        onSelectionChange({ id: edgeId, kind: "edge" });
+      }
     },
     onDragStarted() {
       const transformValue = transform();

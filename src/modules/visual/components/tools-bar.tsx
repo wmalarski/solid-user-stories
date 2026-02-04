@@ -1,7 +1,6 @@
 import { createUniqueId, type Component, type ParentProps } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
-import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import { ThemeToggle } from "~/integrations/theme/theme-toggle";
 import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
@@ -14,7 +13,7 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Tooltip } from "~/ui/tooltip/tooltip";
-import { deleteTaskWithDependencies, useBoardStateContext } from "../contexts/board-state";
+import { useBoardStateContext } from "../contexts/board-state";
 import { useBoardTransformContext } from "../contexts/board-transform";
 import { useExportStateContext } from "../contexts/export-state";
 import { useSelectionStateContext } from "../contexts/selection-state";
@@ -78,8 +77,6 @@ export const ToolsBar: Component = () => {
 const DeleteSelectedElementDialog: Component = () => {
   const { t } = useI18n();
 
-  const { taskCollection, edgeCollection } = useTanstackDbContext();
-
   const dialogId = createUniqueId();
 
   const boardState = useBoardStateContext();
@@ -95,14 +92,9 @@ const DeleteSelectedElementDialog: Component = () => {
     }
 
     if (selection.kind === "task") {
-      deleteTaskWithDependencies({
-        edgeCollection,
-        edges: boardState.edges(),
-        taskCollection,
-        taskId: selection.id,
-      });
+      boardState.deleteTask(selection.id);
     } else {
-      edgeCollection.delete(selection.id);
+      boardState.deleteEdge(selection.id);
     }
 
     onSelectionChange(null);

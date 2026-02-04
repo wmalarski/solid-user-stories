@@ -9,7 +9,6 @@ import {
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import { createId } from "~/integrations/tanstack-db/create-id";
-import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
@@ -32,11 +31,7 @@ import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
-import {
-  deleteTaskWithDependencies,
-  useBoardId,
-  useBoardStateContext,
-} from "../contexts/board-state";
+import { useBoardId, useBoardStateContext } from "../contexts/board-state";
 import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
@@ -89,10 +84,9 @@ type InsertTaskDialogProps = {
 export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
   const { t } = useI18n();
 
-  const { taskCollection } = useTanstackDbContext();
-
   const boardId = useBoardId();
   const sectionConfigs = useSectionConfigsContext();
+  const boardState = useBoardStateContext();
 
   const { onClose } = useDialogBoardToolUtils();
   const [_toolsState, { onToolChage }] = useToolsStateContext();
@@ -118,7 +112,7 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
     const taskId = createId();
     const sectionIds = mapToSections(sectionConfigs(), positionValue);
 
-    taskCollection.insert({
+    boardState.insertTask({
       boardId: boardId(),
       description: parsed.output.description,
       estimate: parsed.output.estimate,
@@ -167,12 +161,11 @@ type UpdateTaskDialogProps = {
 export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
   const { t } = useI18n();
 
-  const { taskCollection } = useTanstackDbContext();
-
   const formId = createUniqueId();
   const dialogId = createUniqueId();
   const [issues, setIssues] = createSignal<FormIssues>();
 
+  const boardState = useBoardStateContext();
   const { onClick, onClose } = useDialogBoardToolUtils();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
@@ -187,11 +180,12 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
       return;
     }
 
-    taskCollection.update(props.task.id, (draft) => {
-      draft.description = parsed.output.description;
-      draft.estimate = parsed.output.estimate;
-      draft.link = parsed.output.link;
-      draft.title = parsed.output.title;
+    boardState.updateTaskData({
+      description: parsed.output.description,
+      estimate: parsed.output.estimate,
+      id: props.task.id,
+      link: parsed.output.link,
+      title: parsed.output.title,
     });
 
     closeDialog(dialogId);
@@ -313,8 +307,6 @@ type DeleteTaskDialogProps = {
 export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const { t } = useI18n();
 
-  const { taskCollection, edgeCollection } = useTanstackDbContext();
-
   const dialogId = createUniqueId();
 
   const boardState = useBoardStateContext();
@@ -325,12 +317,7 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const onConfirmClick = () => {
     closeDialog(dialogId);
 
-    deleteTaskWithDependencies({
-      edgeCollection,
-      edges: boardState.edges(),
-      taskCollection,
-      taskId: props.task.id,
-    });
+    boardState.deleteTask(props.task.id);
 
     if (isSelected()) {
       onSelectionChange(null);

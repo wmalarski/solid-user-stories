@@ -10,10 +10,17 @@ import {
 import type {
   BoardsCollection,
   EdgeCollection,
+  SectionCollection,
   TaskCollection,
 } from "~/integrations/tanstack-db/collections";
+import { createId } from "~/integrations/tanstack-db/create-id";
 import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
-import type { BoardModel, TaskModel } from "~/integrations/tanstack-db/schema";
+import type {
+  BoardModel,
+  EdgeModel,
+  SectionModel,
+  TaskModel,
+} from "~/integrations/tanstack-db/schema";
 import {
   SECTION_X_OFFSET,
   SECTION_Y_OFFSET,
@@ -23,7 +30,8 @@ import {
 import type { SectionConfigs } from "./section-configs";
 
 const createBoardStateContext = (board: Accessor<BoardModel>) => {
-  const { taskCollection, edgeCollection, sectionCollection } = useTanstackDbContext();
+  const { taskCollection, edgeCollection, sectionCollection, boardsCollection } =
+    useTanstackDbContext();
 
   const tasks = useLiveQuery((q) =>
     q.from({ tasks: taskCollection }).where(({ tasks }) => eq(tasks.boardId, board().id)),
@@ -41,7 +49,130 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
     q.from({ section: sectionCollection }).where(({ section }) => eq(section.boardId, board().id)),
   );
 
-  return { board, edges, sections, tasks };
+  const updateTaskPosition = (
+    task: Pick<TaskModel, "id" | "positionX" | "positionY" | "sectionX" | "sectionY">,
+  ) => {
+    taskCollection.update(task.id, (draft) => {
+      draft.positionX = task.positionX;
+      draft.positionY = task.positionY;
+      draft.sectionX = task.sectionX;
+      draft.sectionY = task.sectionY;
+    });
+  };
+
+  const insertTask = (task: TaskModel) => {
+    taskCollection.insert(task);
+  };
+
+  const updateTaskData = (
+    task: Pick<TaskModel, "id" | "description" | "estimate" | "link" | "title">,
+  ) => {
+    taskCollection.update(task.id, (draft) => {
+      draft.description = task.description;
+      draft.estimate = task.estimate;
+      draft.link = task.link;
+      draft.title = task.title;
+    });
+  };
+
+  const updateEdge = (edge: Pick<EdgeModel, "id" | "breakX">) => {
+    edgeCollection.update(edge.id, (draft) => {
+      draft.breakX = edge.breakX;
+    });
+  };
+
+  const insertSection = (
+    args: Pick<SectionModel, "name" | "orientation"> & {
+      index: number;
+      sectionConfigsValue: SectionConfigs;
+    },
+  ) => {
+    insertSectionAndShift({
+      boardId: board().id,
+      boardsCollection,
+      edgeCollection,
+      edges: edges(),
+      sectionCollection,
+      taskCollection,
+      tasks: tasks(),
+      ...args,
+    });
+  };
+
+  const updateSectionData = (section: Pick<SectionModel, "id" | "name">) => {
+    sectionCollection.update(section.id, (draft) => {
+      draft.name = section.name;
+    });
+  };
+
+  const deleteSection = (
+    args: Pick<SectionModel, "id" | "orientation"> & {
+      endPosition: number;
+      shift: number;
+    },
+  ) => {
+    deleteSectionAndShift({
+      boardId: board().id,
+      boardsCollection,
+      edgeCollection,
+      edges: edges(),
+      sectionCollection,
+      sectionId: args.id,
+      taskCollection,
+      tasks: tasks(),
+      ...args,
+    });
+  };
+
+  const deleteTask = (taskId: string) => {
+    deleteTaskWithDependencies({
+      edgeCollection,
+      edges: edges(),
+      taskCollection,
+      taskId,
+    });
+  };
+
+  const deleteEdge = (edgeId: string) => {
+    edgeCollection.delete(edgeId);
+  };
+
+  const insertEdgeToPoint = (args: { isSource: boolean; taskId: string; x: number; y: number }) => {
+    return insertEdgeFromPoint({
+      boardId: board().id,
+      edgeCollection,
+      edges: edges(),
+      tasks: tasks(),
+      ...args,
+    });
+  };
+
+  const insertEdgeToTask = (args: { isSource: boolean; taskId: string; secondTaskId: string }) => {
+    return insertEdgeToSecondTask({
+      boardId: board().id,
+      edgeCollection,
+      tasks: tasks(),
+      ...args,
+    });
+  };
+
+  return {
+    board,
+    deleteEdge,
+    deleteSection,
+    deleteTask,
+    edges,
+    insertEdgeToPoint,
+    insertEdgeToTask,
+    insertSection,
+    insertTask,
+    sections,
+    tasks,
+    updateEdge,
+    updateSectionData,
+    updateTaskData,
+    updateTaskPosition,
+  };
 };
 
 const BoardStateContext = createContext<ReturnType<typeof createBoardStateContext> | null>(null);
@@ -85,7 +216,7 @@ type DeleteTaskWithDependenciesArgs = {
   edgeCollection: EdgeCollection;
 };
 
-export const deleteTaskWithDependencies = ({
+const deleteTaskWithDependencies = ({
   edges,
   taskId,
   taskCollection,
@@ -195,7 +326,7 @@ type ShiftSectionArgs = {
   boardsCollection: BoardsCollection;
 };
 
-export const shiftSections = ({
+const shiftSections = ({
   attribute,
   index,
   boardId,
@@ -219,13 +350,7 @@ type ShiftTasksArgs = {
   taskCollection: TaskCollection;
 };
 
-export const shiftTasks = ({
-  shift,
-  tasks,
-  position,
-  attribute,
-  taskCollection,
-}: ShiftTasksArgs) => {
+const shiftTasks = ({ shift, tasks, position, attribute, taskCollection }: ShiftTasksArgs) => {
   const tasksToMove = tasks.filter((entry) => entry[attribute] > position).map((entry) => entry.id);
 
   if (tasksToMove.length > 0) {
@@ -244,7 +369,7 @@ type ShiftEdgesArgs = {
   edgeCollection: EdgeCollection;
 };
 
-export const shiftEdges = ({ shift, edges, position, edgeCollection }: ShiftEdgesArgs) => {
+const shiftEdges = ({ shift, edges, position, edgeCollection }: ShiftEdgesArgs) => {
   const egesToMove = edges
     .filter((entry) => entry.edge.breakX > position)
     .map((entry) => entry.edge.id);
@@ -298,4 +423,199 @@ export const getBoardBox = ({ tasks, edges, sections }: GetBoardBoxArgs) => {
     shiftY: -minY,
     width: maxX - minX,
   };
+};
+
+type InsertSectionAndShiftArgs = {
+  sectionCollection: SectionCollection;
+  edgeCollection: EdgeCollection;
+  taskCollection: TaskCollection;
+  boardsCollection: BoardsCollection;
+  boardId: string;
+  name: string;
+  orientation: SectionModel["orientation"];
+  index: number;
+  tasks: TaskModel[];
+  edges: EdgeEntry[];
+  sectionConfigsValue: SectionConfigs;
+};
+
+const insertSectionAndShift = ({
+  sectionCollection,
+  edgeCollection,
+  taskCollection,
+  boardsCollection,
+  boardId,
+  name,
+  orientation,
+  index,
+  tasks,
+  edges,
+  sectionConfigsValue,
+}: InsertSectionAndShiftArgs) => {
+  const shift = 500;
+  const sectionId = createId();
+  sectionCollection.insert({ boardId, id: sectionId, name, orientation, size: shift });
+
+  if (orientation === "horizontal") {
+    const position = sectionConfigsValue.x[index].end;
+    shiftTasks({ attribute: "positionX", position, shift, taskCollection, tasks });
+    shiftEdges({ edgeCollection, edges, position, shift });
+    shiftSections({
+      attribute: "x",
+      boardId,
+      boardsCollection,
+      index,
+      sectionConfigsValue,
+      sectionId,
+    });
+  } else {
+    const position = sectionConfigsValue.y[index].end;
+    shiftTasks({ attribute: "positionY", position, shift, taskCollection, tasks });
+    shiftSections({
+      attribute: "y",
+      boardId,
+      boardsCollection,
+      index,
+      sectionConfigsValue,
+      sectionId,
+    });
+  }
+};
+
+type DeleteSectionAndShiftArgs = {
+  sectionCollection: SectionCollection;
+  edgeCollection: EdgeCollection;
+  taskCollection: TaskCollection;
+  boardsCollection: BoardsCollection;
+  boardId: string;
+  sectionId: string;
+  orientation: SectionModel["orientation"];
+  endPosition: number;
+  shift: number;
+  tasks: TaskModel[];
+  edges: EdgeEntry[];
+};
+
+const deleteSectionAndShift = ({
+  boardsCollection,
+  edgeCollection,
+  sectionCollection,
+  taskCollection,
+  boardId,
+  sectionId,
+  orientation,
+  endPosition,
+  shift,
+  edges,
+  tasks,
+}: DeleteSectionAndShiftArgs) => {
+  boardsCollection.update(boardId, (draft) => {
+    draft.sectionXOrder = draft.sectionXOrder.filter((id) => id !== sectionId);
+    draft.sectionYOrder = draft.sectionYOrder.filter((id) => id !== sectionId);
+  });
+
+  if (orientation === "horizontal") {
+    shiftTasks({ attribute: "positionX", position: endPosition, shift, taskCollection, tasks });
+    shiftEdges({ edgeCollection, edges, position: endPosition, shift });
+  } else {
+    shiftTasks({ attribute: "positionY", position: endPosition, shift, taskCollection, tasks });
+  }
+
+  sectionCollection.delete(sectionId);
+};
+
+type InsertEdgeFromPointArgs = {
+  edgeCollection: EdgeCollection;
+  tasks: TaskModel[];
+  edges: EdgeEntry[];
+  x: number;
+  y: number;
+  boardId: string;
+  taskId: string;
+  isSource: boolean;
+};
+
+const insertEdgeFromPoint = ({
+  edgeCollection,
+  edges,
+  tasks,
+  x,
+  y,
+  boardId,
+  taskId,
+  isSource,
+}: InsertEdgeFromPointArgs) => {
+  const currentTask = tasks.find((task) => task.id === taskId);
+
+  const task = tasks.find(
+    (task) =>
+      task.positionX < x &&
+      x < task.positionX + TASK_RECT_WIDTH &&
+      task.positionY < y &&
+      y < task.positionY + TASK_RECT_HEIGHT,
+  );
+
+  if (!task || !currentTask || task.id === taskId) {
+    return;
+  }
+
+  const source = isSource ? taskId : task.id;
+  const target = isSource ? task.id : taskId;
+
+  const hasTheSameConnection = edges.some(
+    (entry) =>
+      (entry.edge.source === source && entry.edge.target === target) ||
+      (entry.edge.source === target && entry.edge.target === source),
+  );
+
+  if (hasTheSameConnection) {
+    return;
+  }
+
+  const breakX = (currentTask.positionX + task.positionX + TASK_RECT_WIDTH) / 2;
+
+  const edgeId = createId();
+
+  edgeCollection.insert({ boardId, breakX, id: edgeId, source, target });
+
+  return edgeId;
+};
+
+type InsertEdgeToTaskArgs = {
+  edgeCollection: EdgeCollection;
+  tasks: TaskModel[];
+  boardId: string;
+  taskId: string;
+  secondTaskId: string;
+  isSource: boolean;
+};
+
+const insertEdgeToSecondTask = ({
+  edgeCollection,
+  tasks,
+  boardId,
+  taskId,
+  isSource,
+  secondTaskId,
+}: InsertEdgeToTaskArgs) => {
+  const currentTask = tasks.find((task) => task.id === taskId);
+  const secondTask = tasks.find((task) => task.id === secondTaskId);
+
+  if (!secondTask || !currentTask) {
+    return;
+  }
+
+  const breakX = (currentTask.positionX + secondTask.positionX + TASK_RECT_WIDTH) / 2;
+
+  const edgeId = createId();
+
+  edgeCollection.insert({
+    boardId,
+    breakX,
+    id: edgeId,
+    source: isSource ? taskId : secondTaskId,
+    target: isSource ? secondTaskId : taskId,
+  });
+
+  return edgeId;
 };
