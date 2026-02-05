@@ -105,6 +105,36 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
     });
   };
 
+  const updateHorizontalSectionPosition = (args: {
+    position: number;
+    draggedTasks: Map<string, number>;
+    sectionId: string;
+    startPosition: number;
+    sectionStart: number;
+  }) => {
+    updateHorizontalSectionSize({
+      sectionCollection,
+      taskCollection,
+      ...args,
+    });
+  };
+
+  const updateVerticalSectionPosition = (args: {
+    position: number;
+    draggedTasks: Map<string, number>;
+    draggedEdges: Map<string, number>;
+    sectionId: string;
+    startPosition: number;
+    sectionStart: number;
+  }) => {
+    updateVerticalSectionSize({
+      edgeCollection,
+      sectionCollection,
+      taskCollection,
+      ...args,
+    });
+  };
+
   const deleteSection = (
     args: Pick<SectionModel, "id" | "orientation"> & {
       endPosition: number;
@@ -169,9 +199,11 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
     sections,
     tasks,
     updateEdge,
+    updateHorizontalSectionPosition,
     updateSectionData,
     updateTaskData,
     updateTaskPosition,
+    updateVerticalSectionPosition,
   };
 };
 
@@ -480,6 +512,81 @@ const insertSectionAndShift = ({
       sectionId,
     });
   }
+};
+
+type UpdateHorizontalSectionSizeArgs = {
+  sectionCollection: SectionCollection;
+  taskCollection: TaskCollection;
+  position: number;
+  draggedTasks: Map<string, number>;
+  sectionId: string;
+  startPosition: number;
+  sectionStart: number;
+};
+
+const updateHorizontalSectionSize = ({
+  sectionCollection,
+  taskCollection,
+  position,
+  draggedTasks,
+  sectionId,
+  startPosition,
+  sectionStart,
+}: UpdateHorizontalSectionSizeArgs) => {
+  const size = position - sectionStart;
+
+  sectionCollection.update(sectionId, (draft) => {
+    draft.size = size;
+  });
+
+  const shift = position - startPosition;
+
+  updateTaskPositions({
+    attribute: "positionY",
+    shift,
+    taskCollection,
+    update: draggedTasks,
+  });
+};
+
+type UpdateVerticalSectionSizeArgs = {
+  sectionCollection: SectionCollection;
+  taskCollection: TaskCollection;
+  edgeCollection: EdgeCollection;
+  position: number;
+  draggedTasks: Map<string, number>;
+  draggedEdges: Map<string, number>;
+  sectionId: string;
+  startPosition: number;
+  sectionStart: number;
+};
+
+const updateVerticalSectionSize = ({
+  sectionCollection,
+  taskCollection,
+  edgeCollection,
+  position,
+  draggedTasks,
+  draggedEdges,
+  sectionId,
+  startPosition,
+  sectionStart,
+}: UpdateVerticalSectionSizeArgs) => {
+  const size = position - sectionStart;
+
+  sectionCollection.update(sectionId, (draft) => {
+    draft.size = size;
+  });
+
+  const shift = position - startPosition;
+
+  updateTaskPositions({
+    attribute: "positionX",
+    shift,
+    taskCollection,
+    update: draggedTasks,
+  });
+  updateEdgePositions({ edgeCollection, shift, update: draggedEdges });
 };
 
 type DeleteSectionAndShiftArgs = {

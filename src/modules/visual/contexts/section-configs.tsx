@@ -14,8 +14,6 @@ const SectionConfigsContext = createContext<ReturnType<typeof createSectionConfi
   throw new Error("SectionConfigsContext not defined");
 });
 
-export type SectionConfigs = ReturnType<ReturnType<typeof createSectionConfigsContext>>;
-
 export const useSectionConfigsContext = () => {
   return useContext(SectionConfigsContext);
 };
@@ -84,6 +82,8 @@ const getSectionConfigs = (entries: SectionModel[], board: BoardModel) => {
 
   return { x, y } as const;
 };
+
+export type SectionConfigs = ReturnType<typeof getSectionConfigs>;
 
 export const mapToSections = (config: ReturnType<typeof getSectionConfigs>, point: Point2D) => {
   const x = point.x - SECTION_X_OFFSET;

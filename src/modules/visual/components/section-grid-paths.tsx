@@ -1,10 +1,7 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
-import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import {
   getDragStartEdgeState,
   getDragStartTaskState,
-  updateEdgePositions,
-  updateTaskPositions,
   useBoardStateContext,
 } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
@@ -69,8 +66,6 @@ type HorizontalPathProps = {
 };
 
 const HorizontalPath: Component<HorizontalPathProps> = (props) => {
-  const { taskCollection, sectionCollection } = useTanstackDbContext();
-
   const boardState = useBoardStateContext();
 
   const [transform] = useBoardTransformContext();
@@ -102,20 +97,13 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
 
       const updatedY = (event.y - transformValue.y) / transformValue.k - SECTION_Y_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
-      const size = withLimit - props.config.start;
 
-      sectionCollection.update(props.config.section.id, (draft) => {
-        draft.size = size;
-      });
-
-      const shift = withLimit - startPosition();
-      const draggedTasksValue = draggedTasks();
-
-      updateTaskPositions({
-        attribute: "positionY",
-        shift,
-        taskCollection,
-        update: draggedTasksValue,
+      boardState.updateHorizontalSectionPosition({
+        draggedTasks: draggedTasks(),
+        position: withLimit,
+        sectionId: props.config.section.id,
+        sectionStart: props.config.start,
+        startPosition: startPosition(),
       });
     },
     ref,
@@ -134,8 +122,6 @@ type VerticalPathProps = {
 };
 
 const VerticalPath: Component<VerticalPathProps> = (props) => {
-  const { taskCollection, edgeCollection, sectionCollection } = useTanstackDbContext();
-
   const boardState = useBoardStateContext();
 
   const [transform] = useBoardTransformContext();
@@ -175,21 +161,15 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
 
       const updatedX = (event.x - transformValue.x) / transformValue.k - SECTION_X_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
-      const size = withLimit - props.config.start;
 
-      sectionCollection.update(props.config.section.id, (draft) => {
-        draft.size = size;
+      boardState.updateVerticalSectionPosition({
+        draggedEdges: draggedEdges(),
+        draggedTasks: draggedTasks(),
+        position: withLimit,
+        sectionId: props.config.section.id,
+        sectionStart: props.config.start,
+        startPosition: startPosition(),
       });
-
-      const shift = withLimit - startPosition();
-
-      updateTaskPositions({
-        attribute: "positionX",
-        shift,
-        taskCollection,
-        update: draggedTasks(),
-      });
-      updateEdgePositions({ edgeCollection, shift, update: draggedEdges() });
     },
     ref,
   });
