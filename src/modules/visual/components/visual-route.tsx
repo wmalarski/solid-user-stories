@@ -4,7 +4,7 @@ import { createMemo, createSignal, For, Show, Suspense, type Component } from "s
 import { cx } from "tailwind-variants";
 import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
-import { BoardStateProvider, getBoardBox, useBoardStateContext } from "../contexts/board-state";
+import { BoardStateProvider, useBoardStateContext } from "../contexts/board-state";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgeDragStateProvider } from "../contexts/edge-drag-state";
@@ -13,6 +13,7 @@ import { SelectionStateProvider, useSelectionStateContext } from "../contexts/se
 import { ToolsStateProvider } from "../contexts/tools-state";
 import { SVG_CLASS, SVG_EXPORT_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
+import { getBoardBox } from "../utils/get-board-box";
 import { DraggedEdge } from "./dragged-edge";
 import { EdgePath, ExportableEdgePath } from "./edge-path";
 import {

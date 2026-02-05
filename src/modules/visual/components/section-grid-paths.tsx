@@ -1,9 +1,6 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
-import {
-  getDragStartEdgeState,
-  getDragStartTaskState,
-  useBoardStateContext,
-} from "../contexts/board-state";
+import type { TaskModel } from "~/integrations/tanstack-db/schema";
+import { useBoardStateContext, type EdgeEntry } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { DottedLine } from "../ui/dotted-line";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
@@ -208,4 +205,52 @@ const ExportableVerticalPath: Component<ExportableVerticalPathProps> = (props) =
 
 const ClickableLine: Component<ComponentProps<"line">> = (props) => {
   return <line stroke="transparent" stroke-width={16} {...props} />;
+};
+
+type GetDragStartTaskStateArgs = {
+  position: number;
+  tasks: TaskModel[];
+  offset: number;
+  attribute: "positionY" | "positionX";
+};
+
+const getDragStartTaskState = ({
+  position,
+  tasks,
+  offset,
+  attribute,
+}: GetDragStartTaskStateArgs) => {
+  let maxNotDraggedPosition = 0;
+  const draggedTasks = new Map<string, number>();
+
+  for (const entry of tasks) {
+    const entryPosition = entry[attribute];
+    if (entryPosition > position + offset) {
+      draggedTasks.set(entry.id, entryPosition);
+    } else {
+      const shiftedPosition = entryPosition - offset + 10;
+      maxNotDraggedPosition = Math.max(maxNotDraggedPosition, shiftedPosition);
+    }
+  }
+
+  return { draggedTasks, maxNotDraggedPosition };
+};
+
+type GetDragStartEdgeStateArgs = {
+  position: number;
+  edges: EdgeEntry[];
+  offset: number;
+};
+
+const getDragStartEdgeState = ({ position, edges, offset }: GetDragStartEdgeStateArgs) => {
+  const draggedEdges = new Map<string, number>();
+
+  for (const entry of edges) {
+    const entryPosition = entry.edge.breakX;
+    if (entryPosition > position + offset) {
+      draggedEdges.set(entry.edge.id, entryPosition);
+    }
+  }
+
+  return { draggedEdges };
 };
