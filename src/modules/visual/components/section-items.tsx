@@ -6,25 +6,25 @@ import { LinkButton } from "~/ui/button/button";
 import { ChevronLeftIcon } from "~/ui/icons/chevron-left-icon";
 import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { useSectionConfigsContext, type SectionConfig } from "../contexts/section-configs";
 import { MultilineText } from "../ui/multiline-text";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TEXT_HEIGHT, TEXT_PADDING } from "../utils/constants";
+import type { SectionConfig } from "../utils/section-configs";
 import { DeleteSectionDialog, InsertSectionDialog, UpdateSectionDialog } from "./section-dialogs";
 
 export const SectionItems: Component = () => {
-  const sectionConfigs = useSectionConfigsContext();
+  const boardState = useBoardStateContext();
 
-  const xLength = createMemo(() => sectionConfigs().x.length);
-  const yLength = createMemo(() => sectionConfigs().y.length);
+  const xLength = createMemo(() => boardState.sectionConfigs().x.length);
+  const yLength = createMemo(() => boardState.sectionConfigs().y.length);
 
   return (
     <>
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
-      <Index each={sectionConfigs().x}>
+      <Index each={boardState.sectionConfigs().x}>
         {(entry) => <HorizontalItemRect totalLength={xLength()} config={entry()} />}
       </Index>
-      <Index each={sectionConfigs().y}>
+      <Index each={boardState.sectionConfigs().y}>
         {(entry) => <VerticalItemRect totalLength={yLength()} config={entry()} />}
       </Index>
       <CenterRect />
@@ -33,7 +33,7 @@ export const SectionItems: Component = () => {
 };
 
 export const ExportableSectionItems: Component = () => {
-  const sectionConfigs = useSectionConfigsContext();
+  const boardState = useBoardStateContext();
 
   return (
     <>
@@ -53,10 +53,10 @@ export const ExportableSectionItems: Component = () => {
         width={SECTION_X_OFFSET}
         filter="url(#dropshadow)"
       />
-      <Index each={sectionConfigs().x}>
+      <Index each={boardState.sectionConfigs().x}>
         {(entry) => <ExportableHorizontalItemRect config={entry()} />}
       </Index>
-      <Index each={sectionConfigs().y}>
+      <Index each={boardState.sectionConfigs().y}>
         {(entry) => <ExportableVerticalItemRect config={entry()} />}
       </Index>
     </>

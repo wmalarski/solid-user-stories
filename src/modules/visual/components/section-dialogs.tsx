@@ -25,7 +25,6 @@ import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
 import { useBoardStateContext } from "../contexts/board-state";
-import { useSectionConfigsContext } from "../contexts/section-configs";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
 
 const SectionFieldsSchema = v.object({
@@ -41,7 +40,6 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
   const { t } = useI18n();
 
   const boardState = useBoardStateContext();
-  const sectionConfigs = useSectionConfigsContext();
   const { onClick, onClose } = useDialogBoardToolUtils();
 
   const formId = createUniqueId();
@@ -62,13 +60,10 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
       return;
     }
 
-    const sectionConfigsValue = sectionConfigs();
-
     boardState.insertSection({
       index: props.index,
       name: parsed.output.name,
       orientation: props.orientation,
-      sectionConfigsValue,
     });
 
     event.currentTarget.reset();

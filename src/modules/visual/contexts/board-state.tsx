@@ -1,11 +1,11 @@
 import { eq, useLiveQuery } from "@tanstack/solid-db";
 import {
-  type Accessor,
-  type Component,
-  type ParentProps,
   createContext,
   createMemo,
   useContext,
+  type Accessor,
+  type Component,
+  type ParentProps,
 } from "solid-js";
 import type {
   BoardsCollection,
@@ -27,7 +27,7 @@ import {
   TASK_RECT_HEIGHT,
   TASK_RECT_WIDTH,
 } from "../utils/constants";
-import type { SectionConfigs } from "./section-configs";
+import { getSectionConfigs, type SectionConfigs } from "../utils/section-configs";
 
 const createBoardStateContext = (board: Accessor<BoardModel>) => {
   const { taskCollection, edgeCollection, sectionCollection, boardsCollection } =
@@ -48,6 +48,8 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
   const sections = useLiveQuery((q) =>
     q.from({ section: sectionCollection }).where(({ section }) => eq(section.boardId, board().id)),
   );
+
+  const sectionConfigs = createMemo(() => getSectionConfigs(sections(), board()));
 
   const updateTaskPosition = (
     task: Pick<TaskModel, "id" | "positionX" | "positionY" | "sectionX" | "sectionY">,
@@ -84,7 +86,6 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
   const insertSection = (
     args: Pick<SectionModel, "name" | "orientation"> & {
       index: number;
-      sectionConfigsValue: SectionConfigs;
     },
   ) => {
     insertSectionAndShift({
@@ -93,6 +94,7 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
       edgeCollection,
       edges: edges(),
       sectionCollection,
+      sectionConfigs: sectionConfigs(),
       taskCollection,
       tasks: tasks(),
       ...args,
@@ -196,6 +198,7 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
     insertEdgeToTask,
     insertSection,
     insertTask,
+    sectionConfigs,
     sections,
     tasks,
     updateEdge,
@@ -316,7 +319,7 @@ type UpdateTaskPositionsArgs = {
   taskCollection: TaskCollection;
 };
 
-export const updateTaskPositions = ({
+const updateTaskPositions = ({
   update,
   shift,
   attribute,
@@ -338,7 +341,7 @@ type UpdateEdgePositionsArgs = {
   edgeCollection: EdgeCollection;
 };
 
-export const updateEdgePositions = ({ edgeCollection, update, shift }: UpdateEdgePositionsArgs) => {
+const updateEdgePositions = ({ edgeCollection, update, shift }: UpdateEdgePositionsArgs) => {
   if (update.size > 0) {
     edgeCollection.update([...update.keys()], (drafts) => {
       for (const draft of drafts) {
@@ -353,7 +356,7 @@ type ShiftSectionArgs = {
   index: number;
   sectionId: string;
   boardId: string;
-  sectionConfigsValue: SectionConfigs;
+  sectionConfigs: SectionConfigs;
   attribute: "x" | "y";
   boardsCollection: BoardsCollection;
 };
@@ -364,9 +367,9 @@ const shiftSections = ({
   boardId,
   sectionId,
   boardsCollection,
-  sectionConfigsValue,
+  sectionConfigs,
 }: ShiftSectionArgs) => {
-  const sectionIds = sectionConfigsValue[attribute].map((config) => config.section.id);
+  const sectionIds = sectionConfigs[attribute].map((config) => config.section.id);
   sectionIds.splice(index + 1, 0, sectionId);
   const key = attribute === "x" ? "sectionXOrder" : "sectionYOrder";
   boardsCollection.update(boardId, (draft) => {
@@ -468,7 +471,7 @@ type InsertSectionAndShiftArgs = {
   index: number;
   tasks: TaskModel[];
   edges: EdgeEntry[];
-  sectionConfigsValue: SectionConfigs;
+  sectionConfigs: SectionConfigs;
 };
 
 const insertSectionAndShift = ({
@@ -482,14 +485,14 @@ const insertSectionAndShift = ({
   index,
   tasks,
   edges,
-  sectionConfigsValue,
+  sectionConfigs,
 }: InsertSectionAndShiftArgs) => {
   const shift = 500;
   const sectionId = createId();
   sectionCollection.insert({ boardId, id: sectionId, name, orientation, size: shift });
 
   if (orientation === "horizontal") {
-    const position = sectionConfigsValue.x[index].end;
+    const position = sectionConfigs.x[index].end;
     shiftTasks({ attribute: "positionX", position, shift, taskCollection, tasks });
     shiftEdges({ edgeCollection, edges, position, shift });
     shiftSections({
@@ -497,18 +500,18 @@ const insertSectionAndShift = ({
       boardId,
       boardsCollection,
       index,
-      sectionConfigsValue,
+      sectionConfigs,
       sectionId,
     });
   } else {
-    const position = sectionConfigsValue.y[index].end;
+    const position = sectionConfigs.y[index].end;
     shiftTasks({ attribute: "positionY", position, shift, taskCollection, tasks });
     shiftSections({
       attribute: "y",
       boardId,
       boardsCollection,
       index,
-      sectionConfigsValue,
+      sectionConfigs,
       sectionId,
     });
   }

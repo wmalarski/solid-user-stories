@@ -32,11 +32,11 @@ import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
 import { useBoardId, useBoardStateContext } from "../contexts/board-state";
-import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
+import { mapToSections } from "../utils/section-configs";
 import type { Point2D } from "../utils/types";
 
 export const TaskFieldsSchema = v.object({
@@ -85,7 +85,6 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
   const { t } = useI18n();
 
   const boardId = useBoardId();
-  const sectionConfigs = useSectionConfigsContext();
   const boardState = useBoardStateContext();
 
   const { onClose } = useDialogBoardToolUtils();
@@ -110,7 +109,7 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
     }
 
     const taskId = createId();
-    const sectionIds = mapToSections(sectionConfigs(), positionValue);
+    const sectionIds = mapToSections(boardState.sectionConfigs(), positionValue);
 
     boardState.insertTask({
       boardId: boardId(),

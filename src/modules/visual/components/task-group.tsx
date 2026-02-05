@@ -10,7 +10,6 @@ import { LinkIcon } from "~/ui/icons/link-icon";
 import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
-import { mapToSections, useSectionConfigsContext } from "../contexts/section-configs";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
 import { MultilineText } from "../ui/multiline-text";
@@ -27,6 +26,7 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
+import { mapToSections } from "../utils/section-configs";
 import type { Point2D } from "../utils/types";
 import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 
@@ -43,7 +43,6 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const [shiftY, setShiftY] = createSignal(0);
 
   const boardState = useBoardStateContext();
-  const sectionConfigs = useSectionConfigsContext();
 
   const insertTaskDialogId = createUniqueId();
   const { onClick } = useDialogBoardToolUtils();
@@ -63,7 +62,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       const updatedX = event.x + shiftX();
       const updatedY = event.y + shiftY();
 
-      const sectionIds = mapToSections(sectionConfigs(), { x: updatedX, y: updatedY });
+      const sectionIds = mapToSections(boardState.sectionConfigs(), { x: updatedX, y: updatedY });
 
       boardState.updateTaskPosition({
         id: props.task.id,

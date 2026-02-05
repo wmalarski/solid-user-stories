@@ -9,7 +9,6 @@ import { BoardTransformProvider, useBoardTransformContext } from "../contexts/bo
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgeDragStateProvider } from "../contexts/edge-drag-state";
 import { ExportStateProvider, useExportStateContext } from "../contexts/export-state";
-import { SectionConfigsProvider, useSectionConfigsContext } from "../contexts/section-configs";
 import { SelectionStateProvider, useSelectionStateContext } from "../contexts/selection-state";
 import { ToolsStateProvider } from "../contexts/tools-state";
 import { SVG_CLASS, SVG_EXPORT_CLASS } from "../utils/constants";
@@ -55,21 +54,19 @@ type VisualPanelProps = {
 const VisualPanel: Component<VisualPanelProps> = (props) => {
   return (
     <BoardStateProvider board={props.board}>
-      <SectionConfigsProvider>
-        <ToolsStateProvider>
-          <DragStateProvider>
-            <SelectionStateProvider>
-              <BoardTransformProvider>
-                <EdgeDragStateProvider>
-                  <ExportStateProvider>
-                    <BoardContent />
-                  </ExportStateProvider>
-                </EdgeDragStateProvider>
-              </BoardTransformProvider>
-            </SelectionStateProvider>
-          </DragStateProvider>
-        </ToolsStateProvider>
-      </SectionConfigsProvider>
+      <ToolsStateProvider>
+        <DragStateProvider>
+          <SelectionStateProvider>
+            <BoardTransformProvider>
+              <EdgeDragStateProvider>
+                <ExportStateProvider>
+                  <BoardContent />
+                </ExportStateProvider>
+              </EdgeDragStateProvider>
+            </BoardTransformProvider>
+          </SelectionStateProvider>
+        </DragStateProvider>
+      </ToolsStateProvider>
     </BoardStateProvider>
   );
 };
@@ -156,14 +153,13 @@ const SvgDefinitions: Component = () => {
 
 const ExportableBoard: Component = () => {
   const boardState = useBoardStateContext();
-  const sectionConfigs = useSectionConfigsContext();
 
   const [exportState] = useExportStateContext();
 
   const boardBox = createMemo(() =>
     getBoardBox({
       edges: boardState.edges(),
-      sections: sectionConfigs(),
+      sections: boardState.sectionConfigs(),
       tasks: boardState.tasks(),
     }),
   );

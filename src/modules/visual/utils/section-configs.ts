@@ -1,30 +1,6 @@
-import { type Component, type ParentProps, createContext, createMemo, useContext } from "solid-js";
 import type { BoardModel, SectionModel } from "~/integrations/tanstack-db/schema";
-
-import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
-import type { Point2D } from "../utils/types";
-import { useBoardStateContext } from "./board-state";
-
-const createSectionConfigsContext = () => {
-  const boardState = useBoardStateContext();
-  return createMemo(() => getSectionConfigs(boardState.sections(), boardState.board()));
-};
-
-const SectionConfigsContext = createContext<ReturnType<typeof createSectionConfigsContext>>(() => {
-  throw new Error("SectionConfigsContext not defined");
-});
-
-export const useSectionConfigsContext = () => {
-  return useContext(SectionConfigsContext);
-};
-
-export const SectionConfigsProvider: Component<ParentProps> = (props) => {
-  const value = createSectionConfigsContext();
-
-  return (
-    <SectionConfigsContext.Provider value={value}>{props.children}</SectionConfigsContext.Provider>
-  );
-};
+import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "./constants";
+import type { Point2D } from "./types";
 
 const orderSectionModels = (collection: SectionModel[], order: string[]) => {
   const map = new Map(collection.map((section) => [section.id, section] as const));
@@ -51,7 +27,7 @@ const getPositions = (collection: SectionModel[]) => {
   );
 };
 
-const getSectionConfigs = (entries: SectionModel[], board: BoardModel) => {
+export const getSectionConfigs = (entries: SectionModel[], board: BoardModel) => {
   const horizontal: SectionModel[] = [];
   const vertical: SectionModel[] = [];
 
@@ -84,8 +60,9 @@ const getSectionConfigs = (entries: SectionModel[], board: BoardModel) => {
 };
 
 export type SectionConfigs = ReturnType<typeof getSectionConfigs>;
+export type SectionConfig = SectionConfigs["x"][0];
 
-export const mapToSections = (config: ReturnType<typeof getSectionConfigs>, point: Point2D) => {
+export const mapToSections = (config: SectionConfigs, point: Point2D) => {
   const x = point.x - SECTION_X_OFFSET;
   const y = point.y - SECTION_Y_OFFSET;
 
@@ -94,5 +71,3 @@ export const mapToSections = (config: ReturnType<typeof getSectionConfigs>, poin
 
   return { sectionX: sectionX?.section.id ?? null, sectionY: sectionY?.section.id ?? null };
 };
-
-export type SectionConfig = ReturnType<typeof getSectionConfigs>["x"][0];

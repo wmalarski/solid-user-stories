@@ -5,10 +5,10 @@ import {
   useBoardStateContext,
 } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { useSectionConfigsContext, type SectionConfig } from "../contexts/section-configs";
 import { DottedLine } from "../ui/dotted-line";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
+import type { SectionConfig } from "../utils/section-configs";
 
 export const SectionGridStaticPaths: Component = () => {
   return (
@@ -20,25 +20,29 @@ export const SectionGridStaticPaths: Component = () => {
 };
 
 export const SectionGridPaths: Component = () => {
-  const sectionConfigs = useSectionConfigsContext();
+  const boardState = useBoardStateContext();
 
   return (
     <>
-      <Index each={sectionConfigs().y}>{(entry) => <HorizontalPath config={entry()} />}</Index>
-      <Index each={sectionConfigs().x}>{(entry) => <VerticalPath config={entry()} />}</Index>
+      <Index each={boardState.sectionConfigs().y}>
+        {(entry) => <HorizontalPath config={entry()} />}
+      </Index>
+      <Index each={boardState.sectionConfigs().x}>
+        {(entry) => <VerticalPath config={entry()} />}
+      </Index>
     </>
   );
 };
 
 export const ExportableSectionGridPaths: Component = () => {
-  const sectionConfigs = useSectionConfigsContext();
+  const boardState = useBoardStateContext();
 
   return (
     <>
-      <Index each={sectionConfigs().y}>
+      <Index each={boardState.sectionConfigs().y}>
         {(entry) => <ExportableHorizontalPath position={entry().end} />}
       </Index>
-      <Index each={sectionConfigs().x}>
+      <Index each={boardState.sectionConfigs().x}>
         {(entry) => <ExportableVerticalPath position={entry().end} />}
       </Index>
     </>
