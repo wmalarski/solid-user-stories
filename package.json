@@ -30,9 +30,9 @@
     "valibot": "^1.2.0"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.23.0",
+    "@cloudflare/vite-plugin": "^1.23.1",
     "@types/d3": "^7.4.3",
-    "daisyui": "^5.5.17",
+    "daisyui": "^5.5.18",
     "knip": "^5.83.0",
     "oxfmt": "^0.28.0",
     "oxlint": "^1.43.0",
@@ -43,6 +43,6 @@
     "vite": "^7.3.1",
     "vite-plugin-solid": "^2.11.10",
     "vite-tsconfig-paths": "^6.0.5",
-    "wrangler": "^4.62.0"
+    "wrangler": "^4.63.0"
   }
 }
