@@ -1,9 +1,12 @@
 import { JazzBrowserContextManager } from "jazz-tools/browser";
 import {
   createContext,
+  createEffect,
   createResource,
+  onCleanup,
   Show,
   useContext,
+  type Accessor,
   type Component,
   type ParentProps,
 } from "solid-js";
@@ -33,69 +36,64 @@ export const JazzProvider: Component<ParentProps> = (props) => {
   return <JazzContext.Provider value={contextManager}>{props.children}</JazzContext.Provider>;
 };
 
-export const useJazzContext = () => {
+const useJazzContext = () => {
   const value = useContext(JazzContext);
   if (!value) {
     throw new Error("ToolsStateContext not defined");
   }
+  return value;
+};
+
+export const useJazzBrowserContext = () => {
+  const value = useJazzContext();
   return value.context;
 };
 
-export const useIsJazzLoaded = () => {
-  const value = useContext(JazzContext);
-  if (!value) {
-    throw new Error("ToolsStateContext not defined");
-  }
-  return value.isLoaded;
-};
-
 export const WithJazz: Component<ParentProps> = (props) => {
-  const isLoaded = useIsJazzLoaded();
-
-  return <Show when={isLoaded()}>{props.children}</Show>;
+  const context = useJazzContext();
+  return <Show when={context.isLoaded()}>{props.children}</Show>;
 };
 
-export const useJazzCurrentAccount = () => {
-  const jazzContext = useJazzContext();
-  const currentValue = jazzContext.getCurrentValue();
-
-  if (!currentValue || !("me" in currentValue)) {
-    throw new Error("Error");
-  }
-
-  const me = currentValue.me as { $jazz: { id: string } };
-
+export const createJazzAccountValue = (id: Accessor<string>) => {
   const [account] = createResource(
-    () => ({ id: me.$jazz.id }),
-    async () => {
-      const model = await BoardAccount.load(me.$jazz.id);
+    () => ({ id: id() }),
+    async ({ id }) => {
+      const model = await BoardAccount.load(id);
       return model.$isLoaded ? model : null;
     },
   );
 
+  createEffect(() => {
+    const accountValue = account();
+
+    if (!accountValue) {
+      return;
+    }
+
+    console.log("[accountValue]", accountValue);
+
+    const unsubscribe = accountValue.$jazz.subscribe((value) => {
+      console.log("[value]", value);
+    });
+
+    onCleanup(() => {
+      unsubscribe();
+    });
+    //
+  });
+
   return account;
 };
 
-const JazzBoardList: Component = () => {
-  // const boards = useLiveQuery((q) => q.from({ board: boardsCollection }));
+export const useJazzCurrentAccount = () => {
+  const jazzContext = useJazzBrowserContext();
 
-  const account = useJazzCurrentAccount();
-
-  // account()?.$jazz.loadingState
-
-  createEffect(() => {
-    const value = account();
-    if (value?.root?.$isLoaded && value.root.boards?.$isLoaded) {
-      value.root.boards.$jazz.subscribe((value) => {
-        console.log("[value]", value);
-      });
+  return createJazzAccountValue(() => {
+    const currentValue = jazzContext.getCurrentValue();
+    if (!currentValue || !("me" in currentValue)) {
+      throw new Error("Error");
     }
+    const me = currentValue.me as { $jazz: { id: string } };
+    return me.$jazz.id;
   });
-
-  return (
-    <pre>
-      {/* oxlint-disable-next-line typescript/no-explicit-any */}
-      {JSON.stringify(account(), null, 2)}
-    </pre>
-  );
 };

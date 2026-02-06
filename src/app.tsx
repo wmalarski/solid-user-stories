@@ -2,6 +2,7 @@ import { MetaProvider } from "@solidjs/meta";
 import { Route, Router } from "@solidjs/router";
 import { ErrorBoundary, lazy, Suspense, type Component } from "solid-js";
 import { I18nContextProvider } from "./integrations/i18n";
+import { JazzProvider } from "./integrations/jazz/provider";
 import { Head } from "./integrations/meta/head";
 import { ErrorFallback } from "./integrations/router/error-fallback";
 import { TanstackDbProvider } from "./integrations/tanstack-db/provider";
@@ -18,18 +19,20 @@ const VisualRoute = lazy(() =>
 export const App: Component = () => (
   <Router
     root={(props) => (
-      <ThemeProvider>
-        <I18nContextProvider>
-          <TanstackDbProvider>
-            <MetaProvider>
-              <Head />
-              <ErrorBoundary fallback={ErrorFallback}>
-                <Suspense>{props.children}</Suspense>
-              </ErrorBoundary>
-            </MetaProvider>
-          </TanstackDbProvider>
-        </I18nContextProvider>
-      </ThemeProvider>
+      <JazzProvider>
+        <ThemeProvider>
+          <I18nContextProvider>
+            <TanstackDbProvider>
+              <MetaProvider>
+                <Head />
+                <ErrorBoundary fallback={ErrorFallback}>
+                  <Suspense>{props.children}</Suspense>
+                </ErrorBoundary>
+              </MetaProvider>
+            </TanstackDbProvider>
+          </I18nContextProvider>
+        </ThemeProvider>
+      </JazzProvider>
     )}
   >
     <Route path="/" component={HomeRoute} />
