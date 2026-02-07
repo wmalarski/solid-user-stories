@@ -59,3 +59,5 @@ export const BoardAccount = co
       });
     }
   });
+
+export type BoardInstance = co.loaded<typeof BoardSchema>;

@@ -5,7 +5,6 @@ import { createLink } from "~/integrations/router/create-link";
 import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { List, ListColumn, ListRow } from "~/ui/list/list";
-import { UpdateBoardDialog } from "../boards/update-board-dialog";
 
 export const BoardList: Component = () => {
   const { boardsCollection } = useTanstackDbContext();
@@ -34,9 +33,6 @@ const BoardListItem: Component<BoardListItemProps> = (props) => {
           {props.board.title}
         </A>
         <span class="text-sm opacity-70">{props.board.description}</span>
-      </ListColumn>
-      <ListColumn class="flex gap-1">
-        <UpdateBoardDialog board={props.board} />
       </ListColumn>
     </ListRow>
   );

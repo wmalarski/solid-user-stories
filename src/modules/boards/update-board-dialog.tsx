@@ -2,8 +2,7 @@ import { decode } from "decode-formdata";
 import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
-import type { BoardModel } from "~/integrations/tanstack-db/schema";
+import type { BoardInstance } from "~/integrations/jazz/schema";
 import { Button } from "~/ui/button/button";
 import {
   closeDialog,
@@ -21,15 +20,13 @@ import { parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
 import { BoardFields, BoardFieldsSchema } from "./board-fields";
 
 type UpdateBoardDialogProps = {
-  board: BoardModel;
+  board: BoardInstance;
   onClose?: () => void;
   onOpen?: () => void;
 };
 
 export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
   const { t } = useI18n();
-
-  const { boardsCollection } = useTanstackDbContext();
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
@@ -38,7 +35,6 @@ export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
-
     const formData = new FormData(event.currentTarget);
 
     const parsed = await v.safeParseAsync(BoardFieldsSchema, decode(formData));
@@ -48,12 +44,10 @@ export const UpdateBoardDialog: Component<UpdateBoardDialogProps> = (props) => {
       return;
     }
 
-    boardsCollection.update(props.board.id, (draft) => {
-      draft.description = parsed.output.description;
-      draft.title = parsed.output.title;
-    });
-
     closeDialog(dialogId);
+
+    props.board.$jazz.set("description", parsed.output.description);
+    props.board.$jazz.set("title", parsed.output.title);
   };
 
   return (

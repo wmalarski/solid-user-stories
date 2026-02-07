@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import type { BoardModel } from "~/integrations/tanstack-db/schema";
+import type { BoardInstance } from "~/integrations/jazz/schema";
 import { FieldError } from "~/ui/field-error/field-error";
 import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
@@ -16,7 +16,7 @@ export const BoardFieldsSchema = v.object({
 type BoardFieldsProps = {
   pending?: boolean;
   issues?: FormIssues;
-  initialValues?: Partial<BoardModel>;
+  initialValues?: Partial<BoardInstance>;
 };
 
 export const BoardFields: Component<BoardFieldsProps> = (props) => {

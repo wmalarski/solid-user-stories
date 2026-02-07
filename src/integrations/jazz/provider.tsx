@@ -5,7 +5,6 @@ import {
   createResource,
   Show,
   useContext,
-  type Accessor,
   type Component,
   type ParentProps,
 } from "solid-js";
@@ -53,16 +52,6 @@ export const useJazzBrowserContext = () => {
 export const WithJazz: Component<ParentProps> = (props) => {
   const context = useJazzContext();
   return <Show when={context.isLoaded()}>{props.children}</Show>;
-};
-
-export const createJazzAccountValue = (id: Accessor<string>) => {
-  const account = createJazzResource(() => ({
-    id: id(),
-    options: { resolve: { root: true } },
-    schema: BoardAccount,
-  }));
-
-  return account;
 };
 
 export const useJazzCurrentAccount = () => {
