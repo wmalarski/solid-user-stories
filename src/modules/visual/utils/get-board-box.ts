@@ -1,13 +1,12 @@
-import type { TaskModel } from "~/integrations/tanstack-db/schema";
-import type { EdgeEntry } from "../contexts/board-state";
+import type { EdgeInput, TaskInput } from "~/integrations/jazz/schema";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
 import type { SectionConfigs } from "./section-configs";
 
 const numberSortAscending = (left: number, right: number) => left - right;
 
 type GetBoardBoxArgs = {
-  tasks: TaskModel[];
-  edges: EdgeEntry[];
+  tasks: TaskInput[];
+  edges: EdgeInput[];
   sections: SectionConfigs;
 };
 
@@ -17,7 +16,7 @@ export const getBoardBox = ({ tasks, edges, sections }: GetBoardBoxArgs) => {
       task.positionX + SECTION_X_OFFSET,
       task.positionX + TASK_RECT_HEIGHT + SECTION_X_OFFSET,
     ]),
-    ...edges.map((entry) => entry.edge.breakX + SECTION_X_OFFSET),
+    ...edges.map((edge) => edge.breakX + SECTION_X_OFFSET),
     ...sections.x.flatMap((section) => [section.start, section.end]),
   ];
 

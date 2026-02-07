@@ -1,3 +1,4 @@
+import { Key } from "@solid-primitives/keyed";
 import { useParams } from "@solidjs/router";
 import { createMemo, createSignal, For, Show, Suspense, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
@@ -96,8 +97,14 @@ const SelectableGroup: Component = () => {
     <g cursor={isDragging() ? "grabbing" : "grab"}>
       <SectionGridPaths />
       <g transform={transform() as unknown as string}>
-        <For each={boardState.edges()}>{(entry) => <EdgePath entry={entry} />}</For>
-        <For each={boardState.tasks()}>{(task) => <TaskGroup task={task} />}</For>
+        <Key each={boardState.edges()} by={(edge) => edge.$jazz.id}>
+          {(edge) => (
+            <EdgePath edgeId={edge().$jazz.id} sourceId={edge().source} targetId={edge().target} />
+          )}
+        </Key>
+        <Key each={boardState.tasks()} by={(task) => task.$jazz.id}>
+          {(task) => <TaskGroup taskId={task().$jazz.id} />}
+        </Key>
       </g>
     </g>
   );
@@ -154,9 +161,9 @@ const ExportableBoard: Component = () => {
 
   const boardBox = createMemo(() =>
     getBoardBox({
-      edges: boardState.edges(),
+      edges: boardState.edges()?.map((edge) => edge) ?? [],
       sections: boardState.sectionConfigs(),
-      tasks: boardState.tasks(),
+      tasks: boardState.tasks()?.map((task) => task) ?? [],
     }),
   );
 
@@ -170,7 +177,15 @@ const ExportableBoard: Component = () => {
       >
         <ExportableSectionGridPaths />
         <For each={boardState.tasks()}>{(task) => <ExportableTaskGroup task={task} />}</For>
-        <For each={boardState.edges()}>{(entry) => <ExportableEdgePath entry={entry} />}</For>
+        <For each={boardState.edges()}>
+          {(edge) => (
+            <ExportableEdgePath
+              edgeId={edge.$jazz.id}
+              sourceId={edge.source}
+              targetId={edge.target}
+            />
+          )}
+        </For>
         <ExportableSectionItems />
       </svg>
     </Show>

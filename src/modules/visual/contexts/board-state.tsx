@@ -29,19 +29,19 @@ import { deleteTaskWithDependencies } from "../utils/task-actions";
 const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const tasks = createJazzResource(() => ({
     id: board().tasks.$jazz.id,
-    options: { resolve: { $each: true } },
+    options: { resolve: false },
     schema: TaskListSchema,
   }));
 
   const edges = createJazzResource(() => ({
     id: board().edges.$jazz.id,
-    options: { resolve: { $each: true } },
+    options: { resolve: false },
     schema: EdgesListSchema,
   }));
 
   const sections = createJazzResource(() => ({
     id: board().sections.$jazz.id,
-    options: { resolve: { $each: true } },
+    options: { resolve: false },
     schema: SectionListSchema,
   }));
 

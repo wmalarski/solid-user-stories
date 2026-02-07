@@ -2,7 +2,8 @@ import * as d3 from "d3";
 import { createMemo, createSignal, createUniqueId, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
-import type { TaskInstance } from "~/integrations/jazz/schema";
+import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
+import { TaskSchema, type TaskInstance } from "~/integrations/jazz/schema";
 import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
 import { openDialog } from "~/ui/dialog/dialog";
@@ -34,10 +35,23 @@ import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dia
 type TaskHandleKind = "source" | "target";
 
 type TaskGroupProps = {
-  task: TaskInstance;
+  taskId: string;
 };
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
+  const task = createJazzResource(() => ({
+    id: props.taskId,
+    schema: TaskSchema,
+  }));
+
+  return <Show when={task()}>{(task) => <TaskContainer task={task()} />}</Show>;
+};
+
+type TaskContainerProps = {
+  task: TaskInstance;
+};
+
+const TaskContainer: Component<TaskContainerProps> = (props) => {
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
   const [shiftX, setShiftX] = createSignal(0);
