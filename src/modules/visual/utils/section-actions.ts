@@ -3,6 +3,7 @@ import type {
   SectionInput,
   SectionInstance,
   SectionListInstance,
+  TaskListInstance,
 } from "~/integrations/jazz/schema";
 import type {
   BoardsCollection,
@@ -82,10 +83,21 @@ type ShiftTasksArgs = {
   tasks: TaskModel[];
   attribute: "positionY" | "positionX";
   taskCollection: TaskCollection;
+  tasks2: TaskListInstance;
 };
 
-const shiftTasks = ({ shift, tasks, position, attribute, taskCollection }: ShiftTasksArgs) => {
-  const tasksToMove = tasks.filter((entry) => entry[attribute] > position).map((entry) => entry.id);
+const shiftTasks = ({
+  shift,
+  tasks,
+  position,
+  attribute,
+  taskCollection,
+  tasks2,
+}: ShiftTasksArgs) => {
+  const loadedTasks = tasks2.flatMap((task) => (task.$isLoaded ? [task] : []));
+  const tasksToMove = loadedTasks
+    .filter((entry) => entry[attribute] > position)
+    .map((entry) => entry.id);
 
   if (tasksToMove.length > 0) {
     taskCollection.update(tasksToMove, (drafts) => {
@@ -252,7 +264,6 @@ export const updateVerticalSectionSize = ({
 };
 
 type DeleteSectionAndShiftArgs = {
-  sectionCollection: SectionCollection;
   edgeCollection: EdgeCollection;
   taskCollection: TaskCollection;
   boardsCollection: BoardsCollection;
@@ -263,12 +274,12 @@ type DeleteSectionAndShiftArgs = {
   shift: number;
   tasks: TaskModel[];
   edges: EdgeEntry[];
+  sections?: SectionListInstance;
 };
 
 export const deleteSectionAndShift = ({
   boardsCollection,
   edgeCollection,
-  sectionCollection,
   taskCollection,
   boardId,
   sectionId,
@@ -277,6 +288,7 @@ export const deleteSectionAndShift = ({
   shift,
   edges,
   tasks,
+  sections,
 }: DeleteSectionAndShiftArgs) => {
   boardsCollection.update(boardId, (draft) => {
     draft.sectionXOrder = draft.sectionXOrder.filter((id) => id !== sectionId);
@@ -290,7 +302,7 @@ export const deleteSectionAndShift = ({
     shiftTasks({ attribute: "positionY", position: endPosition, shift, taskCollection, tasks });
   }
 
-  sectionCollection.delete(sectionId);
+  sections?.$jazz.remove((section) => section.$jazz.id === sectionId);
 };
 
 export const updateSectionData = (

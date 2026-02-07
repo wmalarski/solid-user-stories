@@ -1,31 +1,25 @@
-import type { TaskInput, TaskInstance } from "~/integrations/jazz/schema";
-import type { EdgeCollection, TaskCollection } from "~/integrations/tanstack-db/collections";
-import type { EdgeEntry } from "../contexts/board-state";
-
-const getEdgesByTask = (edges: EdgeEntry[], taskId: string) => {
-  return edges
-    .map((entry) => entry.edge)
-    .filter((edge) => edge.source === taskId || edge.target === taskId);
-};
+import type {
+  EdgeListInstance,
+  TaskInput,
+  TaskInstance,
+  TaskListInstance,
+} from "~/integrations/jazz/schema";
 
 type DeleteTaskWithDependenciesArgs = {
   taskId: string;
-  edges: EdgeEntry[];
-  taskCollection: TaskCollection;
-  edgeCollection: EdgeCollection;
+  tasks?: TaskListInstance;
+  edges?: EdgeListInstance;
 };
 
 export const deleteTaskWithDependencies = ({
-  edges,
   taskId,
-  taskCollection,
-  edgeCollection,
+  tasks,
+  edges,
 }: DeleteTaskWithDependenciesArgs) => {
-  const taskEdges = getEdgesByTask(edges, taskId);
-  if (edges.length > 0) {
-    edgeCollection.delete(taskEdges.map((edge) => edge.id));
-  }
-  taskCollection.delete(taskId);
+  edges?.$jazz.remove((edge) =>
+    edge.$isLoaded ? edge.target === taskId || edge.source === taskId : false,
+  );
+  tasks?.$jazz.remove((task) => task.$jazz.id === taskId);
 };
 
 export const updateTaskPosition = (

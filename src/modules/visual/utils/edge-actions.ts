@@ -1,34 +1,34 @@
-import type { EdgeInput, EdgeInstance } from "~/integrations/jazz/schema";
-import type { EdgeCollection } from "~/integrations/tanstack-db/collections";
-import { createId } from "~/integrations/tanstack-db/create-id";
-import type { TaskModel } from "~/integrations/tanstack-db/schema";
-import type { EdgeEntry } from "../contexts/board-state";
+import type {
+  EdgeInput,
+  EdgeInstance,
+  EdgeListInstance,
+  TaskListInstance,
+} from "~/integrations/jazz/schema";
 import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
 
 type InsertEdgeFromPointArgs = {
-  edgeCollection: EdgeCollection;
-  tasks: TaskModel[];
-  edges: EdgeEntry[];
+  tasks?: TaskListInstance;
+  edges?: EdgeListInstance;
   x: number;
   y: number;
-  boardId: string;
   taskId: string;
   isSource: boolean;
 };
 
 export const insertEdgeFromPoint = ({
-  edgeCollection,
   edges,
   tasks,
   x,
   y,
-  boardId,
   taskId,
   isSource,
 }: InsertEdgeFromPointArgs) => {
-  const currentTask = tasks.find((task) => task.id === taskId);
+  const loadedTasks = tasks?.flatMap((task) => (task.$isLoaded ? [task] : [])) ?? [];
+  const loadedEdges = edges?.flatMap((edge) => (edge.$isLoaded ? [edge] : [])) ?? [];
 
-  const task = tasks.find(
+  const currentTask = loadedTasks.find((task) => task.$jazz.id === taskId);
+
+  const task = loadedTasks.find(
     (task) =>
       task.positionX < x &&
       x < task.positionX + TASK_RECT_WIDTH &&
@@ -36,17 +36,17 @@ export const insertEdgeFromPoint = ({
       y < task.positionY + TASK_RECT_HEIGHT,
   );
 
-  if (!task || !currentTask || task.id === taskId) {
+  if (!task || !currentTask || task.$jazz.id === taskId) {
     return;
   }
 
-  const source = isSource ? taskId : task.id;
-  const target = isSource ? task.id : taskId;
+  const source = isSource ? taskId : task.$jazz.id;
+  const target = isSource ? task.$jazz.id : taskId;
 
-  const hasTheSameConnection = edges.some(
+  const hasTheSameConnection = loadedEdges.some(
     (entry) =>
-      (entry.edge.source === source && entry.edge.target === target) ||
-      (entry.edge.source === target && entry.edge.target === source),
+      (entry.source === source && entry.target === target) ||
+      (entry.source === target && entry.target === source),
   );
 
   if (hasTheSameConnection) {
@@ -55,32 +55,30 @@ export const insertEdgeFromPoint = ({
 
   const breakX = (currentTask.positionX + task.positionX + TASK_RECT_WIDTH) / 2;
 
-  const edgeId = createId();
+  const index = edges?.$jazz.push({ breakX, source, target }) ?? 0;
 
-  edgeCollection.insert({ boardId, breakX, id: edgeId, source, target });
-
-  return edgeId;
+  return edges?.at(index - 1)?.$jazz.id;
 };
 
 type InsertEdgeToTaskArgs = {
-  edgeCollection: EdgeCollection;
-  tasks: TaskModel[];
-  boardId: string;
   taskId: string;
   secondTaskId: string;
   isSource: boolean;
+  tasks?: TaskListInstance;
+  edges?: EdgeListInstance;
 };
 
 export const insertEdgeToSecondTask = ({
-  edgeCollection,
-  tasks,
-  boardId,
   taskId,
   isSource,
   secondTaskId,
+  edges,
+  tasks,
 }: InsertEdgeToTaskArgs) => {
-  const currentTask = tasks.find((task) => task.id === taskId);
-  const secondTask = tasks.find((task) => task.id === secondTaskId);
+  const loadedTasks = tasks?.flatMap((task) => (task.$isLoaded ? [task] : [])) ?? [];
+
+  const currentTask = loadedTasks.find((task) => task.$jazz.id === taskId);
+  const secondTask = loadedTasks.find((task) => task.$jazz.id === secondTaskId);
 
   if (!secondTask || !currentTask) {
     return;
@@ -88,17 +86,14 @@ export const insertEdgeToSecondTask = ({
 
   const breakX = (currentTask.positionX + secondTask.positionX + TASK_RECT_WIDTH) / 2;
 
-  const edgeId = createId();
+  const index =
+    edges?.$jazz.push({
+      breakX,
+      source: isSource ? taskId : secondTaskId,
+      target: isSource ? secondTaskId : taskId,
+    }) ?? 0;
 
-  edgeCollection.insert({
-    boardId,
-    breakX,
-    id: edgeId,
-    source: isSource ? taskId : secondTaskId,
-    target: isSource ? secondTaskId : taskId,
-  });
-
-  return edgeId;
+  return edges?.at(index - 1)?.$jazz.id;
 };
 
 export const updateEdge = (instance: EdgeInstance, edge: Pick<EdgeInput, "breakX">) => {

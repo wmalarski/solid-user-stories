@@ -7,12 +7,12 @@ import {
   type ParentProps,
 } from "solid-js";
 import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
-import type { TaskInput } from "~/integrations/jazz/schema";
 import {
   EdgesListSchema,
   SectionListSchema,
   TaskListSchema,
   type BoardInstance,
+  type TaskInput,
 } from "~/integrations/jazz/schema";
 import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { SectionModel } from "~/integrations/tanstack-db/schema";
@@ -115,8 +115,8 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
       boardsCollection,
       edgeCollection,
       edges: edges(),
-      sectionCollection,
       sectionId: args.id,
+      sections: sections(),
       taskCollection,
       tasks: tasks(),
       ...args,
@@ -125,21 +125,18 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
 
   const deleteTask = (taskId: string) => {
     deleteTaskWithDependencies({
-      edgeCollection,
       edges: edges(),
-      taskCollection,
       taskId,
+      tasks: tasks(),
     });
   };
 
   const deleteEdge = (edgeId: string) => {
-    edgeCollection.delete(edgeId);
+    edges()?.$jazz.remove((edge) => edge.$jazz.id === edgeId);
   };
 
   const insertEdgeToPoint = (args: { isSource: boolean; taskId: string; x: number; y: number }) => {
     return insertEdgeFromPoint({
-      boardId: board().id,
-      edgeCollection,
       edges: edges(),
       tasks: tasks(),
       ...args,
@@ -148,8 +145,7 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
 
   const insertEdgeToTask = (args: { isSource: boolean; taskId: string; secondTaskId: string }) => {
     return insertEdgeToSecondTask({
-      boardId: board().id,
-      edgeCollection,
+      edges: edges(),
       tasks: tasks(),
       ...args,
     });
