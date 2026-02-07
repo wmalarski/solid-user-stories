@@ -25,7 +25,30 @@ const createJazzContext = () => {
     return true;
   });
 
-  return { context, isLoaded };
+  const account = createMemo(() => {
+    if (!isLoaded()) {
+      return;
+    }
+
+    const currentValue = context.getCurrentValue();
+    if (!currentValue || !("me" in currentValue)) {
+      throw new Error("Error");
+    }
+    const id = currentValue.me.$jazz.id;
+
+    return createJazzResource(() => ({
+      id,
+      options: { resolve: { root: true } },
+      schema: BoardAccount,
+    }));
+  });
+
+  return {
+    get account() {
+      return account()?.();
+    },
+    context,
+  };
 };
 
 const JazzContext = createContext<ReturnType<typeof createJazzContext> | null>(null);
@@ -36,7 +59,7 @@ export const JazzProvider: Component<ParentProps> = (props) => {
   return <JazzContext.Provider value={contextManager}>{props.children}</JazzContext.Provider>;
 };
 
-const useJazzContext = () => {
+export const useJazzContext = () => {
   const value = useContext(JazzContext);
   if (!value) {
     throw new Error("ToolsStateContext not defined");
@@ -44,31 +67,18 @@ const useJazzContext = () => {
   return value;
 };
 
-export const useJazzBrowserContext = () => {
-  const value = useJazzContext();
-  return value.context;
+export const useJazzAccount = () => {
+  const value = useContext(JazzContext);
+  return createMemo(() => {
+    const account = value?.account;
+    if (!account) {
+      throw new Error("ToolsStateContext not defined");
+    }
+    return account;
+  });
 };
 
 export const WithJazz: Component<ParentProps> = (props) => {
   const context = useJazzContext();
-  return <Show when={context.isLoaded()}>{props.children}</Show>;
-};
-
-export const useJazzCurrentAccount = () => {
-  const jazzContext = useJazzBrowserContext();
-
-  const id = createMemo(() => {
-    const currentValue = jazzContext.getCurrentValue();
-    if (!currentValue || !("me" in currentValue)) {
-      throw new Error("Error");
-    }
-    const me = currentValue.me as { $jazz: { id: string } };
-    return me.$jazz.id;
-  });
-
-  return createJazzResource(() => ({
-    id: id(),
-    options: { resolve: { root: true } },
-    schema: BoardAccount,
-  }));
+  return <Show when={context.account?.root.$isLoaded}>{props.children}</Show>;
 };

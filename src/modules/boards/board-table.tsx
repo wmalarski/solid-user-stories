@@ -2,7 +2,7 @@ import { Key } from "@solid-primitives/keyed";
 import { A } from "@solidjs/router";
 import { Show, Suspense, type Component, type ComponentProps } from "solid-js";
 import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
-import { useJazzCurrentAccount } from "~/integrations/jazz/provider";
+import { useJazzAccount } from "~/integrations/jazz/provider";
 import { BoardSchema, BoardsList } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
 import { createId } from "~/integrations/tanstack-db/create-id";
@@ -11,22 +11,10 @@ import { DeleteBoardDialog } from "./delete-board-dialog";
 import { UpdateBoardDialog } from "./update-board-dialog";
 
 export const BoardTable: Component = () => {
-  const account = useJazzCurrentAccount();
+  const account = useJazzAccount();
 
-  return (
-    <Show when={account()?.root.boards.$jazz.id}>
-      {(boardsId) => <BoardTableWithAccount boardsId={boardsId()} />}
-    </Show>
-  );
-};
-
-type BoardTableWithAccountProps = {
-  boardsId: string;
-};
-
-const BoardTableWithAccount: Component<BoardTableWithAccountProps> = (props) => {
   const boards = createJazzResource(() => ({
-    id: props.boardsId,
+    id: account().root.boards.$jazz.id,
     options: { resolve: true },
     schema: BoardsList,
   }));
@@ -59,7 +47,7 @@ const BoardTableWithAccount: Component<BoardTableWithAccountProps> = (props) => 
       <Suspense>
         <List>
           <Key each={boards()} by={(board) => board.$jazz.id}>
-            {(board) => <BoardTableItem boardId={board().$jazz.id} boardsId={props.boardsId} />}
+            {(board) => <BoardTableItem boardId={board().$jazz.id} />}
           </Key>
         </List>
       </Suspense>
@@ -69,7 +57,6 @@ const BoardTableWithAccount: Component<BoardTableWithAccountProps> = (props) => 
 
 type BoardTableItemProps = {
   boardId: string;
-  boardsId: string;
 };
 
 const BoardTableItem: Component<BoardTableItemProps> = (props) => {
@@ -94,7 +81,7 @@ const BoardTableItem: Component<BoardTableItemProps> = (props) => {
             </ListColumn>
             <ListColumn class="flex gap-1">
               <UpdateBoardDialog board={board()} />
-              <DeleteBoardDialog boardsId={props.boardsId} boardId={board().$jazz.id} />
+              <DeleteBoardDialog boardId={board().$jazz.id} />
             </ListColumn>
           </ListRow>
         )}
