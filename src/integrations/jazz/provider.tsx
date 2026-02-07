@@ -18,6 +18,7 @@ const createJazzContext = () => {
   const [isLoaded] = createResource(async () => {
     const apiKey = import.meta.env.VITE_JAZZ_API_KEY;
     await context.createContext({
+      AccountSchema: BoardAccount,
       sync: {
         peer: `wss://cloud.jazz.tools?key=${apiKey}`,
       },
@@ -55,10 +56,22 @@ export const WithJazz: Component<ParentProps> = (props) => {
 };
 
 export const createJazzAccountValue = (id: Accessor<string>) => {
-  const [account] = createResource(
+  const [account, { mutate }] = createResource(
     () => ({ id: id() }),
     async ({ id }) => {
-      const model = await BoardAccount.load(id);
+      const model = await BoardAccount.load(id, { resolve: { root: { boards: true } } });
+
+      console.log(
+        "[model]",
+        model,
+        "model.$isLoaded",
+        model.$isLoaded,
+        "model.root.$isLoaded",
+        model.$isLoaded && model.root?.$isLoaded,
+        "model.root.boards.$isLoaded",
+        model.$isLoaded && model.root?.boards?.$isLoaded,
+      );
+
       return model.$isLoaded ? model : null;
     },
   );
@@ -71,9 +84,21 @@ export const createJazzAccountValue = (id: Accessor<string>) => {
     }
 
     console.log("[accountValue]", accountValue);
+    console.log("[accountValue-root]", accountValue.$jazz.has("root"));
+    console.log("[accountValue-profile]", accountValue.$jazz.has("profile"));
 
     const unsubscribe = accountValue.$jazz.subscribe((value) => {
-      console.log("[value]", value);
+      // mutate(value);
+      console.log(
+        "[value]",
+        value,
+        "value.$isLoaded",
+        value.$isLoaded,
+        "value.root.$isLoaded",
+        value.root?.$isLoaded,
+        "value.root.boards.$isLoaded",
+        value.root?.boards?.$isLoaded,
+      );
     });
 
     onCleanup(() => {
