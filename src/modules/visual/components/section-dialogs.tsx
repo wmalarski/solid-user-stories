@@ -2,6 +2,7 @@ import { decode } from "decode-formdata";
 import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
+import type { SectionInstance } from "~/integrations/jazz/schema";
 import type { SectionModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
@@ -26,6 +27,7 @@ import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
 import { useBoardStateContext } from "../contexts/board-state";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
+import { updateSectionData } from "../utils/section-actions";
 
 const SectionFieldsSchema = v.object({
   name: v.string(),
@@ -101,13 +103,11 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
 };
 
 type UpdateSectionDialogProps = {
-  section: SectionModel;
+  section: SectionInstance;
 };
 
 export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) => {
   const { t } = useI18n();
-
-  const boardState = useBoardStateContext();
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
@@ -130,8 +130,7 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
       return;
     }
 
-    boardState.updateSectionData({
-      id: props.section.id,
+    updateSectionData(props.section, {
       name: parsed.output.name,
     });
   };

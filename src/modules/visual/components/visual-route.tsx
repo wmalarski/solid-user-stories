@@ -1,9 +1,8 @@
 import { useParams } from "@solidjs/router";
-import { eq, useLiveQuery } from "@tanstack/solid-db";
 import { createMemo, createSignal, For, Show, Suspense, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
-import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
-import type { BoardModel } from "~/integrations/tanstack-db/schema";
+import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
+import { BoardSchema, type BoardInstance } from "~/integrations/jazz/schema";
 import { BoardStateProvider, useBoardStateContext } from "../contexts/board-state";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
@@ -27,21 +26,17 @@ import { ExportableTaskGroup, TaskGroup } from "./task-group";
 import { ToolsBar, ZoomBar } from "./tools-bar";
 
 export const VisualRoute: Component = () => {
-  const { boardsCollection } = useTanstackDbContext();
-
   const params = useParams();
   const boardId = createMemo(() => params.boardId ?? "");
 
-  const board = useLiveQuery((q) =>
-    q
-      .from({ board: boardsCollection })
-      .where(({ board }) => eq(board.id, boardId()))
-      .findOne(),
-  );
+  const board = createJazzResource(() => ({
+    id: boardId(),
+    schema: BoardSchema,
+  }));
 
   return (
     <Suspense fallback={"Loading..."}>
-      <Show when={board().at(0)} fallback={"No board..."}>
+      <Show when={board()} fallback={"No board..."}>
         {(board) => <VisualPanel board={board()} />}
       </Show>
     </Suspense>
@@ -49,7 +44,7 @@ export const VisualRoute: Component = () => {
 };
 
 type VisualPanelProps = {
-  board: BoardModel;
+  board: BoardInstance;
 };
 
 const VisualPanel: Component<VisualPanelProps> = (props) => {

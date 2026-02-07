@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import { createMemo, createSignal, createUniqueId, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
-import type { TaskModel } from "~/integrations/tanstack-db/schema";
+import type { TaskInstance } from "~/integrations/jazz/schema";
 import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
 import { openDialog } from "~/ui/dialog/dialog";
@@ -27,13 +27,14 @@ import {
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
 import { mapToSections } from "../utils/section-configs";
+import { updateTaskPosition } from "../utils/task-actions";
 import type { Point2D } from "../utils/types";
 import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 
 type TaskHandleKind = "source" | "target";
 
 type TaskGroupProps = {
-  task: TaskModel;
+  task: TaskInstance;
 };
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
@@ -49,12 +50,12 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const [newTaskHandle, setNewTaskHandle] = createSignal<TaskHandleKind>("source");
   const [newTaskPoint, setNewTaskPoint] = createSignal<Point2D>({ x: 0, y: 0 });
 
-  const isSelected = useIsSelected(() => props.task.id);
+  const isSelected = useIsSelected(() => props.task.$jazz.id);
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
   createD3DragElement({
     onDragStarted(event) {
-      onSelectionChange({ id: props.task.id, kind: "task" });
+      onSelectionChange({ id: props.task.$jazz.id, kind: "task" });
       setShiftX(props.task.positionX - event.x);
       setShiftY(props.task.positionY - event.y);
     },
@@ -64,8 +65,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
 
       const sectionIds = mapToSections(boardState.sectionConfigs(), { x: updatedX, y: updatedY });
 
-      boardState.updateTaskPosition({
-        id: props.task.id,
+      updateTaskPosition(props.task, {
         positionX: updatedX,
         positionY: updatedY,
         sectionX: sectionIds.sectionX,
@@ -112,13 +112,13 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
           kind="source"
           x={props.task.positionX}
           y={props.task.positionY}
-          taskId={props.task.id}
+          taskId={props.task.$jazz.id}
         />
         <TaskHandle
           kind="target"
           x={props.task.positionX}
           y={props.task.positionY}
-          taskId={props.task.id}
+          taskId={props.task.$jazz.id}
         />
         <TaskArrows task={props.task} onArrowClick={onArrowClick} />
       </Show>
@@ -127,7 +127,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
 };
 
 type TaskContentProps = {
-  task: TaskModel;
+  task: TaskInstance;
   newTaskPoint: Point2D;
   newTaskHandle: TaskHandleKind;
 };
@@ -139,13 +139,13 @@ const TaskContent: Component<TaskContentProps> = (props) => {
 
   const insertTaskDialogId = createUniqueId();
 
-  const isSelected = useIsSelected(() => props.task.id);
+  const isSelected = useIsSelected(() => props.task.$jazz.id);
 
   const onInsertSuccess = (newTaskId: string) => {
     boardState.insertEdgeToTask({
       isSource: props.newTaskHandle === "source",
       secondTaskId: newTaskId,
-      taskId: props.task.id,
+      taskId: props.task.$jazz.id,
     });
   };
 
@@ -187,7 +187,7 @@ const TaskContent: Component<TaskContentProps> = (props) => {
 };
 
 type ExportableTaskGroupProps = {
-  task: TaskModel;
+  task: TaskInstance;
 };
 
 export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) => {
@@ -300,7 +300,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
 };
 
 type TaskArrowsProps = {
-  task: TaskModel;
+  task: TaskInstance;
   onArrowClick: (taskPoint: Point2D, orientation: TaskHandleKind) => void;
 };
 
@@ -346,7 +346,7 @@ const ARROW_HEIGHT_HALF = 10;
 const ARROW_WIDTH = 10;
 
 type ChevronPathProps = {
-  task: TaskModel;
+  task: TaskInstance;
   ref: (element: SVGElement) => void;
 };
 

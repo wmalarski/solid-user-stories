@@ -1,10 +1,10 @@
-import type { BoardModel, SectionModel } from "~/integrations/tanstack-db/schema";
+import type { BoardInstance, SectionInstance } from "~/integrations/jazz/schema";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "./constants";
 import type { Point2D } from "./types";
 
-const orderSectionModels = (collection: SectionModel[], order: string[]) => {
+const orderSectionModels = (collection: SectionInstance[], order: string[]) => {
   const map = new Map(collection.map((section) => [section.id, section] as const));
-  const result: SectionModel[] = [];
+  const result: SectionInstance[] = [];
 
   for (const sectionId of order) {
     const ssection = map.get(sectionId);
@@ -16,7 +16,7 @@ const orderSectionModels = (collection: SectionModel[], order: string[]) => {
   return result;
 };
 
-const getPositions = (collection: SectionModel[]) => {
+const getPositions = (collection: SectionInstance[]) => {
   return collection.reduce(
     (previous, current) => {
       const last = previous.at(-1) ?? 0;
@@ -27,11 +27,11 @@ const getPositions = (collection: SectionModel[]) => {
   );
 };
 
-export const getSectionConfigs = (entries: SectionModel[], board: BoardModel) => {
-  const horizontal: SectionModel[] = [];
-  const vertical: SectionModel[] = [];
+export const getSectionConfigs = (board: BoardInstance, entries?: SectionInstance[]) => {
+  const horizontal: SectionInstance[] = [];
+  const vertical: SectionInstance[] = [];
 
-  for (const entry of entries) {
+  for (const entry of entries ?? []) {
     const array = entry.orientation === "horizontal" ? horizontal : vertical;
     array.push(entry);
   }

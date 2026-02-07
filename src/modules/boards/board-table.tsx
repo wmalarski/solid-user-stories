@@ -1,11 +1,10 @@
 import { Key } from "@solid-primitives/keyed";
 import { A } from "@solidjs/router";
-import { Show, Suspense, type Component, type ComponentProps } from "solid-js";
+import { Show, Suspense, type Component } from "solid-js";
 import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
 import { useJazzAccount } from "~/integrations/jazz/provider";
-import { BoardSchema, BoardsList } from "~/integrations/jazz/schema";
+import { BoardSchema, BoardsListSchema } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
-import { createId } from "~/integrations/tanstack-db/create-id";
 import { List, ListColumn, ListRow } from "~/ui/list/list";
 import { DeleteBoardDialog } from "./delete-board-dialog";
 import { UpdateBoardDialog } from "./update-board-dialog";
@@ -16,42 +15,17 @@ export const BoardTable: Component = () => {
   const boards = createJazzResource(() => ({
     id: account().root.boards.$jazz.id,
     options: { resolve: true },
-    schema: BoardsList,
+    schema: BoardsListSchema,
   }));
 
-  const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-
-    boards()?.$jazz.push({
-      description: "desc",
-      edges: [],
-      id: createId(),
-      sectionXOrder: [],
-      sectionYOrder: [],
-      sections: [],
-      tasks: [],
-      title: formData.get("title") as string,
-      user: "",
-    });
-
-    event.currentTarget.reset();
-  };
-
   return (
-    <>
-      <form onSubmit={onSubmit}>
-        <input type="text" name="title" placeholder="Band name" />
-        <button>Add</button>
-      </form>
-      <Suspense>
-        <List>
-          <Key each={boards()} by={(board) => board.$jazz.id}>
-            {(board) => <BoardTableItem boardId={board().$jazz.id} />}
-          </Key>
-        </List>
-      </Suspense>
-    </>
+    <Suspense>
+      <List>
+        <Key each={boards()} by={(board) => board.$jazz.id}>
+          {(board) => <BoardTableItem boardId={board().$jazz.id} />}
+        </Key>
+      </List>
+    </Suspense>
   );
 };
 

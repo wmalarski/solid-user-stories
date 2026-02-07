@@ -1,8 +1,6 @@
-import { createUniqueId, Show, type Component, type ParentProps } from "solid-js";
+import { createUniqueId, type Component, type ParentProps } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
-import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
-import { BoardSchema } from "~/integrations/jazz/schema";
 import { ThemeToggle } from "~/integrations/theme/theme-toggle";
 import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
@@ -40,11 +38,6 @@ export const ToolsBar: Component = () => {
     onSelectionChange(null);
   };
 
-  const board = createJazzResource(() => ({
-    id: boardState.board().id,
-    schema: BoardSchema,
-  }));
-
   return (
     <div class="absolute bottom-2 w-full flex justify-center">
       <ToolContainer class="justify-center items-center px-3 py-2">
@@ -72,13 +65,9 @@ export const ToolsBar: Component = () => {
         </Tooltip>
         <DeleteSelectedElementDialog />
         <ExportToPngButton />
-        <Show when={board()}>
-          {(board) => (
-            <Tooltip data-tip={t("board.forms.update")} placement="top">
-              <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={board()} />
-            </Tooltip>
-          )}
-        </Show>
+        <Tooltip data-tip={t("board.forms.update")} placement="top">
+          <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
+        </Tooltip>
         <ThemeToggle />
       </ToolContainer>
     </div>

@@ -1,10 +1,8 @@
 import { co, z } from "jazz-tools";
 
 export const TaskSchema = co.map({
-  boardId: z.string(),
   description: z.string(),
   estimate: z.number(),
-  id: z.string(),
   link: z.optional(z.string()),
   positionX: z.number(),
   positionY: z.number(),
@@ -14,34 +12,36 @@ export const TaskSchema = co.map({
 });
 
 export const EdgeSchema = co.map({
-  boardId: z.string(),
   breakX: z.number(),
-  id: z.string(),
   source: z.string(),
   target: z.string(),
 });
 
 export const SectionSchema = co.map({
-  boardId: z.string(),
   id: z.string(),
   name: z.string(),
   orientation: z.union([z.literal("horizontal"), z.literal("vertical")]),
   size: z.number(),
 });
 
+export const EdgesListSchema = co.list(EdgeSchema);
+
+export const SectionListSchema = co.list(SectionSchema);
+
+export const TaskListSchema = co.list(TaskSchema);
+
 export const BoardSchema = co.map({
   description: z.string(),
-  edges: co.list(EdgeSchema),
-  id: z.string(),
+  edges: EdgesListSchema,
   sectionXOrder: z.array(z.string()),
   sectionYOrder: z.array(z.string()),
-  sections: co.list(SectionSchema),
-  tasks: co.list(TaskSchema),
+  sections: SectionListSchema,
+  tasks: TaskListSchema,
   title: z.string(),
   user: z.string(),
 });
 
-export const BoardsList = co.list(BoardSchema);
+export const BoardsListSchema = co.list(BoardSchema);
 
 export const BoardAccountRoot = co.map({
   boards: co.list(BoardSchema),
@@ -60,4 +60,11 @@ export const BoardAccount = co
     }
   });
 
+export type SectionInstance = co.loaded<typeof SectionSchema>;
+export type SectionInput = co.input<typeof SectionSchema>;
+export type SectionListInstance = co.loaded<typeof SectionListSchema>;
+export type EdgeInstance = co.loaded<typeof EdgeSchema>;
+export type EdgeInput = co.input<typeof EdgeSchema>;
+export type TaskInstance = co.loaded<typeof TaskSchema>;
+export type TaskInput = co.input<typeof TaskSchema>;
 export type BoardInstance = co.loaded<typeof BoardSchema>;

@@ -1,3 +1,4 @@
+import type { EdgeInput, EdgeInstance } from "~/integrations/jazz/schema";
 import type { EdgeCollection } from "~/integrations/tanstack-db/collections";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import type { TaskModel } from "~/integrations/tanstack-db/schema";
@@ -98,4 +99,8 @@ export const insertEdgeToSecondTask = ({
   });
 
   return edgeId;
+};
+
+export const updateEdge = (instance: EdgeInstance, edge: Pick<EdgeInput, "breakX">) => {
+  instance.$jazz.set("breakX", edge.breakX);
 };

@@ -3,9 +3,11 @@ import { decode } from "decode-formdata";
 import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
+import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
+import { useJazzAccount } from "~/integrations/jazz/provider";
+import { BoardsListSchema } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
 import { createId } from "~/integrations/tanstack-db/create-id";
-import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import { Button } from "~/ui/button/button";
 import {
   Dialog,
@@ -24,7 +26,13 @@ import { BoardFields, BoardFieldsSchema } from "./board-fields";
 export const InsertBoardDialog: Component = () => {
   const { t } = useI18n();
 
-  const { sectionCollection, boardsCollection } = useTanstackDbContext();
+  const account = useJazzAccount();
+
+  const boards = createJazzResource(() => ({
+    id: account().root.boards.$jazz.id,
+    options: { resolve: true },
+    schema: BoardsListSchema,
+  }));
 
   const navigate = useNavigate();
 
@@ -45,40 +53,41 @@ export const InsertBoardDialog: Component = () => {
       return;
     }
 
-    const boardId = createId();
     const sectionXId = createId();
     const sectionYId = createId();
 
-    const boardTx = boardsCollection.insert({
+    const index = boards()?.$jazz.push({
       description: parsed.output.description,
-      id: boardId,
+      edges: [],
       sectionXOrder: [sectionXId],
       sectionYOrder: [sectionYId],
+      sections: [
+        {
+          id: sectionXId,
+          name: t("board.forms.xSectionDefault"),
+          orientation: "horizontal",
+          size: 500,
+        },
+        {
+          id: sectionYId,
+          name: t("board.forms.ySectionDefault"),
+          orientation: "vertical",
+          size: 500,
+        },
+      ],
+      tasks: [],
       title: parsed.output.title,
       user: "1",
     });
 
-    const sectionTx = sectionCollection.insert([
-      {
-        boardId,
-        id: sectionXId,
-        name: t("board.forms.xSectionDefault"),
-        orientation: "horizontal",
-        size: 500,
-      },
-      {
-        boardId,
-        id: sectionYId,
-        name: t("board.forms.ySectionDefault"),
-        orientation: "vertical",
-        size: 500,
-      },
-    ]);
+    if (!index) {
+      return;
+    }
 
-    await boardTx.isPersisted.promise;
-    await sectionTx.isPersisted.promise;
-
-    navigate(createLink("/board/:boardId", { params: { boardId } }));
+    const boardId = boards()?.at(index - 1)?.$jazz.id;
+    if (boardId) {
+      navigate(createLink("/board/:boardId", { params: { boardId } }));
+    }
   };
 
   return (

@@ -1,4 +1,3 @@
-import { eq, useLiveQuery } from "@tanstack/solid-db";
 import {
   createContext,
   createMemo,
@@ -7,13 +6,16 @@ import {
   type Component,
   type ParentProps,
 } from "solid-js";
+import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
+import type { TaskInput } from "~/integrations/jazz/schema";
+import {
+  EdgesListSchema,
+  SectionListSchema,
+  TaskListSchema,
+  type BoardInstance,
+} from "~/integrations/jazz/schema";
 import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
-import type {
-  BoardModel,
-  EdgeModel,
-  SectionModel,
-  TaskModel,
-} from "~/integrations/tanstack-db/schema";
+import type { SectionModel } from "~/integrations/tanstack-db/schema";
 import { insertEdgeFromPoint, insertEdgeToSecondTask } from "../utils/edge-actions";
 import {
   deleteSectionAndShift,
@@ -24,58 +26,37 @@ import {
 import { getSectionConfigs } from "../utils/section-configs";
 import { deleteTaskWithDependencies } from "../utils/task-actions";
 
-const createBoardStateContext = (board: Accessor<BoardModel>) => {
+const createBoardStateContext = (board: Accessor<BoardInstance>) => {
+  const tasks = createJazzResource(() => ({
+    id: board().tasks.$jazz.id,
+    options: { resolve: { $each: true } },
+    schema: TaskListSchema,
+  }));
+
+  const edges = createJazzResource(() => ({
+    id: board().edges.$jazz.id,
+    options: { resolve: { $each: true } },
+    schema: EdgesListSchema,
+  }));
+
+  const sections = createJazzResource(() => ({
+    id: board().sections.$jazz.id,
+    options: { resolve: { $each: true } },
+    schema: SectionListSchema,
+  }));
+
   const { taskCollection, edgeCollection, sectionCollection, boardsCollection } =
     useTanstackDbContext();
 
-  const tasks = useLiveQuery((q) =>
-    q.from({ tasks: taskCollection }).where(({ tasks }) => eq(tasks.boardId, board().id)),
+  const sectionConfigs = createMemo(() =>
+    getSectionConfigs(
+      board(),
+      sections()?.map((section) => section),
+    ),
   );
 
-  const edges = useLiveQuery((q) =>
-    q
-      .from({ edge: edgeCollection })
-      .where(({ edge }) => eq(edge.boardId, board().id))
-      .innerJoin({ source: taskCollection }, ({ edge, source }) => eq(edge.source, source.id))
-      .innerJoin({ target: taskCollection }, ({ edge, target }) => eq(edge.target, target.id)),
-  );
-
-  const sections = useLiveQuery((q) =>
-    q.from({ section: sectionCollection }).where(({ section }) => eq(section.boardId, board().id)),
-  );
-
-  const sectionConfigs = createMemo(() => getSectionConfigs(sections(), board()));
-
-  const updateTaskPosition = (
-    task: Pick<TaskModel, "id" | "positionX" | "positionY" | "sectionX" | "sectionY">,
-  ) => {
-    taskCollection.update(task.id, (draft) => {
-      draft.positionX = task.positionX;
-      draft.positionY = task.positionY;
-      draft.sectionX = task.sectionX;
-      draft.sectionY = task.sectionY;
-    });
-  };
-
-  const insertTask = (task: TaskModel) => {
-    taskCollection.insert(task);
-  };
-
-  const updateTaskData = (
-    task: Pick<TaskModel, "id" | "description" | "estimate" | "link" | "title">,
-  ) => {
-    taskCollection.update(task.id, (draft) => {
-      draft.description = task.description;
-      draft.estimate = task.estimate;
-      draft.link = task.link;
-      draft.title = task.title;
-    });
-  };
-
-  const updateEdge = (edge: Pick<EdgeModel, "id" | "breakX">) => {
-    edgeCollection.update(edge.id, (draft) => {
-      draft.breakX = edge.breakX;
-    });
+  const insertTask = (task: TaskInput) => {
+    tasks()?.$jazz.push(task);
   };
 
   const insertSection = (
@@ -84,21 +65,12 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
     },
   ) => {
     insertSectionAndShift({
-      boardId: board().id,
-      boardsCollection,
       edgeCollection,
       edges: edges(),
-      sectionCollection,
       sectionConfigs: sectionConfigs(),
       taskCollection,
       tasks: tasks(),
       ...args,
-    });
-  };
-
-  const updateSectionData = (section: Pick<SectionModel, "id" | "name">) => {
-    sectionCollection.update(section.id, (draft) => {
-      draft.name = section.name;
     });
   };
 
@@ -196,11 +168,7 @@ const createBoardStateContext = (board: Accessor<BoardModel>) => {
     sectionConfigs,
     sections,
     tasks,
-    updateEdge,
     updateHorizontalSectionPosition,
-    updateSectionData,
-    updateTaskData,
-    updateTaskPosition,
     updateVerticalSectionPosition,
   };
 };
@@ -218,13 +186,8 @@ export const useBoardStateContext = () => {
   return context;
 };
 
-export const useBoardId = () => {
-  const context = useBoardStateContext();
-  return createMemo(() => context.board().id);
-};
-
 type BoardStateProviderProps = ParentProps<{
-  board: BoardModel;
+  board: BoardInstance;
 }>;
 
 export const BoardStateProvider: Component<BoardStateProviderProps> = (props) => {
