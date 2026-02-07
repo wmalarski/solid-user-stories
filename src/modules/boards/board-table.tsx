@@ -1,14 +1,7 @@
+import { Key } from "@solid-primitives/keyed";
 import { A } from "@solidjs/router";
-import {
-  createEffect,
-  createResource,
-  For,
-  onCleanup,
-  Show,
-  Suspense,
-  type Component,
-  type ComponentProps,
-} from "solid-js";
+import { createResource, Show, Suspense, type Component, type ComponentProps } from "solid-js";
+import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
 import { useJazzCurrentAccount } from "~/integrations/jazz/provider";
 import { BoardSchema, BoardsList } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
@@ -32,21 +25,11 @@ type BoardTableWithAccountProps = {
 };
 
 const BoardTableWithAccount: Component<BoardTableWithAccountProps> = (props) => {
-  const [boards, { mutate }] = createResource(
-    () => ({ id: props.boardsId }),
-    async (args) => {
-      const root = await BoardsList.load(args.id, { resolve: true });
-      return root.$isLoaded ? root : null;
-    },
-  );
-
-  createEffect(() => {
-    onCleanup(
-      BoardsList.subscribe(props.boardsId, (value) => {
-        mutate(value);
-      }),
-    );
-  });
+  const boards = createJazzResource(() => ({
+    id: props.boardsId,
+    options: { resolve: true },
+    schema: BoardsList,
+  }));
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
     event.preventDefault();
@@ -75,9 +58,9 @@ const BoardTableWithAccount: Component<BoardTableWithAccountProps> = (props) => 
       </form>
       <Suspense>
         <List>
-          <For each={boards()}>
-            {(board) => <BoardTableItem boardId={board.$jazz.id} boardsId={props.boardsId} />}
-          </For>
+          <Key each={boards()} by={(board) => board.$jazz.id}>
+            {(board) => <BoardTableItem boardId={board().$jazz.id} boardsId={props.boardsId} />}
+          </Key>
         </List>
       </Suspense>
     </>
@@ -114,11 +97,7 @@ const BoardTableItem: Component<BoardTableItemProps> = (props) => {
             </ListColumn>
             <ListColumn class="flex gap-1">
               <UpdateBoardDialog board={board()} />
-              <DeleteBoardDialog
-                board={board()}
-                boardsId={props.boardsId}
-                boardId={board().$jazz.id}
-              />
+              <DeleteBoardDialog boardsId={props.boardsId} boardId={board().$jazz.id} />
             </ListColumn>
           </ListRow>
         )}

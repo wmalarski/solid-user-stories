@@ -6,7 +6,6 @@ import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { List, ListColumn, ListRow } from "~/ui/list/list";
 import { UpdateBoardDialog } from "../boards/update-board-dialog";
-import { DeleteBoardDialog } from "./delete-board-dialog";
 
 export const BoardList: Component = () => {
   const { boardsCollection } = useTanstackDbContext();
@@ -38,7 +37,6 @@ const BoardListItem: Component<BoardListItemProps> = (props) => {
       </ListColumn>
       <ListColumn class="flex gap-1">
         <UpdateBoardDialog board={props.board} />
-        <DeleteBoardDialog board={props.board} boardId="" rootId="" />
       </ListColumn>
     </ListRow>
   );
