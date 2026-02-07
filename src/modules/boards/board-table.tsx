@@ -1,6 +1,6 @@
 import { Key } from "@solid-primitives/keyed";
 import { A } from "@solidjs/router";
-import { createResource, Show, Suspense, type Component, type ComponentProps } from "solid-js";
+import { Show, Suspense, type Component, type ComponentProps } from "solid-js";
 import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
 import { useJazzCurrentAccount } from "~/integrations/jazz/provider";
 import { BoardSchema, BoardsList } from "~/integrations/jazz/schema";
@@ -73,13 +73,10 @@ type BoardTableItemProps = {
 };
 
 const BoardTableItem: Component<BoardTableItemProps> = (props) => {
-  const [board] = createResource(
-    () => ({ boardId: props.boardId }),
-    async (args) => {
-      const board = await BoardSchema.load(args.boardId);
-      return board.$isLoaded ? board : null;
-    },
-  );
+  const board = createJazzResource(() => ({
+    id: props.boardId,
+    schema: BoardSchema,
+  }));
 
   return (
     <Suspense fallback="Suspense">

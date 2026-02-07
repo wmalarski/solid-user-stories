@@ -1,6 +1,7 @@
 import { JazzBrowserContextManager } from "jazz-tools/browser";
 import {
   createContext,
+  createMemo,
   createResource,
   Show,
   useContext,
@@ -8,6 +9,7 @@ import {
   type Component,
   type ParentProps,
 } from "solid-js";
+import { createJazzResource } from "./create-jazz-resource";
 import { BoardAccount } from "./schema";
 
 const createJazzContext = () => {
@@ -54,51 +56,11 @@ export const WithJazz: Component<ParentProps> = (props) => {
 };
 
 export const createJazzAccountValue = (id: Accessor<string>) => {
-  const [account, { mutate }] = createResource(
-    () => ({ id: id() }),
-    async ({ id }) => {
-      const model = await BoardAccount.load(id, { resolve: { root: true } });
-
-      // console.log(
-      //   "[model]",
-      //   model,
-      //   "model.$isLoaded",
-      //   model.$isLoaded,
-      //   "model.root.$isLoaded",
-      //   model.$isLoaded && model.root?.$isLoaded,
-      //   // "model.root.boards.$isLoaded",
-      //   // model.$isLoaded && model.root?.boards?.$isLoaded,
-      // );
-
-      return model.$isLoaded ? model : null;
-    },
-  );
-
-  // createEffect(() => {
-  //   const accountValue = account();
-
-  //   if (!accountValue) {
-  //     return;
-  //   }
-
-  //   console.log("[accountValue]", accountValue);
-  //   console.log("[accountValue-root]", accountValue.$jazz.has("root"));
-  //   console.log("[accountValue-profile]", accountValue.$jazz.has("profile"));
-
-  //   onCleanup(
-  //     accountValue.$jazz.subscribe((value) => {
-  //       // mutate(value);
-  //       console.log(
-  //         "[value]",
-  //         value,
-  //         "value.$isLoaded",
-  //         value.$isLoaded,
-  //         "value.root.$isLoaded",
-  //         value.root?.$isLoaded,
-  //       );
-  //     }),
-  //   );
-  // });
+  const account = createJazzResource(() => ({
+    id: id(),
+    options: { resolve: { root: true } },
+    schema: BoardAccount,
+  }));
 
   return account;
 };
@@ -106,7 +68,7 @@ export const createJazzAccountValue = (id: Accessor<string>) => {
 export const useJazzCurrentAccount = () => {
   const jazzContext = useJazzBrowserContext();
 
-  return createJazzAccountValue(() => {
+  const id = createMemo(() => {
     const currentValue = jazzContext.getCurrentValue();
     if (!currentValue || !("me" in currentValue)) {
       throw new Error("Error");
@@ -114,4 +76,10 @@ export const useJazzCurrentAccount = () => {
     const me = currentValue.me as { $jazz: { id: string } };
     return me.$jazz.id;
   });
+
+  return createJazzResource(() => ({
+    id: id(),
+    options: { resolve: { root: true } },
+    schema: BoardAccount,
+  }));
 };
