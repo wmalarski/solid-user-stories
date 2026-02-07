@@ -38,7 +38,7 @@ const BoardListItem: Component<BoardListItemProps> = (props) => {
       </ListColumn>
       <ListColumn class="flex gap-1">
         <UpdateBoardDialog board={props.board} />
-        <DeleteBoardDialog board={props.board} />
+        <DeleteBoardDialog board={props.board} boardId="" rootId="" />
       </ListColumn>
     </ListRow>
   );

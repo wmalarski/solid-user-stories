@@ -1,9 +1,7 @@
 import { JazzBrowserContextManager } from "jazz-tools/browser";
 import {
   createContext,
-  createEffect,
   createResource,
-  onCleanup,
   Show,
   useContext,
   type Accessor,
@@ -59,53 +57,48 @@ export const createJazzAccountValue = (id: Accessor<string>) => {
   const [account, { mutate }] = createResource(
     () => ({ id: id() }),
     async ({ id }) => {
-      const model = await BoardAccount.load(id, { resolve: { root: { boards: true } } });
+      const model = await BoardAccount.load(id, { resolve: { root: true } });
 
-      console.log(
-        "[model]",
-        model,
-        "model.$isLoaded",
-        model.$isLoaded,
-        "model.root.$isLoaded",
-        model.$isLoaded && model.root?.$isLoaded,
-        "model.root.boards.$isLoaded",
-        model.$isLoaded && model.root?.boards?.$isLoaded,
-      );
+      // console.log(
+      //   "[model]",
+      //   model,
+      //   "model.$isLoaded",
+      //   model.$isLoaded,
+      //   "model.root.$isLoaded",
+      //   model.$isLoaded && model.root?.$isLoaded,
+      //   // "model.root.boards.$isLoaded",
+      //   // model.$isLoaded && model.root?.boards?.$isLoaded,
+      // );
 
       return model.$isLoaded ? model : null;
     },
   );
 
-  createEffect(() => {
-    const accountValue = account();
+  // createEffect(() => {
+  //   const accountValue = account();
 
-    if (!accountValue) {
-      return;
-    }
+  //   if (!accountValue) {
+  //     return;
+  //   }
 
-    console.log("[accountValue]", accountValue);
-    console.log("[accountValue-root]", accountValue.$jazz.has("root"));
-    console.log("[accountValue-profile]", accountValue.$jazz.has("profile"));
+  //   console.log("[accountValue]", accountValue);
+  //   console.log("[accountValue-root]", accountValue.$jazz.has("root"));
+  //   console.log("[accountValue-profile]", accountValue.$jazz.has("profile"));
 
-    const unsubscribe = accountValue.$jazz.subscribe((value) => {
-      // mutate(value);
-      console.log(
-        "[value]",
-        value,
-        "value.$isLoaded",
-        value.$isLoaded,
-        "value.root.$isLoaded",
-        value.root?.$isLoaded,
-        "value.root.boards.$isLoaded",
-        value.root?.boards?.$isLoaded,
-      );
-    });
-
-    onCleanup(() => {
-      unsubscribe();
-    });
-    //
-  });
+  //   onCleanup(
+  //     accountValue.$jazz.subscribe((value) => {
+  //       // mutate(value);
+  //       console.log(
+  //         "[value]",
+  //         value,
+  //         "value.$isLoaded",
+  //         value.$isLoaded,
+  //         "value.root.$isLoaded",
+  //         value.root?.$isLoaded,
+  //       );
+  //     }),
+  //   );
+  // });
 
   return account;
 };

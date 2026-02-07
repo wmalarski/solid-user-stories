@@ -1,6 +1,6 @@
-import { createUniqueId, type Component } from "solid-js";
+import { createResource, createUniqueId, type Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
-import { useTanstackDbContext } from "~/integrations/tanstack-db/provider";
+import { BoardsList } from "~/integrations/jazz/schema";
 import type { BoardModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { closeDialog, DialogTrigger } from "~/ui/dialog/dialog";
@@ -8,20 +8,32 @@ import { TrashIcon } from "~/ui/icons/trash-icon";
 
 type DeleteBoardDialogProps = {
   board: BoardModel;
+  boardId: string;
+  boardsId: string;
 };
 
 export const DeleteBoardDialog: Component<DeleteBoardDialogProps> = (props) => {
   const { t } = useI18n();
 
-  const { boardsCollection } = useTanstackDbContext();
+  const [root] = createResource(
+    () => ({ id: props.boardsId }),
+    async (args) => {
+      const root = await BoardsList.load(args.id);
+      return root.$isLoaded ? root : null;
+    },
+  );
+
+  // const { boardsCollection } = useTanstackDbContext();
 
   const dialogId = createUniqueId();
 
   const onSave = () => {
     closeDialog(dialogId);
 
+    root()?.$jazz.remove((board) => board.$jazz.id === props.boardId);
+
     // taskCollection.
-    boardsCollection.delete(props.board.id);
+    // boardsCollection.delete(props.board.id);
   };
 
   return (

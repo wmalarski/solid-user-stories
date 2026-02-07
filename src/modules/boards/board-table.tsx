@@ -1,15 +1,16 @@
 import { A } from "@solidjs/router";
 import {
-  createMemo,
+  createEffect,
   createResource,
   For,
+  onCleanup,
   Show,
   Suspense,
   type Component,
   type ComponentProps,
 } from "solid-js";
 import { useJazzCurrentAccount } from "~/integrations/jazz/provider";
-import { BoardSchema } from "~/integrations/jazz/schema";
+import { BoardSchema, BoardsList } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import { List, ListColumn, ListRow } from "~/ui/list/list";
@@ -19,40 +20,39 @@ import { UpdateBoardDialog } from "./update-board-dialog";
 export const BoardTable: Component = () => {
   const account = useJazzCurrentAccount();
 
-  const boards = createMemo(() => {
-    const accountValue = account();
+  return (
+    <Show when={account()?.root.boards.$jazz.id}>
+      {(boardsId) => <BoardTableWithAccount boardsId={boardsId()} />}
+    </Show>
+  );
+};
 
-    console.log("accountValue?.root?.$isLoaded", accountValue?.root?.$isLoaded);
+type BoardTableWithAccountProps = {
+  boardsId: string;
+};
 
-    if (!accountValue?.root?.$isLoaded) {
-      return null;
-    }
+const BoardTableWithAccount: Component<BoardTableWithAccountProps> = (props) => {
+  const [boards, { mutate }] = createResource(
+    () => ({ id: props.boardsId }),
+    async (args) => {
+      const root = await BoardsList.load(args.id, { resolve: true });
+      return root.$isLoaded ? root : null;
+    },
+  );
 
-    return accountValue.root.boards;
+  createEffect(() => {
+    onCleanup(
+      BoardsList.subscribe(props.boardsId, (value) => {
+        mutate(value);
+      }),
+    );
   });
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
-    const accountValue = account();
-
-    console.log("[accountValue?.$isLoaded]", accountValue?.$isLoaded);
-    console.log("[accountValue?.root?.$isLoaded]", accountValue?.root?.$isLoaded);
-
-    if (accountValue?.root?.$isLoaded) {
-      console.log("[accountValue?.root.boards.$isLoaded]", accountValue?.root?.boards.$isLoaded);
-    }
-
-    if (
-      !accountValue?.$isLoaded ||
-      !accountValue?.root?.$isLoaded ||
-      !accountValue?.root?.boards.$isLoaded
-    ) {
-      return;
-    }
-
-    accountValue.root.boards.$jazz.push({
+    boards()?.$jazz.push({
       description: "desc",
       edges: [],
       id: createId(),
@@ -75,7 +75,9 @@ export const BoardTable: Component = () => {
       </form>
       <Suspense>
         <List>
-          <For each={boards()}>{(board) => <BoardTableItem boardId={board.$jazz.id} />}</For>
+          <For each={boards()}>
+            {(board) => <BoardTableItem boardId={board.$jazz.id} boardsId={props.boardsId} />}
+          </For>
         </List>
       </Suspense>
     </>
@@ -84,6 +86,7 @@ export const BoardTable: Component = () => {
 
 type BoardTableItemProps = {
   boardId: string;
+  boardsId: string;
 };
 
 const BoardTableItem: Component<BoardTableItemProps> = (props) => {
@@ -111,7 +114,11 @@ const BoardTableItem: Component<BoardTableItemProps> = (props) => {
             </ListColumn>
             <ListColumn class="flex gap-1">
               <UpdateBoardDialog board={board()} />
-              <DeleteBoardDialog board={board()} />
+              <DeleteBoardDialog
+                board={board()}
+                boardsId={props.boardsId}
+                boardId={board().$jazz.id}
+              />
             </ListColumn>
           </ListRow>
         )}

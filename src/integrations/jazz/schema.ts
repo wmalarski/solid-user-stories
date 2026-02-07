@@ -41,6 +41,8 @@ export const BoardSchema = co.map({
   user: z.string(),
 });
 
+export const BoardsList = co.list(BoardSchema);
+
 export const BoardAccountRoot = co.map({
   boards: co.list(BoardSchema),
 });
