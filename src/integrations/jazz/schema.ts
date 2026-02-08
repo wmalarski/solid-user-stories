@@ -15,8 +15,6 @@ export const TaskSchema = co.map({
   positionY: z.number(),
   sectionX: z.string().nullable(),
   sectionY: z.string().nullable(),
-  sourceEdges: z.array(z.string()),
-  targetEdges: z.array(z.string()),
   title: z.string(),
 });
 

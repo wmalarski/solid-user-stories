@@ -1,4 +1,3 @@
-import { getLoadedOrUndefined } from "jazz-tools";
 import {
   createContext,
   createEffect,
@@ -11,7 +10,12 @@ import {
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { BoardSchema, type BoardInstance, type SectionInstance } from "~/integrations/jazz/schema";
-import { insertEdgeFromPoint, insertEdgeToSecondTask, updateEdge } from "../utils/edge-actions";
+import {
+  deleteEdgeInstance,
+  insertEdgeFromPoint,
+  insertEdgeToSecondTask,
+  updateEdge,
+} from "../utils/edge-actions";
 import {
   deleteSectionAndShift,
   insertHorizonalSectionAndShift,
@@ -23,6 +27,7 @@ import {
 import { getSectionConfig, mapToSections } from "../utils/section-configs";
 import {
   deleteTaskWithDependencies,
+  insertTaskInstance,
   updateTaskData,
   updateTaskPosition,
 } from "../utils/task-actions";
@@ -58,13 +63,9 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const insertTask = (
     input: Pick<TaskModel, "description" | "estimate" | "link" | "title" | "position">,
   ) => {
-    const tasksValue = getLoadedOrUndefined(board().tasks);
-    if (!tasksValue) {
-      return;
-    }
-
     const sections = mapToSections(sectionXConfigs(), sectionYConfigs(), input.position);
-    tasksValue.$jazz.push({
+    insertTaskInstance({
+      board: board(),
       description: input.description,
       estimate: input.estimate,
       link: input.link,
@@ -72,8 +73,6 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
       positionY: input.position.y,
       sectionX: sections.sectionX?.id ?? null,
       sectionY: sections.sectionY?.id ?? null,
-      sourceEdges: [],
-      targetEdges: [],
       title: input.title,
     });
   };
@@ -146,11 +145,17 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   };
 
   const deleteTask = (taskId: string) => {
-    deleteTaskWithDependencies({ board: board(), taskId });
+    deleteTaskWithDependencies({
+      board: board(),
+      taskId,
+    });
   };
 
   const deleteEdge = (edgeId: string) => {
-    getLoadedOrUndefined(board().edges)?.$jazz.remove((edge) => edge.$jazz.id === edgeId);
+    deleteEdgeInstance({
+      board: board(),
+      edgeId,
+    });
   };
 
   const insertEdgeToPoint = (args: { isSource: boolean; taskId: string; x: number; y: number }) => {
@@ -168,7 +173,11 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   };
 
   const updateEdgePosition = (edge: Pick<EdgeModel, "id" | "breakX">) => {
-    updateEdge({ board: board(), breakX: edge.breakX, edgeId: edge.id });
+    updateEdge({
+      board: board(),
+      breakX: edge.breakX,
+      edgeId: edge.id,
+    });
   };
 
   const updateSectionName = (args: Pick<SectionModel, "id" | "name" | "orientation">) => {

@@ -3,6 +3,28 @@ import type { BoardInstance, TaskInstance } from "~/integrations/jazz/schema";
 import { getTaskMap } from "./instance-maps";
 import type { Point2D } from "./types";
 
+type InsertTaskInstanceArgs = Pick<
+  TaskInstance,
+  | "description"
+  | "estimate"
+  | "link"
+  | "title"
+  | "positionX"
+  | "positionY"
+  | "sectionX"
+  | "sectionY"
+> & {
+  board: BoardInstance;
+};
+
+export const insertTaskInstance = ({ board, ...args }: InsertTaskInstanceArgs) => {
+  const tasksValue = getLoadedOrUndefined(board.tasks);
+  if (!tasksValue) {
+    return;
+  }
+  tasksValue.$jazz.push(args);
+};
+
 type DeleteTaskWithDependenciesArgs = {
   board: BoardInstance;
   taskId: string;

@@ -107,3 +107,12 @@ export const updateEdge = ({ board, breakX, edgeId }: UpdateEdgeArgs) => {
   const instance = edgeMap.get(edgeId);
   instance?.$jazz.set("breakX", breakX);
 };
+
+type DeleteEdgeInstanceArgs = {
+  board: BoardInstance;
+  edgeId: string;
+};
+
+export const deleteEdgeInstance = ({ board, edgeId }: DeleteEdgeInstanceArgs) => {
+  getLoadedOrUndefined(board.edges)?.$jazz.remove((edge) => edge.$jazz.id === edgeId);
+};
