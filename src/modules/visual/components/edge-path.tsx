@@ -99,11 +99,11 @@ export const createEdgePath = (entry: Accessor<EdgeEntry>) => {
   return createMemo(() => {
     const value = entry();
 
-    const startX = value.source.position.x + TASK_RECT_WIDTH;
-    const endX = value.target.position.x;
+    const startX = value.source.positionX + TASK_RECT_WIDTH;
+    const endX = value.target.positionX;
 
-    const startY = value.source.position.y + TASK_RECT_HEIGHT_HALF;
-    const endY = value.target.position.y + TASK_RECT_HEIGHT_HALF;
+    const startY = value.source.positionY + TASK_RECT_HEIGHT_HALF;
+    const endY = value.target.positionY + TASK_RECT_HEIGHT_HALF;
 
     const context = d3.path();
     context.moveTo(startX, startY);
@@ -138,7 +138,7 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
       ref={setRectRef}
       x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF}
       y={
-        (props.entry.source.position.y + props.entry.target.position.y) / 2 +
+        (props.entry.source.positionY + props.entry.target.positionY) / 2 +
         TASK_RECT_HEIGHT_HALF -
         EDGE_HANDLE_SIZE_HALF
       }

@@ -16,8 +16,8 @@ export const getBoardBox = ({ edges, tasks, sectionsX, sectionsY }: GetBoardBoxA
     ...tasks
       .values()
       .flatMap((task) => [
-        task.position.x + SECTION_X_OFFSET,
-        task.position.x + TASK_RECT_HEIGHT + SECTION_X_OFFSET,
+        task.positionX + SECTION_X_OFFSET,
+        task.positionX + TASK_RECT_HEIGHT + SECTION_X_OFFSET,
       ]),
     ...edges.map((edge) => edge.breakX + SECTION_X_OFFSET),
     ...sectionsX.flatMap((section) => [section.start, section.end]),
@@ -27,8 +27,8 @@ export const getBoardBox = ({ edges, tasks, sectionsX, sectionsY }: GetBoardBoxA
     ...tasks
       .values()
       .flatMap((task) => [
-        task.position.y + SECTION_Y_OFFSET,
-        task.position.y + SECTION_Y_OFFSET + TASK_RECT_WIDTH,
+        task.positionY + SECTION_Y_OFFSET,
+        task.positionY + SECTION_Y_OFFSET + TASK_RECT_WIDTH,
       ]),
     ...sectionsY.flatMap((section) => [section.start, section.end]),
   ];

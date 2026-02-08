@@ -54,8 +54,8 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   createD3DragElement({
     onDragStarted(event) {
       onSelectionChange({ id: props.task.id, kind: "task" });
-      setShiftX(props.task.position.x - event.x);
-      setShiftY(props.task.position.y - event.y);
+      setShiftX(props.task.positionX - event.x);
+      setShiftY(props.task.positionY - event.y);
     },
     onDragged(event) {
       const updatedX = event.x + shiftX();
@@ -63,7 +63,8 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
 
       boardState.updateTask({
         id: props.task.id,
-        position: { x: updatedX, y: updatedY },
+        positionX: updatedX,
+        positionY: updatedY,
       });
     },
     ref: rectRef,
@@ -79,8 +80,8 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   return (
     <>
       <rect
-        x={props.task.position.x}
-        y={props.task.position.y}
+        x={props.task.positionX}
+        y={props.task.positionY}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
         filter="url(#dropshadow)"
@@ -89,8 +90,8 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       />
       <foreignObject
         ref={setRectRef}
-        x={props.task.position.x}
-        y={props.task.position.y}
+        x={props.task.positionX}
+        y={props.task.positionY}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
         class="stroke-base-300 border-0"
@@ -104,14 +105,14 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       <Show when={isSelected()}>
         <TaskHandle
           kind="source"
-          x={props.task.position.x}
-          y={props.task.position.y}
+          x={props.task.positionX}
+          y={props.task.positionY}
           task={props.task}
         />
         <TaskHandle
           kind="target"
-          x={props.task.position.x}
-          y={props.task.position.y}
+          x={props.task.positionX}
+          y={props.task.positionY}
           task={props.task}
         />
         <TaskArrows task={props.task} onArrowClick={onArrowClick} />
@@ -188,8 +189,8 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
   return (
     <>
       <rect
-        x={props.task.position.x}
-        y={props.task.position.y}
+        x={props.task.positionX}
+        y={props.task.positionY}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
         filter="url(#dropshadow)"
@@ -197,8 +198,8 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
       />
 
       <MultilineText
-        x={props.task.position.x + TEXT_PADDING}
-        y={props.task.position.y + TEXT_PADDING + TEXT_HEIGHT}
+        x={props.task.positionX + TEXT_PADDING}
+        y={props.task.positionY + TEXT_PADDING + TEXT_HEIGHT}
         class="fill-base-content"
         font-weight={600}
         content={props.task.title}
@@ -207,8 +208,8 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
 
       <MultilineText
         maxWidth={TASK_RECT_WIDTH - 2 * TEXT_PADDING}
-        x={props.task.position.x + TEXT_PADDING}
-        y={props.task.position.y + 2 * (TEXT_PADDING + TEXT_HEIGHT)}
+        x={props.task.positionX + TEXT_PADDING}
+        y={props.task.positionY + 2 * (TEXT_PADDING + TEXT_HEIGHT)}
         content={props.task.description}
         maxLines={3}
         font-size="12"
@@ -216,8 +217,8 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
       />
 
       <text
-        x={props.task.position.x + TASK_RECT_WIDTH - TEXT_PADDING}
-        y={props.task.position.y + TASK_RECT_HEIGHT - TEXT_PADDING}
+        x={props.task.positionX + TASK_RECT_WIDTH - TEXT_PADDING}
+        y={props.task.positionY + TASK_RECT_HEIGHT - TEXT_PADDING}
         class="fill-base-content"
         text-anchor="end"
         font-size="20"
@@ -306,8 +307,8 @@ const TaskArrows: Component<TaskArrowsProps> = (props) => {
     onClick() {
       props.onArrowClick(
         {
-          x: props.task.position.x + TASK_RECT_WIDTH + 400,
-          y: props.task.position.y,
+          x: props.task.positionX + TASK_RECT_WIDTH + 400,
+          y: props.task.positionY,
         },
         "source",
       );
@@ -319,8 +320,8 @@ const TaskArrows: Component<TaskArrowsProps> = (props) => {
     onClick() {
       props.onArrowClick(
         {
-          x: props.task.position.x - 400,
-          y: props.task.position.y,
+          x: props.task.positionX - 400,
+          y: props.task.positionY,
         },
         "target",
       );
@@ -346,8 +347,8 @@ type ChevronPathProps = {
 
 const ChevronRightPath: Component<ChevronPathProps> = (props) => {
   const path = createMemo(() => {
-    const x = props.task.position.x + TASK_RECT_WIDTH + TASK_ARROW_OFFSET;
-    const y = props.task.position.y + TASK_RECT_HEIGHT_HALF;
+    const x = props.task.positionX + TASK_RECT_WIDTH + TASK_ARROW_OFFSET;
+    const y = props.task.positionY + TASK_RECT_HEIGHT_HALF;
 
     const context = d3.path();
     context.moveTo(x, y - ARROW_HEIGHT_HALF);
@@ -363,8 +364,8 @@ const ChevronRightPath: Component<ChevronPathProps> = (props) => {
 
 const ChevronLeftPath: Component<ChevronPathProps> = (props) => {
   const path = createMemo(() => {
-    const x = props.task.position.x - TASK_ARROW_OFFSET;
-    const y = props.task.position.y + TASK_RECT_HEIGHT_HALF;
+    const x = props.task.positionX - TASK_ARROW_OFFSET;
+    const y = props.task.positionY + TASK_RECT_HEIGHT_HALF;
 
     const context = d3.path();
     context.moveTo(x, y - ARROW_HEIGHT_HALF);

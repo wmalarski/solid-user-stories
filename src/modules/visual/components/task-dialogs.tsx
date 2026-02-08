@@ -112,7 +112,8 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
       description: parsed.output.description,
       estimate: parsed.output.estimate,
       link: parsed.output.link,
-      position: positionValue,
+      positionX: positionValue.x,
+      positionY: positionValue.y,
       title: parsed.output.title,
     });
 

@@ -8,7 +8,6 @@ import type {
   TaskInstance,
   TaskListInstance,
 } from "~/integrations/jazz/schema";
-import type { Point2D } from "../utils/types";
 
 export type Orientation = "horizontal" | "vertical";
 
@@ -23,7 +22,8 @@ export type TaskModel = {
   description: string;
   estimate: number;
   link?: string;
-  position: Point2D;
+  positionX: number;
+  positionY: number;
   sectionX: string | null;
   sectionY: string | null;
   title: string;
@@ -120,7 +120,8 @@ const mapToTaskModel = (task: MaybeLoaded<TaskInstance>): TaskModel | null => {
     estimate: loaded.estimate,
     id: task.$jazz.id,
     link: loaded.link,
-    position: { x: loaded.positionX, y: loaded.positionY },
+    positionX: loaded.positionX,
+    positionY: loaded.positionY,
     sectionX: loaded.sectionX,
     sectionY: loaded.sectionY,
     title: loaded.title,

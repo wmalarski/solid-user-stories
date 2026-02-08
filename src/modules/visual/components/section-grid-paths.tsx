@@ -83,7 +83,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
   createD3DragElement({
     onDragStarted() {
       const { draggedTasks, maxNotDraggedPosition } = getDragStartTaskState({
-        attribute: "y",
+        attribute: "positionY",
         offset: SECTION_Y_OFFSET,
         position: props.config.end,
         tasks: boardState.store.tasks,
@@ -140,7 +140,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
   createD3DragElement({
     onDragStarted() {
       const { draggedTasks, maxNotDraggedPosition } = getDragStartTaskState({
-        attribute: "x",
+        attribute: "positionX",
         offset: SECTION_X_OFFSET,
         position: props.config.end,
         tasks: boardState.store.tasks,
@@ -211,7 +211,7 @@ type GetDragStartTaskStateArgs = {
   position: number;
   tasks: TaskModel[];
   offset: number;
-  attribute: "y" | "x";
+  attribute: "positionY" | "positionX";
 };
 
 const getDragStartTaskState = ({
@@ -224,7 +224,7 @@ const getDragStartTaskState = ({
   const draggedTasks = new Map<string, number>();
 
   for (const task of tasks) {
-    const entryPosition = task.position[attribute];
+    const entryPosition = task[attribute];
     if (entryPosition > position + offset) {
       draggedTasks.set(task.id, entryPosition);
     } else {

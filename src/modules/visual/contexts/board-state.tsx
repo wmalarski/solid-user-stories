@@ -62,16 +62,20 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const sectionYConfigs = createMemo(() => getSectionConfig(store.sectionsY));
 
   const insertTask = (
-    input: Pick<TaskModel, "description" | "estimate" | "link" | "title" | "position">,
+    input: Pick<
+      TaskModel,
+      "description" | "estimate" | "link" | "title" | "positionX" | "positionY"
+    >,
   ) => {
-    const sections = mapToSections(sectionXConfigs(), sectionYConfigs(), input.position);
+    const position = { x: input.positionX, y: input.positionY };
+    const sections = mapToSections(sectionXConfigs(), sectionYConfigs(), position);
     insertTaskInstance({
       board: board(),
       description: input.description,
       estimate: input.estimate,
       link: input.link,
-      positionX: input.position.x,
-      positionY: input.position.y,
+      positionX: input.positionX,
+      positionY: input.positionY,
       sectionX: sections.sectionX?.id ?? null,
       sectionY: sections.sectionY?.id ?? null,
       title: input.title,
@@ -208,11 +212,12 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     });
   };
 
-  const updateTask = (args: Pick<TaskModel, "id" | "position">) => {
-    const sectionIds = mapToSections(sectionXConfigs(), sectionYConfigs(), args.position);
+  const updateTask = (args: Pick<TaskModel, "id" | "positionX" | "positionY">) => {
+    const position = { x: args.positionX, y: args.positionY };
+    const sectionIds = mapToSections(sectionXConfigs(), sectionYConfigs(), position);
     updateTaskPosition({
       board: board(),
-      position: args.position,
+      position,
       sectionX: sectionIds.sectionX?.id ?? null,
       sectionY: sectionIds.sectionY?.id ?? null,
       taskId: args.id,
