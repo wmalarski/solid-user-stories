@@ -1,5 +1,7 @@
 import { createMemo, Index, Show, type Accessor, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
+import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
+import { SectionSizeSchema } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
 import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
@@ -107,7 +109,12 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
     translateX(transform(), props.config.start + SECTION_X_OFFSET),
   );
 
-  const width = createMemo(() => props.config.section.size * transform().k);
+  const size = createJazzResource(() => ({
+    id: props.config.section.size.$jazz.id,
+    schema: SectionSizeSchema,
+  }));
+
+  const width = createMemo(() => (size()?.value ?? 0) * transform().k);
 
   return (
     <foreignObject width={width()} x={transformed()} y={0} height={SECTION_Y_OFFSET}>
@@ -128,7 +135,12 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
     translateY(transform(), props.config.start + SECTION_Y_OFFSET),
   );
 
-  const height = createMemo(() => props.config.section.size * transform().k);
+  const size = createJazzResource(() => ({
+    id: props.config.section.size.$jazz.id,
+    schema: SectionSizeSchema,
+  }));
+
+  const height = createMemo(() => (size()?.value ?? 0) * transform().k);
 
   return (
     <foreignObject height={height()} x={0} y={transformed()} width={SECTION_X_OFFSET}>
@@ -163,7 +175,7 @@ const SectionItemContent: Component<SectionItemContentProps> = (props) => {
           index={props.config.index}
         />
         <UpdateSectionDialog section={props.config.section} />
-        <Show when={props.totalLength > 1 && tasks().length === 0}>
+        <Show when={props.totalLength > 1 && tasks()?.length === 0}>
           <DeleteSectionDialog section={props.config.section} endPosition={props.config.end} />
         </Show>
         <Badge size="sm" color="accent" class="my-1">
@@ -180,16 +192,16 @@ const createSectionItemValues = (config: Accessor<SectionConfig>) => {
   const tasks = createMemo(() => {
     const configValue = config();
     const isVerticalValue = configValue.section.orientation === "vertical";
-    const sectionId = configValue.section.id;
+    const sectionId = configValue.section.$jazz.id;
     return boardState
       .tasks()
-      .filter((entry) =>
+      ?.filter((entry) =>
         isVerticalValue ? entry.sectionY === sectionId : entry.sectionX === sectionId,
       );
   });
 
   const esitmationSum = createMemo(() => {
-    return tasks().reduce((previous, current) => previous + current.estimate, 0);
+    return tasks()?.reduce((previous, current) => previous + current.estimate, 0);
   });
 
   return { esitmationSum, tasks };
@@ -226,10 +238,15 @@ type ExportableHorizontalItemRectProps = {
 const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps> = (props) => {
   const { esitmationSum } = createSectionItemValues(() => props.config);
 
+  const size = createJazzResource(() => ({
+    id: props.config.section.size.$jazz.id,
+    schema: SectionSizeSchema,
+  }));
+
   return (
     <>
       <rect
-        width={props.config.section.size}
+        width={size()?.value}
         x={props.config.start + SECTION_X_OFFSET}
         y={0}
         height={SECTION_Y_OFFSET}
@@ -241,7 +258,7 @@ const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps>
         font-weight={600}
         class="fill-base-content"
         content={props.config.section.name}
-        maxWidth={props.config.section.size - 2 * TEXT_PADDING}
+        maxWidth={(size()?.value ?? 0) - 2 * TEXT_PADDING}
         maxLines={3}
         font-size="12"
       />
@@ -266,10 +283,15 @@ type ExportableVerticalItemRectProps = {
 const ExportableVerticalItemRect: Component<ExportableVerticalItemRectProps> = (props) => {
   const { esitmationSum } = createSectionItemValues(() => props.config);
 
+  const size = createJazzResource(() => ({
+    id: props.config.section.size.$jazz.id,
+    schema: SectionSizeSchema,
+  }));
+
   return (
     <>
       <rect
-        height={props.config.section.size}
+        height={size()?.value}
         x={0}
         y={props.config.start + SECTION_Y_OFFSET}
         width={SECTION_X_OFFSET}

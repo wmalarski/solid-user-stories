@@ -1,47 +1,51 @@
 import type {
-  EdgeInput,
-  EdgeInstance,
+  EdgeBreakInstance,
   EdgeListInstance,
   TaskListInstance,
+  TaskPositionInstance,
 } from "~/integrations/jazz/schema";
 import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
 
 type InsertEdgeFromPointArgs = {
-  tasks?: TaskListInstance;
-  edges?: EdgeListInstance;
+  edges: EdgeListInstance;
   x: number;
   y: number;
   taskId: string;
   isSource: boolean;
+  taskPositions: Map<string, TaskPositionInstance>;
 };
 
 export const insertEdgeFromPoint = ({
   edges,
-  tasks,
   x,
   y,
   taskId,
   isSource,
+  taskPositions,
 }: InsertEdgeFromPointArgs) => {
-  const loadedTasks = tasks?.flatMap((task) => (task.$isLoaded ? [task] : [])) ?? [];
   const loadedEdges = edges?.flatMap((edge) => (edge.$isLoaded ? [edge] : [])) ?? [];
 
-  const currentTask = loadedTasks.find((task) => task.$jazz.id === taskId);
+  const currentTask = taskPositions.get(taskId);
 
-  const task = loadedTasks.find(
-    (task) =>
-      task.positionX < x &&
-      x < task.positionX + TASK_RECT_WIDTH &&
-      task.positionY < y &&
-      y < task.positionY + TASK_RECT_HEIGHT,
-  );
+  const found = taskPositions
+    .entries()
+    .find(
+      ([_taskId, task]) =>
+        task.x < x && x < task.x + TASK_RECT_WIDTH && task.y < y && y < task.y + TASK_RECT_HEIGHT,
+    );
 
-  if (!task || !currentTask || task.$jazz.id === taskId) {
+  if (!found || !currentTask) {
     return;
   }
 
-  const source = isSource ? taskId : task.$jazz.id;
-  const target = isSource ? task.$jazz.id : taskId;
+  const [cursorTaskId, cursorTask] = found;
+
+  if (cursorTaskId === taskId) {
+    return;
+  }
+
+  const source = isSource ? taskId : cursorTaskId;
+  const target = isSource ? cursorTaskId : taskId;
 
   const hasTheSameConnection = loadedEdges.some(
     (entry) =>
@@ -53,19 +57,19 @@ export const insertEdgeFromPoint = ({
     return;
   }
 
-  const breakX = (currentTask.positionX + task.positionX + TASK_RECT_WIDTH) / 2;
+  const breakX = (currentTask.x + cursorTask.x + TASK_RECT_WIDTH) / 2;
 
-  const index = edges?.$jazz.push({ breakX, source, target }) ?? 0;
-
-  return edges?.at(index - 1)?.$jazz.id;
+  const size = edges.$jazz.push({ breakX: { value: breakX }, source, target });
+  return edges[size - 1].$jazz.id;
 };
 
 type InsertEdgeToTaskArgs = {
   taskId: string;
   secondTaskId: string;
   isSource: boolean;
-  tasks?: TaskListInstance;
-  edges?: EdgeListInstance;
+  tasks: TaskListInstance;
+  edges: EdgeListInstance;
+  taskPositions: Map<string, TaskPositionInstance>;
 };
 
 export const insertEdgeToSecondTask = ({
@@ -73,29 +77,26 @@ export const insertEdgeToSecondTask = ({
   isSource,
   secondTaskId,
   edges,
-  tasks,
+  taskPositions,
 }: InsertEdgeToTaskArgs) => {
-  const loadedTasks = tasks?.flatMap((task) => (task.$isLoaded ? [task] : [])) ?? [];
-
-  const currentTask = loadedTasks.find((task) => task.$jazz.id === taskId);
-  const secondTask = loadedTasks.find((task) => task.$jazz.id === secondTaskId);
+  const currentTask = taskPositions.get(taskId);
+  const secondTask = taskPositions.get(secondTaskId);
 
   if (!secondTask || !currentTask) {
     return;
   }
 
-  const breakX = (currentTask.positionX + secondTask.positionX + TASK_RECT_WIDTH) / 2;
+  const breakX = (currentTask.x + secondTask.x + TASK_RECT_WIDTH) / 2;
 
-  const index =
-    edges?.$jazz.push({
-      breakX,
-      source: isSource ? taskId : secondTaskId,
-      target: isSource ? secondTaskId : taskId,
-    }) ?? 0;
+  const size = edges.$jazz.push({
+    breakX: { value: breakX },
+    source: isSource ? taskId : secondTaskId,
+    target: isSource ? secondTaskId : taskId,
+  });
 
-  return edges?.at(index - 1)?.$jazz.id;
+  return edges[size - 1].$jazz.id;
 };
 
-export const updateEdge = (instance: EdgeInstance, edge: Pick<EdgeInput, "breakX">) => {
-  instance.$jazz.set("breakX", edge.breakX);
+export const updateEdge = (instance: EdgeBreakInstance, edge: Pick<EdgeBreakInstance, "value">) => {
+  instance.$jazz.set("value", edge.value);
 };

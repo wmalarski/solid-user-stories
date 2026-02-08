@@ -12,9 +12,9 @@ import {
   SectionListSchema,
   TaskListSchema,
   type BoardInstance,
+  type SectionInstance,
   type TaskInput,
 } from "~/integrations/jazz/schema";
-import type { SectionModel } from "~/integrations/tanstack-db/schema";
 import { insertEdgeFromPoint, insertEdgeToSecondTask } from "../utils/edge-actions";
 import {
   deleteSectionAndShift,
@@ -96,7 +96,7 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   };
 
   const insertSection = (
-    args: Pick<SectionModel, "name" | "orientation"> & {
+    args: Pick<SectionInstance, "name" | "orientation"> & {
       index: number;
     },
   ) => {
@@ -163,9 +163,10 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   };
 
   const deleteSection = (
-    args: Pick<SectionModel, "id" | "orientation"> & {
+    args: Pick<SectionInstance, "orientation"> & {
       endPosition: number;
       shift: number;
+      id: string;
     },
   ) => {
     const sectionsYValue = sectionsY();
@@ -197,19 +198,27 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   };
 
   const insertEdgeToPoint = (args: { isSource: boolean; taskId: string; x: number; y: number }) => {
-    return insertEdgeFromPoint({
-      edges: edges(),
-      tasks: tasks(),
-      ...args,
-    });
+    const edgesValue = edges();
+    if (edgesValue) {
+      return insertEdgeFromPoint({
+        edges: edgesValue,
+        taskPositions: taskPositions(),
+        ...args,
+      });
+    }
   };
 
   const insertEdgeToTask = (args: { isSource: boolean; taskId: string; secondTaskId: string }) => {
-    return insertEdgeToSecondTask({
-      edges: edges(),
-      tasks: tasks(),
-      ...args,
-    });
+    const edgesValue = edges();
+    const tasksValue = tasks();
+    if (edgesValue && tasksValue) {
+      return insertEdgeToSecondTask({
+        edges: edgesValue,
+        taskPositions: taskPositions(),
+        tasks: tasksValue,
+        ...args,
+      });
+    }
   };
 
   return {
@@ -217,6 +226,7 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     deleteEdge,
     deleteSection,
     deleteTask,
+    edgePositions,
     edges,
     insertEdgeToPoint,
     insertEdgeToTask,
@@ -226,6 +236,7 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     sectionsX,
     sectionsY,
     taskMap,
+    taskPositions,
     tasks,
     updateHorizontalSectionPosition,
     updateVerticalSectionPosition,

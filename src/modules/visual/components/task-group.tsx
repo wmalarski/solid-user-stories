@@ -3,7 +3,12 @@ import { createMemo, createSignal, createUniqueId, Show, type Component } from "
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
 import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
-import { TaskSchema, type TaskInstance } from "~/integrations/jazz/schema";
+import {
+  TaskPositionSchema,
+  TaskSchema,
+  type TaskInstance,
+  type TaskPositionInstance,
+} from "~/integrations/jazz/schema";
 import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
 import { openDialog } from "~/ui/dialog/dialog";
@@ -28,7 +33,7 @@ import {
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
 import { mapToSections } from "../utils/section-configs";
-import { updateTaskPosition } from "../utils/task-actions";
+import { updateTaskPosition, updateTaskSections } from "../utils/task-actions";
 import type { Point2D } from "../utils/types";
 import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 
@@ -36,19 +41,25 @@ type TaskHandleKind = "source" | "target";
 
 type TaskGroupProps = {
   taskId: string;
+  taskPositionId: string;
 };
 
 export const TaskGroup: Component<TaskGroupProps> = (props) => {
-  const task = createJazzResource(() => ({
-    id: props.taskId,
-    schema: TaskSchema,
+  const position = createJazzResource(() => ({
+    id: props.taskPositionId,
+    schema: TaskPositionSchema,
   }));
 
-  return <Show when={task()}>{(task) => <TaskContainer task={task()} />}</Show>;
+  return (
+    <Show when={position()}>
+      {(position) => <TaskContainer taskId={props.taskId} position={position()} />}
+    </Show>
+  );
 };
 
 type TaskContainerProps = {
-  task: TaskInstance;
+  taskId: string;
+  position: TaskPositionInstance;
 };
 
 const TaskContainer: Component<TaskContainerProps> = (props) => {
@@ -59,19 +70,24 @@ const TaskContainer: Component<TaskContainerProps> = (props) => {
 
   const boardState = useBoardStateContext();
 
+  const task = createJazzResource(() => ({
+    id: props.taskId,
+    schema: TaskSchema,
+  }));
+
   const insertTaskDialogId = createUniqueId();
   const { onClick } = useDialogBoardToolUtils();
   const [newTaskHandle, setNewTaskHandle] = createSignal<TaskHandleKind>("source");
   const [newTaskPoint, setNewTaskPoint] = createSignal<Point2D>({ x: 0, y: 0 });
 
-  const isSelected = useIsSelected(() => props.task.$jazz.id);
+  const isSelected = useIsSelected(() => props.taskId);
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
   createD3DragElement({
     onDragStarted(event) {
-      onSelectionChange({ id: props.task.$jazz.id, kind: "task" });
-      setShiftX(props.task.positionX - event.x);
-      setShiftY(props.task.positionY - event.y);
+      onSelectionChange({ id: props.taskId, kind: "task" });
+      setShiftX(props.position.x - event.x);
+      setShiftY(props.position.y - event.y);
     },
     onDragged(event) {
       const updatedX = event.x + shiftX();
@@ -79,12 +95,18 @@ const TaskContainer: Component<TaskContainerProps> = (props) => {
 
       const sectionIds = mapToSections(boardState.sectionConfigs(), { x: updatedX, y: updatedY });
 
-      updateTaskPosition(props.task, {
-        positionX: updatedX,
-        positionY: updatedY,
-        sectionX: sectionIds.sectionX,
-        sectionY: sectionIds.sectionY,
-      });
+      const taskValue = task();
+
+      if (taskValue) {
+        updateTaskPosition(props.position, {
+          x: updatedX,
+          y: updatedY,
+        });
+        updateTaskSections(taskValue, {
+          sectionX: sectionIds.sectionX?.$jazz.id ?? null,
+          sectionY: sectionIds.sectionY?.$jazz.id ?? null,
+        });
+      }
     },
     ref: rectRef,
   });
@@ -99,8 +121,8 @@ const TaskContainer: Component<TaskContainerProps> = (props) => {
   return (
     <>
       <rect
-        x={props.task.positionX}
-        y={props.task.positionY}
+        x={props.position.x}
+        y={props.position.y}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
         filter="url(#dropshadow)"
@@ -109,32 +131,26 @@ const TaskContainer: Component<TaskContainerProps> = (props) => {
       />
       <foreignObject
         ref={setRectRef}
-        x={props.task.positionX}
-        y={props.task.positionY}
+        x={props.position.x}
+        y={props.position.y}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
         class="stroke-base-300 border-0"
       >
-        <TaskContent
-          newTaskHandle={newTaskHandle()}
-          newTaskPoint={newTaskPoint()}
-          task={props.task}
-        />
+        <Show when={task()}>
+          {(task) => (
+            <TaskContent
+              newTaskHandle={newTaskHandle()}
+              newTaskPoint={newTaskPoint()}
+              task={task()}
+            />
+          )}
+        </Show>
       </foreignObject>
       <Show when={isSelected()}>
-        <TaskHandle
-          kind="source"
-          x={props.task.positionX}
-          y={props.task.positionY}
-          taskId={props.task.$jazz.id}
-        />
-        <TaskHandle
-          kind="target"
-          x={props.task.positionX}
-          y={props.task.positionY}
-          taskId={props.task.$jazz.id}
-        />
-        <TaskArrows task={props.task} onArrowClick={onArrowClick} />
+        <TaskHandle kind="source" x={props.position.x} y={props.position.y} taskId={props.taskId} />
+        <TaskHandle kind="target" x={props.position.x} y={props.position.y} taskId={props.taskId} />
+        <TaskArrows position={props.position} onArrowClick={onArrowClick} />
       </Show>
     </>
   );
@@ -202,14 +218,15 @@ const TaskContent: Component<TaskContentProps> = (props) => {
 
 type ExportableTaskGroupProps = {
   task: TaskInstance;
+  position: TaskPositionInstance;
 };
 
 export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) => {
   return (
     <>
       <rect
-        x={props.task.positionX}
-        y={props.task.positionY}
+        x={props.position.x}
+        y={props.position.y}
         width={TASK_RECT_WIDTH}
         height={TASK_RECT_HEIGHT}
         filter="url(#dropshadow)"
@@ -217,8 +234,8 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
       />
 
       <MultilineText
-        x={props.task.positionX + TEXT_PADDING}
-        y={props.task.positionY + TEXT_PADDING + TEXT_HEIGHT}
+        x={props.position.x + TEXT_PADDING}
+        y={props.position.y + TEXT_PADDING + TEXT_HEIGHT}
         class="fill-base-content"
         font-weight={600}
         content={props.task.title}
@@ -227,8 +244,8 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
 
       <MultilineText
         maxWidth={TASK_RECT_WIDTH - 2 * TEXT_PADDING}
-        x={props.task.positionX + TEXT_PADDING}
-        y={props.task.positionY + 2 * (TEXT_PADDING + TEXT_HEIGHT)}
+        x={props.position.x + TEXT_PADDING}
+        y={props.position.y + 2 * (TEXT_PADDING + TEXT_HEIGHT)}
         content={props.task.description}
         maxLines={3}
         font-size="12"
@@ -236,8 +253,8 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
       />
 
       <text
-        x={props.task.positionX + TASK_RECT_WIDTH - TEXT_PADDING}
-        y={props.task.positionY + TASK_RECT_HEIGHT - TEXT_PADDING}
+        x={props.position.x + TASK_RECT_WIDTH - TEXT_PADDING}
+        y={props.position.y + TASK_RECT_HEIGHT - TEXT_PADDING}
         class="fill-base-content"
         text-anchor="end"
         font-size="20"
@@ -314,7 +331,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
 };
 
 type TaskArrowsProps = {
-  task: TaskInstance;
+  position: TaskPositionInstance;
   onArrowClick: (taskPoint: Point2D, orientation: TaskHandleKind) => void;
 };
 
@@ -326,8 +343,8 @@ const TaskArrows: Component<TaskArrowsProps> = (props) => {
     onClick() {
       props.onArrowClick(
         {
-          x: props.task.positionX + TASK_RECT_WIDTH + 400,
-          y: props.task.positionY,
+          x: props.position.x + TASK_RECT_WIDTH + 400,
+          y: props.position.y,
         },
         "source",
       );
@@ -339,8 +356,8 @@ const TaskArrows: Component<TaskArrowsProps> = (props) => {
     onClick() {
       props.onArrowClick(
         {
-          x: props.task.positionX - 400,
-          y: props.task.positionY,
+          x: props.position.x - 400,
+          y: props.position.y,
         },
         "target",
       );
@@ -350,8 +367,8 @@ const TaskArrows: Component<TaskArrowsProps> = (props) => {
 
   return (
     <>
-      <ChevronRightPath ref={setRightPathRef} task={props.task} />
-      <ChevronLeftPath ref={setLeftPathRef} task={props.task} />
+      <ChevronRightPath ref={setRightPathRef} position={props.position} />
+      <ChevronLeftPath ref={setLeftPathRef} position={props.position} />
     </>
   );
 };
@@ -360,14 +377,14 @@ const ARROW_HEIGHT_HALF = 10;
 const ARROW_WIDTH = 10;
 
 type ChevronPathProps = {
-  task: TaskInstance;
+  position: TaskPositionInstance;
   ref: (element: SVGElement) => void;
 };
 
 const ChevronRightPath: Component<ChevronPathProps> = (props) => {
   const path = createMemo(() => {
-    const x = props.task.positionX + TASK_RECT_WIDTH + TASK_ARROW_OFFSET;
-    const y = props.task.positionY + TASK_RECT_HEIGHT_HALF;
+    const x = props.position.x + TASK_RECT_WIDTH + TASK_ARROW_OFFSET;
+    const y = props.position.y + TASK_RECT_HEIGHT_HALF;
 
     const context = d3.path();
     context.moveTo(x, y - ARROW_HEIGHT_HALF);
@@ -383,8 +400,8 @@ const ChevronRightPath: Component<ChevronPathProps> = (props) => {
 
 const ChevronLeftPath: Component<ChevronPathProps> = (props) => {
   const path = createMemo(() => {
-    const x = props.task.positionX - TASK_ARROW_OFFSET;
-    const y = props.task.positionY + TASK_RECT_HEIGHT_HALF;
+    const x = props.position.x - TASK_ARROW_OFFSET;
+    const y = props.position.y + TASK_RECT_HEIGHT_HALF;
 
     const context = d3.path();
     context.moveTo(x, y - ARROW_HEIGHT_HALF);

@@ -103,7 +103,9 @@ const SelectableGroup: Component = () => {
           )}
         </Key>
         <Key each={boardState.tasks()} by={(task) => task.$jazz.id}>
-          {(task) => <TaskGroup taskId={task().$jazz.id} />}
+          {(task) => (
+            <TaskGroup taskPositionId={task().position.$jazz.id} taskId={task().$jazz.id} />
+          )}
         </Key>
       </g>
     </g>
@@ -161,9 +163,9 @@ const ExportableBoard: Component = () => {
 
   const boardBox = createMemo(() =>
     getBoardBox({
-      edges: boardState.edges()?.map((edge) => edge) ?? [],
+      edgePositions: boardState.edgePositions(),
       sections: boardState.sectionConfigs(),
-      tasks: boardState.tasks()?.map((task) => task) ?? [],
+      taskPositions: boardState.taskPositions(),
     }),
   );
 
@@ -176,7 +178,9 @@ const ExportableBoard: Component = () => {
         class="bg-base-100"
       >
         <ExportableSectionGridPaths />
-        <For each={boardState.tasks()}>{(task) => <ExportableTaskGroup task={task} />}</For>
+        <For each={boardState.tasks()}>
+          {(task) => <ExportableTaskGroup position={task.position} task={task} />}
+        </For>
         <For each={boardState.edges()}>
           {(edge) => (
             <ExportableEdgePath

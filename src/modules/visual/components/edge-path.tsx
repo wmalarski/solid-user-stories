@@ -4,8 +4,8 @@ import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
 import {
   EdgeSchema,
   TaskSchema,
-  type EdgeInstance,
-  type TaskInstance,
+  type EdgeBreakInstance,
+  type TaskPositionInstance,
 } from "~/integrations/jazz/schema";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { AnimatedPath } from "../ui/animated-path";
@@ -23,9 +23,9 @@ import { createD3DragElement } from "../utils/create-d3-drag-element";
 import { updateEdge } from "../utils/edge-actions";
 
 type EdgeEntry = {
-  edge: EdgeInstance;
-  source: TaskInstance;
-  target: TaskInstance;
+  edge: EdgeBreakInstance;
+  source: TaskPositionInstance;
+  target: TaskPositionInstance;
 };
 
 type EdgePathProps = {
@@ -67,7 +67,7 @@ const createEntryResource = (
     const sourceValue = source();
     const targetValue = target();
     return edgeValue && sourceValue && targetValue
-      ? { edge: edgeValue, source: sourceValue, target: targetValue }
+      ? { edge: edgeValue.breakX, source: sourceValue.position, target: targetValue.position }
       : null;
   });
 
@@ -132,16 +132,16 @@ export const createEdgePath = (entry: Accessor<EdgeEntry>) => {
   return createMemo(() => {
     const value = entry();
 
-    const startX = value.source.positionX + TASK_RECT_WIDTH;
-    const endX = value.target.positionX;
+    const startX = value.source.x + TASK_RECT_WIDTH;
+    const endX = value.target.x;
 
-    const startY = value.source.positionY + TASK_RECT_HEIGHT_HALF;
-    const endY = value.target.positionY + TASK_RECT_HEIGHT_HALF;
+    const startY = value.source.y + TASK_RECT_HEIGHT_HALF;
+    const endY = value.target.y + TASK_RECT_HEIGHT_HALF;
 
     const context = d3.path();
     context.moveTo(startX, startY);
-    context.lineTo(value.edge.breakX, startY);
-    context.lineTo(value.edge.breakX, endY);
+    context.lineTo(value.edge.value, startY);
+    context.lineTo(value.edge.value, endY);
     context.lineTo(endX, endY);
     return context.toString();
   });
@@ -156,9 +156,7 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
 
   createD3DragElement({
     onDragged(event) {
-      updateEdge(props.entry.edge, {
-        breakX: event.x,
-      });
+      updateEdge(props.entry.edge, { value: event.x });
     },
     ref: rectRef,
   });
@@ -166,9 +164,9 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
   return (
     <HandleRect
       ref={setRectRef}
-      x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF}
+      x={props.entry.edge.value - EDGE_HANDLE_SIZE_HALF}
       y={
-        (props.entry.source.positionY + props.entry.target.positionY) / 2 +
+        (props.entry.source.y + props.entry.target.y) / 2 +
         TASK_RECT_HEIGHT_HALF -
         EDGE_HANDLE_SIZE_HALF
       }

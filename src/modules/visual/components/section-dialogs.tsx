@@ -3,7 +3,6 @@ import { createSignal, createUniqueId, type Component, type ComponentProps } fro
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import type { SectionInstance } from "~/integrations/jazz/schema";
-import type { SectionModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
@@ -34,7 +33,7 @@ const SectionFieldsSchema = v.object({
 });
 
 type InsertSectionDialogProps = {
-  orientation: SectionModel["orientation"];
+  orientation: SectionInstance["orientation"];
   index: number;
 };
 
@@ -169,7 +168,7 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
 type SectionFieldsProps = {
   pending?: boolean;
   issues?: FormIssues;
-  initialValues?: Partial<SectionModel>;
+  initialValues?: Partial<SectionInstance>;
 };
 
 const SectionFields: Component<SectionFieldsProps> = (props) => {
@@ -198,7 +197,7 @@ const SectionFields: Component<SectionFieldsProps> = (props) => {
 };
 
 type DeleteSectionDialogProps = {
-  section: SectionModel;
+  section: SectionInstance;
   endPosition: number;
 };
 
@@ -215,7 +214,7 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
 
     boardState.deleteSection({
       endPosition: props.endPosition,
-      id: props.section.id,
+      id: props.section.$jazz.id,
       orientation: props.section.orientation,
       shift: -props.section.size,
     });

@@ -1,6 +1,6 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
-import type { TaskModel } from "~/integrations/tanstack-db/schema";
-import { useBoardStateContext, type EdgeEntry } from "../contexts/board-state";
+import type { EdgeBreakInstance, TaskPositionInstance } from "~/integrations/jazz/schema";
+import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { DottedLine } from "../ui/dotted-line";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
@@ -83,10 +83,10 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
   createD3DragElement({
     onDragStarted() {
       const { draggedTasks, maxNotDraggedPosition } = getDragStartTaskState({
-        attribute: "positionY",
+        attribute: "y",
         offset: SECTION_Y_OFFSET,
         position: props.config.end,
-        tasks: boardState.tasks(),
+        taskPositions: boardState.taskPositions(),
       });
 
       setMaxNotDraggedPosition(maxNotDraggedPosition);
@@ -102,7 +102,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       boardState.updateHorizontalSectionPosition({
         draggedTasks: draggedTasks(),
         position: withLimit,
-        sectionId: props.config.section.id,
+        sectionId: props.config.section.$jazz.id,
         sectionStart: props.config.start,
         startPosition: startPosition(),
       });
@@ -140,14 +140,14 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
   createD3DragElement({
     onDragStarted() {
       const { draggedTasks, maxNotDraggedPosition } = getDragStartTaskState({
-        attribute: "positionX",
+        attribute: "x",
         offset: SECTION_X_OFFSET,
         position: props.config.end,
-        tasks: boardState.tasks(),
+        taskPositions: boardState.taskPositions(),
       });
 
       const { draggedEdges } = getDragStartEdgeState({
-        edges: boardState.edges(),
+        edgePositions: boardState.edgePositions(),
         offset: SECTION_X_OFFSET,
         position: props.config.end,
       });
@@ -167,7 +167,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
         draggedEdges: draggedEdges(),
         draggedTasks: draggedTasks(),
         position: withLimit,
-        sectionId: props.config.section.id,
+        sectionId: props.config.section.$jazz.id,
         sectionStart: props.config.start,
         startPosition: startPosition(),
       });
@@ -209,24 +209,24 @@ const ClickableLine: Component<ComponentProps<"line">> = (props) => {
 
 type GetDragStartTaskStateArgs = {
   position: number;
-  tasks: TaskModel[];
+  taskPositions: Map<string, TaskPositionInstance>;
   offset: number;
-  attribute: "positionY" | "positionX";
+  attribute: "y" | "x";
 };
 
 const getDragStartTaskState = ({
   position,
-  tasks,
+  taskPositions,
   offset,
   attribute,
 }: GetDragStartTaskStateArgs) => {
   let maxNotDraggedPosition = 0;
   const draggedTasks = new Map<string, number>();
 
-  for (const entry of tasks) {
+  for (const [taskId, entry] of taskPositions.entries()) {
     const entryPosition = entry[attribute];
     if (entryPosition > position + offset) {
-      draggedTasks.set(entry.id, entryPosition);
+      draggedTasks.set(taskId, entryPosition);
     } else {
       const shiftedPosition = entryPosition - offset + 10;
       maxNotDraggedPosition = Math.max(maxNotDraggedPosition, shiftedPosition);
@@ -238,17 +238,17 @@ const getDragStartTaskState = ({
 
 type GetDragStartEdgeStateArgs = {
   position: number;
-  edges: EdgeEntry[];
+  edgePositions: Map<string, EdgeBreakInstance>;
   offset: number;
 };
 
-const getDragStartEdgeState = ({ position, edges, offset }: GetDragStartEdgeStateArgs) => {
+const getDragStartEdgeState = ({ position, edgePositions, offset }: GetDragStartEdgeStateArgs) => {
   const draggedEdges = new Map<string, number>();
 
-  for (const entry of edges) {
-    const entryPosition = entry.edge.breakX;
+  for (const [edgeId, entry] of edgePositions.entries()) {
+    const entryPosition = entry.value;
     if (entryPosition > position + offset) {
-      draggedEdges.set(entry.edge.id, entryPosition);
+      draggedEdges.set(edgeId, entryPosition);
     }
   }
 

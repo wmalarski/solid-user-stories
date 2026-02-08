@@ -3,6 +3,7 @@ import type {
   TaskInput,
   TaskInstance,
   TaskListInstance,
+  TaskPositionInstance,
 } from "~/integrations/jazz/schema";
 
 type DeleteTaskWithDependenciesArgs = {
@@ -22,14 +23,20 @@ export const deleteTaskWithDependencies = ({
   tasks?.$jazz.remove((task) => task.$jazz.id === taskId);
 };
 
-export const updateTaskPosition = (
+export const updateTaskSections = (
   instance: TaskInstance,
-  task: Pick<TaskInput, "positionX" | "positionY" | "sectionX" | "sectionY">,
+  task: Pick<TaskInput, "sectionX" | "sectionY">,
 ) => {
-  instance.$jazz.set("positionX", task.positionX);
-  instance.$jazz.set("positionY", task.positionX);
   instance.$jazz.set("sectionX", task.sectionX);
   instance.$jazz.set("sectionY", task.sectionY);
+};
+
+export const updateTaskPosition = (
+  position: TaskPositionInstance,
+  task: Pick<TaskPositionInstance, "x" | "y">,
+) => {
+  position.$jazz.set("x", task.x);
+  position.$jazz.set("y", task.y);
 };
 
 export const updateTaskData = (

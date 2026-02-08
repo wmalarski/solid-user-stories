@@ -6,7 +6,6 @@ import type {
   SectionSizeInstance,
   TaskPositionInstance,
 } from "~/integrations/jazz/schema";
-import type { SectionModel } from "~/integrations/tanstack-db/schema";
 import type { SectionConfigs } from "./section-configs";
 
 type UpdateTaskPositionsArgs = {
@@ -196,7 +195,7 @@ export const updateVerticalSectionSize = ({
 
 type DeleteSectionAndShiftArgs = {
   sectionId: string;
-  orientation: SectionModel["orientation"];
+  orientation: SectionInstance["orientation"];
   endPosition: number;
   shift: number;
   sectionsX: SectionListInstance;

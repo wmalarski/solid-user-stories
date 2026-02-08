@@ -10,7 +10,6 @@ import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import type { TaskInstance } from "~/integrations/jazz/schema";
 import { createId } from "~/integrations/tanstack-db/create-id";
-import type { TaskModel } from "~/integrations/tanstack-db/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
@@ -216,7 +215,7 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
 type TaskFieldsProps = {
   pending?: boolean;
   issues?: FormIssues;
-  initialValues?: Partial<TaskModel>;
+  initialValues?: Partial<TaskInstance>;
 };
 
 const TaskFields: Component<TaskFieldsProps> = (props) => {
