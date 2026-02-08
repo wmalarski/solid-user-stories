@@ -44,11 +44,6 @@ import {
 } from "./board-model";
 
 const createBoardStateContext = (board: Accessor<BoardInstance>) => {
-  const tasks = createJazzResource(() => ({
-    id: board().tasks.$jazz.id,
-    schema: TaskListSchema,
-  }));
-
   const [store, setStore] = createStore<BoardModel>({
     edges: [],
     sectionsX: [],
@@ -65,6 +60,11 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
       }),
     );
   });
+
+  const tasks = createJazzResource(() => ({
+    id: board().tasks.$jazz.id,
+    schema: TaskListSchema,
+  }));
 
   const edges = createJazzResource(() => ({
     id: board().edges.$jazz.id,
@@ -122,28 +122,22 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     },
   ) => {
     if (args.orientation === "horizontal") {
-      const sectionsXValue = sectionsX();
-      if (sectionsXValue) {
-        insertHorizonalSectionAndShift({
-          edgePositions: edgeMap(),
-          index: args.index,
-          name: args.name,
-          sectionConfigs: sectionXConfigs(),
-          sections: sectionsXValue,
-          taskPositions: taskMap(),
-        });
-      }
+      insertHorizonalSectionAndShift({
+        board: board(),
+        edgePositions: edgeMap(),
+        index: args.index,
+        name: args.name,
+        sectionConfigs: sectionXConfigs(),
+        taskPositions: taskMap(),
+      });
     } else {
-      const sectionsYValue = sectionsY();
-      if (sectionsYValue) {
-        insertVerticalSectionAndShift({
-          index: args.index,
-          name: args.name,
-          sectionConfigs: sectionYConfigs(),
-          sections: sectionsYValue,
-          taskPositions: taskMap(),
-        });
-      }
+      insertVerticalSectionAndShift({
+        board: board(),
+        index: args.index,
+        name: args.name,
+        sectionConfigs: sectionYConfigs(),
+        taskPositions: taskMap(),
+      });
     }
   };
 
@@ -190,56 +184,39 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
       id: string;
     },
   ) => {
-    const sectionsYValue = sectionsY();
-    const sectionsXValue = sectionsX();
-    if (sectionsYValue && sectionsXValue) {
-      deleteSectionAndShift({
-        edgePositions: edgeMap(),
-        endPosition: args.endPosition,
-        orientation: args.orientation,
-        sectionId: args.id,
-        sectionsX: sectionsXValue,
-        sectionsY: sectionsYValue,
-        shift: args.shift,
-        taskPositions: taskMap(),
-      });
-    }
-  };
-
-  const deleteTask = (taskId: string) => {
-    deleteTaskWithDependencies({
-      edges: edges(),
-      taskId,
-      tasks: tasks(),
+    deleteSectionAndShift({
+      board: board(),
+      edgePositions: edgeMap(),
+      endPosition: args.endPosition,
+      orientation: args.orientation,
+      sectionId: args.id,
+      shift: args.shift,
+      taskPositions: taskMap(),
     });
   };
 
+  const deleteTask = (taskId: string) => {
+    deleteTaskWithDependencies({ board: board(), taskId });
+  };
+
   const deleteEdge = (edgeId: string) => {
-    edges()?.$jazz.remove((edge) => edge.$jazz.id === edgeId);
+    getLoadedOrUndefined(board().edges)?.$jazz.remove((edge) => edge.$jazz.id === edgeId);
   };
 
   const insertEdgeToPoint = (args: { isSource: boolean; taskId: string; x: number; y: number }) => {
-    const edgesValue = edges();
-    if (edgesValue) {
-      return insertEdgeFromPoint({
-        edges: edgesValue,
-        taskPositions: taskMap(),
-        ...args,
-      });
-    }
+    return insertEdgeFromPoint({
+      board: board(),
+      taskPositions: taskMap(),
+      ...args,
+    });
   };
 
   const insertEdgeToTask = (args: { isSource: boolean; taskId: string; secondTaskId: string }) => {
-    const edgesValue = edges();
-    const tasksValue = tasks();
-    if (edgesValue && tasksValue) {
-      return insertEdgeToSecondTask({
-        edges: edgesValue,
-        taskPositions: taskMap(),
-        tasks: tasksValue,
-        ...args,
-      });
-    }
+    return insertEdgeToSecondTask({
+      board: board(),
+      taskPositions: taskMap(),
+      ...args,
+    });
   };
 
   const updateEdgePosition = (edge: Pick<EdgeModel, "id" | "breakX">) => {
@@ -250,14 +227,12 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   };
 
   const updateSectionName = (args: Pick<SectionModel, "id" | "name" | "orientation">) => {
-    const sections = args.orientation === "horizontal" ? sectionsX() : sectionsY();
-    const section = sections?.find((section) => section.$jazz.id === args.id);
-
-    if (section) {
-      updateSectionData(section, {
-        name: args.name,
-      });
-    }
+    updateSectionData({
+      board: board(),
+      id: args.id,
+      name: args.name,
+      orientation: args.orientation,
+    });
   };
 
   const updateTaskModel = (

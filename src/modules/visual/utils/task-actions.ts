@@ -1,26 +1,17 @@
-import type {
-  EdgeListInstance,
-  TaskInput,
-  TaskInstance,
-  TaskListInstance,
-} from "~/integrations/jazz/schema";
+import { getLoadedOrUndefined } from "jazz-tools";
+import type { BoardInstance, TaskInput, TaskInstance } from "~/integrations/jazz/schema";
 import type { Point2D } from "./types";
 
 type DeleteTaskWithDependenciesArgs = {
+  board: BoardInstance;
   taskId: string;
-  tasks?: TaskListInstance;
-  edges?: EdgeListInstance;
 };
 
-export const deleteTaskWithDependencies = ({
-  taskId,
-  tasks,
-  edges,
-}: DeleteTaskWithDependenciesArgs) => {
-  edges?.$jazz.remove((edge) =>
+export const deleteTaskWithDependencies = ({ board, taskId }: DeleteTaskWithDependenciesArgs) => {
+  getLoadedOrUndefined(board.edges)?.$jazz.remove((edge) =>
     edge.$isLoaded ? edge.target === taskId || edge.source === taskId : false,
   );
-  tasks?.$jazz.remove((task) => task.$jazz.id === taskId);
+  getLoadedOrUndefined(board.tasks)?.$jazz.remove((task) => task.$jazz.id === taskId);
 };
 
 export const updateTaskSections = (

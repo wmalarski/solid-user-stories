@@ -1,8 +1,8 @@
+import { getLoadedOrUndefined } from "jazz-tools";
 import type {
+  BoardInstance,
   EdgeInstance,
-  SectionInput,
   SectionInstance,
-  SectionListInstance,
   TaskInstance,
 } from "~/integrations/jazz/schema";
 import type { SectionConfigs } from "./section-configs";
@@ -80,10 +80,10 @@ const shiftEdges = ({ shift, position, edgePositions }: ShiftEdgesArgs) => {
 };
 
 type InsertHorizontalSectionAndShiftArgs = {
+  board: BoardInstance;
   name: string;
   index: number;
   sectionConfigs: SectionConfigs;
-  sections: SectionListInstance;
   taskPositions: Map<string, TaskInstance>;
   edgePositions: Map<string, EdgeInstance>;
 };
@@ -92,36 +92,47 @@ export const insertHorizonalSectionAndShift = ({
   name,
   index,
   sectionConfigs,
-  sections,
   taskPositions,
   edgePositions,
+  board,
 }: InsertHorizontalSectionAndShiftArgs) => {
   const shift = 500;
   const orientation = "horizontal";
-  sections?.$jazz.splice(index + 1, 0, { name, orientation, size: shift, tasks: [] });
+
+  getLoadedOrUndefined(board.sectionX)?.$jazz.splice(index + 1, 0, {
+    name,
+    orientation,
+    size: shift,
+    tasks: [],
+  });
   const position = sectionConfigs[index].end;
   shiftTasks({ attribute: "positionX", position, shift, taskPositions });
   shiftEdges({ edgePositions, position, shift });
 };
 
 type InsertVerticalSectionAndShiftArgs = {
+  board: BoardInstance;
   name: string;
   index: number;
   sectionConfigs: SectionConfigs;
-  sections: SectionListInstance;
   taskPositions: Map<string, TaskInstance>;
 };
 
 export const insertVerticalSectionAndShift = ({
+  board,
   name,
   index,
   sectionConfigs,
-  sections,
   taskPositions,
 }: InsertVerticalSectionAndShiftArgs) => {
   const shift = 500;
   const orientation = "vertical";
-  sections?.$jazz.splice(index + 1, 0, { name, orientation, size: shift, tasks: [] });
+  getLoadedOrUndefined(board.sectionY)?.$jazz.splice(index + 1, 0, {
+    name,
+    orientation,
+    size: shift,
+    tasks: [],
+  });
   const position = sectionConfigs[index].end;
   shiftTasks({ attribute: "positionY", position, shift, taskPositions });
 };
@@ -193,39 +204,45 @@ export const updateVerticalSectionSize = ({
 };
 
 type DeleteSectionAndShiftArgs = {
+  board: BoardInstance;
   sectionId: string;
   orientation: SectionInstance["orientation"];
   endPosition: number;
   shift: number;
-  sectionsX: SectionListInstance;
-  sectionsY: SectionListInstance;
   taskPositions: Map<string, TaskInstance>;
   edgePositions: Map<string, EdgeInstance>;
 };
 
 export const deleteSectionAndShift = ({
+  board,
   sectionId,
   orientation,
   endPosition,
   shift,
-  sectionsX,
-  sectionsY,
   taskPositions,
   edgePositions,
 }: DeleteSectionAndShiftArgs) => {
   if (orientation === "horizontal") {
-    sectionsX.$jazz.remove((section) => section.$jazz.id === sectionId);
+    getLoadedOrUndefined(board.sectionX)?.$jazz.remove((section) => section.$jazz.id === sectionId);
     shiftTasks({ attribute: "positionX", position: endPosition, shift, taskPositions });
     shiftEdges({ edgePositions, position: endPosition, shift });
   } else {
-    sectionsY.$jazz.remove((section) => section.$jazz.id === sectionId);
+    getLoadedOrUndefined(board.sectionY)?.$jazz.remove((section) => section.$jazz.id === sectionId);
     shiftTasks({ attribute: "positionY", position: endPosition, shift, taskPositions });
   }
 };
 
-export const updateSectionData = (
-  instance: SectionInstance,
-  section: Pick<SectionInput, "name">,
-) => {
-  instance.$jazz.set("name", section.name);
+type UpdateSectionDataArgs = {
+  board: BoardInstance;
+  name: string;
+  id: string;
+  orientation: SectionInstance["orientation"];
+};
+
+export const updateSectionData = ({ board, id, name, orientation }: UpdateSectionDataArgs) => {
+  const sections = getLoadedOrUndefined(
+    board[orientation === "horizontal" ? "sectionX" : "sectionY"],
+  );
+  const section = sections?.find((section) => section.$jazz.id === id);
+  getLoadedOrUndefined(section)?.$jazz.set("name", name);
 };
