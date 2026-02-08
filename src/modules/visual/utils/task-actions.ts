@@ -1,9 +1,8 @@
 import { getLoadedOrUndefined } from "jazz-tools";
 import type { BoardInstance, TaskInstance } from "~/integrations/jazz/schema";
 import { getTaskMap } from "./instance-maps";
-import type { Point2D } from "./types";
 
-type InsertTaskInstanceArgs = Pick<
+export type InsertTaskInstanceArgs = Pick<
   TaskInstance,
   | "description"
   | "estimate"
@@ -25,31 +24,34 @@ export const insertTaskInstance = ({ board, ...args }: InsertTaskInstanceArgs) =
   tasksValue.$jazz.push(args);
 };
 
-type DeleteTaskWithDependenciesArgs = {
+export type DeleteTaskInstanceArgs = {
   board: BoardInstance;
   taskId: string;
 };
 
-export const deleteTaskWithDependencies = ({ board, taskId }: DeleteTaskWithDependenciesArgs) => {
+export const deleteTaskInstance = ({ board, taskId }: DeleteTaskInstanceArgs) => {
   getLoadedOrUndefined(board.edges)?.$jazz.remove((edge) =>
     edge.$isLoaded ? edge.target === taskId || edge.source === taskId : false,
   );
   getLoadedOrUndefined(board.tasks)?.$jazz.remove((task) => task.$jazz.id === taskId);
 };
 
-type UpdateTaskPositionArgs = Pick<TaskInstance, "sectionX" | "sectionY"> & {
+export type UpdateTaskInstancePositionArgs = Pick<
+  TaskInstance,
+  "sectionX" | "sectionY" | "positionX" | "positionY"
+> & {
   board: BoardInstance;
   taskId: string;
-  position: Point2D;
 };
 
-export const updateTaskPosition = ({
+export const updateTaskInstancePosition = ({
   board,
-  position,
+  positionX,
+  positionY,
   taskId,
   sectionX,
   sectionY,
-}: UpdateTaskPositionArgs) => {
+}: UpdateTaskInstancePositionArgs) => {
   const taskMap = getTaskMap(board);
   const instance = taskMap.get(taskId);
 
@@ -57,25 +59,28 @@ export const updateTaskPosition = ({
     return;
   }
 
-  instance.$jazz.set("positionX", position.x);
-  instance.$jazz.set("positionY", position.y);
+  instance.$jazz.set("positionX", positionX);
+  instance.$jazz.set("positionY", positionY);
   instance.$jazz.set("sectionX", sectionX);
   instance.$jazz.set("sectionY", sectionY);
 };
 
-type UpdateTaskDataArgs = Pick<TaskInstance, "description" | "estimate" | "link" | "title"> & {
+export type UpdateTaskInstanceDetailsArgs = Pick<
+  TaskInstance,
+  "description" | "estimate" | "link" | "title"
+> & {
   board: BoardInstance;
   taskId: string;
 };
 
-export const updateTaskData = ({
+export const updateTaskInstanceDetails = ({
   board,
   description,
   estimate,
   link,
   taskId,
   title,
-}: UpdateTaskDataArgs) => {
+}: UpdateTaskInstanceDetailsArgs) => {
   const taskMap = getTaskMap(board);
   const instance = taskMap.get(taskId);
 

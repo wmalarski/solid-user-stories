@@ -36,6 +36,7 @@ import { useIsSelected, useSelectionStateContext } from "../contexts/selection-s
 import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
+import { mapToSections } from "../utils/section-configs";
 import type { Point2D } from "../utils/types";
 
 export const TaskFieldsSchema = v.object({
@@ -108,12 +109,20 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
 
     const taskId = createId();
 
-    boardState.insertTask({
+    const sections = mapToSections(
+      boardState.sectionX.configs(),
+      boardState.sectionY.configs(),
+      positionValue,
+    );
+
+    boardState.tasks.insertTask({
       description: parsed.output.description,
       estimate: parsed.output.estimate,
       link: parsed.output.link,
       positionX: positionValue.x,
       positionY: positionValue.y,
+      sectionX: sections.sectionX?.id ?? null,
+      sectionY: sections.sectionY?.id ?? null,
       title: parsed.output.title,
     });
 
@@ -173,11 +182,11 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
       return;
     }
 
-    boardState.updateTaskModel({
+    boardState.tasks.updateTaskDetails({
       description: parsed.output.description,
       estimate: parsed.output.estimate,
-      id: props.task.id,
       link: parsed.output.link,
+      taskId: props.task.id,
       title: parsed.output.title,
     });
 
@@ -310,7 +319,7 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const onConfirmClick = () => {
     closeDialog(dialogId);
 
-    boardState.deleteTask(props.task.id);
+    boardState.tasks.deleteTask({ taskId: props.task.id });
 
     if (isSelected()) {
       onSelectionChange(null);

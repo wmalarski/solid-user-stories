@@ -21,10 +21,10 @@ export const SectionGridPaths: Component = () => {
 
   return (
     <>
-      <Index each={boardState.sectionYConfigs()}>
+      <Index each={boardState.sectionY.configs()}>
         {(entry) => <HorizontalPath config={entry()} />}
       </Index>
-      <Index each={boardState.sectionXConfigs()}>
+      <Index each={boardState.sectionX.configs()}>
         {(entry) => <VerticalPath config={entry()} />}
       </Index>
     </>
@@ -36,10 +36,10 @@ export const ExportableSectionGridPaths: Component = () => {
 
   return (
     <>
-      <Index each={boardState.sectionYConfigs()}>
+      <Index each={boardState.sectionY.configs()}>
         {(entry) => <ExportableHorizontalPath position={entry().end} />}
       </Index>
-      <Index each={boardState.sectionXConfigs()}>
+      <Index each={boardState.sectionX.configs()}>
         {(entry) => <ExportableVerticalPath position={entry().end} />}
       </Index>
     </>
@@ -99,10 +99,10 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       const updatedY = (event.y - transformValue.y) / transformValue.k - SECTION_Y_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
 
-      boardState.updateHorizontalSectionPosition({
+      boardState.sectionX.updateSectionPosition({
         draggedTasks: draggedTasks(),
         position: withLimit,
-        sectionSizeId: props.config.section.id,
+        sectionId: props.config.section.id,
         sectionStart: props.config.start,
         startPosition: startPosition(),
       });
@@ -163,11 +163,11 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       const updatedX = (event.x - transformValue.x) / transformValue.k - SECTION_X_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
 
-      boardState.updateVerticalSectionPosition({
+      boardState.sectionY.updateSectionPosition({
         draggedEdges: draggedEdges(),
         draggedTasks: draggedTasks(),
         position: withLimit,
-        sectionSizeId: props.config.section.id,
+        sectionId: props.config.section.id,
         sectionStart: props.config.start,
         startPosition: startPosition(),
       });

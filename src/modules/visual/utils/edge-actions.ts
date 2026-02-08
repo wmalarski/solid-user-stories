@@ -3,7 +3,7 @@ import type { BoardInstance } from "~/integrations/jazz/schema";
 import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
 import { getEdgeMap, getTaskMap } from "./instance-maps";
 
-type InsertEdgeFromPointArgs = {
+export type InsertEdgeInstanceToPointArgs = {
   board: BoardInstance;
   x: number;
   y: number;
@@ -11,7 +11,13 @@ type InsertEdgeFromPointArgs = {
   isSource: boolean;
 };
 
-export const insertEdgeFromPoint = ({ board, x, y, taskId, isSource }: InsertEdgeFromPointArgs) => {
+export const insertEdgeInstanceToPoint = ({
+  board,
+  x,
+  y,
+  taskId,
+  isSource,
+}: InsertEdgeInstanceToPointArgs) => {
   const edges = getLoadedOrUndefined(board.edges);
   const taskPositions = getTaskMap(board);
 
@@ -62,19 +68,19 @@ export const insertEdgeFromPoint = ({ board, x, y, taskId, isSource }: InsertEdg
   return edges[size - 1].$jazz.id;
 };
 
-type InsertEdgeToTaskArgs = {
+export type InsertEdgeInstanceToTaskArgs = {
   board: BoardInstance;
   taskId: string;
   secondTaskId: string;
   isSource: boolean;
 };
 
-export const insertEdgeToSecondTask = ({
+export const insertEdgeInstanceToSecondTask = ({
   board,
   taskId,
   isSource,
   secondTaskId,
-}: InsertEdgeToTaskArgs) => {
+}: InsertEdgeInstanceToTaskArgs) => {
   const taskPositions = getTaskMap(board);
   const currentTask = taskPositions.get(taskId);
   const secondTask = taskPositions.get(secondTaskId);
@@ -96,19 +102,19 @@ export const insertEdgeToSecondTask = ({
   return edges[size - 1].$jazz.id;
 };
 
-type UpdateEdgeArgs = {
+export type UpdateEdgeInstanceArgs = {
   board: BoardInstance;
   edgeId: string;
   breakX: number;
 };
 
-export const updateEdge = ({ board, breakX, edgeId }: UpdateEdgeArgs) => {
+export const updateEdgeInstance = ({ board, breakX, edgeId }: UpdateEdgeInstanceArgs) => {
   const edgeMap = getEdgeMap(board);
   const instance = edgeMap.get(edgeId);
   instance?.$jazz.set("breakX", breakX);
 };
 
-type DeleteEdgeInstanceArgs = {
+export type DeleteEdgeInstanceArgs = {
   board: BoardInstance;
   edgeId: string;
 };

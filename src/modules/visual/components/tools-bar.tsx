@@ -92,9 +92,9 @@ const DeleteSelectedElementDialog: Component = () => {
     }
 
     if (selection.kind === "task") {
-      boardState.deleteTask(selection.id);
+      boardState.tasks.deleteTask({ taskId: selection.id });
     } else {
-      boardState.deleteEdge(selection.id);
+      boardState.edges.deleteEdge({ edgeId: selection.id });
     }
 
     onSelectionChange(null);

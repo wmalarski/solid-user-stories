@@ -75,19 +75,19 @@ const shiftEdges = ({ shift, position, edgePositions }: ShiftEdgesArgs) => {
   });
 };
 
-type InsertHorizontalSectionAndShiftArgs = {
+export type InsertHorizontalSectionInstance = {
   board: BoardInstance;
   name: string;
   index: number;
   sectionConfigs: SectionConfigs;
 };
 
-export const insertHorizonalSectionAndShift = ({
+export const insertHorizontalSectionInstance = ({
   name,
   index,
   sectionConfigs,
   board,
-}: InsertHorizontalSectionAndShiftArgs) => {
+}: InsertHorizontalSectionInstance) => {
   const shift = 500;
   const edgePositions = getEdgeMap(board);
   const taskPositions = getTaskMap(board);
@@ -103,19 +103,19 @@ export const insertHorizonalSectionAndShift = ({
   shiftEdges({ edgePositions, position, shift });
 };
 
-type InsertVerticalSectionAndShiftArgs = {
+export type InsertVerticalSectionInstanceArgs = {
   board: BoardInstance;
   name: string;
   index: number;
   sectionConfigs: SectionConfigs;
 };
 
-export const insertVerticalSectionAndShift = ({
+export const insertVerticalSectionInstance = ({
   board,
   name,
   index,
   sectionConfigs,
-}: InsertVerticalSectionAndShiftArgs) => {
+}: InsertVerticalSectionInstanceArgs) => {
   const shift = 500;
   const taskPositions = getTaskMap(board);
 
@@ -129,7 +129,7 @@ export const insertVerticalSectionAndShift = ({
   shiftTasks({ attribute: "positionY", position, shift, taskPositions });
 };
 
-type UpdateHorizontalSectionSizeArgs = {
+export type UpdateHorizontalSectionInstanceSizeArgs = {
   board: BoardInstance;
   position: number;
   draggedTasks: Map<string, number>;
@@ -138,14 +138,14 @@ type UpdateHorizontalSectionSizeArgs = {
   sectionId: string;
 };
 
-export const updateHorizontalSectionSize = ({
+export const updateHorizontalSectionInstanceSize = ({
   board,
   sectionId,
   position,
   draggedTasks,
   startPosition,
   sectionStart,
-}: UpdateHorizontalSectionSizeArgs) => {
+}: UpdateHorizontalSectionInstanceSizeArgs) => {
   const sectionsYMap = getSectionYMap(board);
   const taskPositions = getTaskMap(board);
   const sectionSize = sectionsYMap.get(sectionId);
@@ -161,7 +161,7 @@ export const updateHorizontalSectionSize = ({
   });
 };
 
-type UpdateVerticalSectionSizeArgs = {
+export type UpdateVerticalSectionInstanceSizeArgs = {
   board: BoardInstance;
   position: number;
   draggedTasks: Map<string, number>;
@@ -171,7 +171,7 @@ type UpdateVerticalSectionSizeArgs = {
   sectionId: string;
 };
 
-export const updateVerticalSectionSize = ({
+export const updateVerticalSectionInstanceSize = ({
   board,
   position,
   draggedTasks,
@@ -179,7 +179,7 @@ export const updateVerticalSectionSize = ({
   startPosition,
   sectionStart,
   sectionId,
-}: UpdateVerticalSectionSizeArgs) => {
+}: UpdateVerticalSectionInstanceSizeArgs) => {
   const edgePositions = getEdgeMap(board);
   const taskPositions = getTaskMap(board);
   const sectionsXMap = getSectionXMap(board);
@@ -202,19 +202,19 @@ export const updateVerticalSectionSize = ({
   });
 };
 
-type DeleteHorizontalSectionAndShiftArgs = {
+export type DeleteHorizontalSectionInstanceArgs = {
   board: BoardInstance;
   sectionId: string;
   endPosition: number;
   shift: number;
 };
 
-export const deleteHorizontalSectionAndShift = ({
+export const deleteHorizontalSectionInstance = ({
   board,
   sectionId,
   endPosition,
   shift,
-}: DeleteHorizontalSectionAndShiftArgs) => {
+}: DeleteHorizontalSectionInstanceArgs) => {
   const edgePositions = getEdgeMap(board);
   const taskPositions = getTaskMap(board);
 
@@ -223,48 +223,52 @@ export const deleteHorizontalSectionAndShift = ({
   shiftEdges({ edgePositions, position: endPosition, shift });
 };
 
-type DeleteVerticalSectionAndShiftArgs = {
+export type DeleteVerticalSectionInstanceArgs = {
   board: BoardInstance;
   sectionId: string;
   endPosition: number;
   shift: number;
 };
 
-export const deleteVerticalSectionAndShift = ({
+export const deleteVerticalSectionInstance = ({
   board,
   sectionId,
   endPosition,
   shift,
-}: DeleteVerticalSectionAndShiftArgs) => {
+}: DeleteVerticalSectionInstanceArgs) => {
   const taskPositions = getTaskMap(board);
 
   getLoadedOrUndefined(board.sectionY)?.$jazz.remove((section) => section.$jazz.id === sectionId);
   shiftTasks({ attribute: "positionY", position: endPosition, shift, taskPositions });
 };
 
-type UpdateHorizontalSectionDataArgs = {
+export type UpdateHorizontalSectionInstanceArgs = {
   board: BoardInstance;
   name: string;
   id: string;
 };
 
-export const updateHorizontalSectionData = ({
+export const updateHorizontalSectionInstance = ({
   board,
   id,
   name,
-}: UpdateHorizontalSectionDataArgs) => {
+}: UpdateHorizontalSectionInstanceArgs) => {
   const sections = getLoadedOrUndefined(board.sectionX);
   const section = sections?.find((section) => section.$jazz.id === id);
   getLoadedOrUndefined(section)?.$jazz.set("name", name);
 };
 
-type UpdateVerticalSectionDataArgs = {
+export type UpdateVerticalSectionInstanceArgs = {
   board: BoardInstance;
   name: string;
   id: string;
 };
 
-export const updateVerticalSectionData = ({ board, id, name }: UpdateVerticalSectionDataArgs) => {
+export const updateVerticalSectionInstance = ({
+  board,
+  id,
+  name,
+}: UpdateVerticalSectionInstanceArgs) => {
   const sections = getLoadedOrUndefined(board.sectionY);
   const section = sections?.find((section) => section.$jazz.id === id);
   getLoadedOrUndefined(section)?.$jazz.set("name", name);

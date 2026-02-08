@@ -10,35 +10,49 @@ import {
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { BoardSchema, type BoardInstance } from "~/integrations/jazz/schema";
+
 import {
   deleteEdgeInstance,
-  insertEdgeFromPoint,
-  insertEdgeToSecondTask,
-  updateEdge,
+  insertEdgeInstanceToPoint,
+  insertEdgeInstanceToSecondTask,
+  updateEdgeInstance,
+  type DeleteEdgeInstanceArgs,
+  type InsertEdgeInstanceToPointArgs,
+  type InsertEdgeInstanceToTaskArgs,
+  type UpdateEdgeInstanceArgs,
 } from "../utils/edge-actions";
 import {
-  deleteHorizontalSectionAndShift,
-  deleteVerticalSectionAndShift,
-  insertHorizonalSectionAndShift,
-  insertVerticalSectionAndShift,
-  updateHorizontalSectionData,
-  updateHorizontalSectionSize,
-  updateVerticalSectionSize,
+  deleteHorizontalSectionInstance,
+  deleteVerticalSectionInstance,
+  insertHorizontalSectionInstance,
+  insertVerticalSectionInstance,
+  updateHorizontalSectionInstance,
+  updateHorizontalSectionInstanceSize,
+  updateVerticalSectionInstance,
+  updateVerticalSectionInstanceSize,
+  type DeleteHorizontalSectionInstanceArgs,
+  type DeleteVerticalSectionInstanceArgs,
+  type InsertHorizontalSectionInstance,
+  type InsertVerticalSectionInstanceArgs,
+  type UpdateHorizontalSectionInstanceArgs,
+  type UpdateHorizontalSectionInstanceSizeArgs,
+  type UpdateVerticalSectionInstanceArgs,
+  type UpdateVerticalSectionInstanceSizeArgs,
 } from "../utils/section-actions";
-import { getSectionConfig, mapToSections } from "../utils/section-configs";
+import { getSectionConfig } from "../utils/section-configs";
 import {
-  deleteTaskWithDependencies,
+  deleteTaskInstance,
   insertTaskInstance,
-  updateTaskData,
-  updateTaskPosition,
+  updateTaskInstanceDetails,
+  updateTaskInstancePosition,
+  type DeleteTaskInstanceArgs,
+  type InsertTaskInstanceArgs,
+  type UpdateTaskInstanceDetailsArgs,
+  type UpdateTaskInstancePositionArgs,
 } from "../utils/task-actions";
-import {
-  mapToBoardModel,
-  type BoardModel,
-  type EdgeModel,
-  type SectionModel,
-  type TaskModel,
-} from "./board-model";
+import { mapToBoardModel, type BoardModel } from "./board-model";
+
+type OmitBoard<T> = Omit<T, "board">;
 
 const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const [store, setStore] = createStore<BoardModel>({
@@ -61,190 +75,51 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const sectionXConfigs = createMemo(() => getSectionConfig(store.sectionsX));
   const sectionYConfigs = createMemo(() => getSectionConfig(store.sectionsY));
 
-  const insertTask = (
-    input: Pick<
-      TaskModel,
-      "description" | "estimate" | "link" | "title" | "positionX" | "positionY"
-    >,
-  ) => {
-    const position = { x: input.positionX, y: input.positionY };
-    const sections = mapToSections(sectionXConfigs(), sectionYConfigs(), position);
-    insertTaskInstance({
-      board: board(),
-      description: input.description,
-      estimate: input.estimate,
-      link: input.link,
-      positionX: input.positionX,
-      positionY: input.positionY,
-      sectionX: sections.sectionX?.id ?? null,
-      sectionY: sections.sectionY?.id ?? null,
-      title: input.title,
-    });
-  };
-
-  const insertHorizontalSection = (args: Pick<SectionModel, "name"> & { index: number }) => {
-    insertHorizonalSectionAndShift({
-      board: board(),
-      index: args.index,
-      name: args.name,
-      sectionConfigs: sectionXConfigs(),
-    });
-  };
-
-  const insertVerticalSection = (args: Pick<SectionModel, "name"> & { index: number }) => {
-    insertVerticalSectionAndShift({
-      board: board(),
-      index: args.index,
-      name: args.name,
-      sectionConfigs: sectionYConfigs(),
-    });
-  };
-
-  const updateHorizontalSectionPosition = (args: {
-    position: number;
-    draggedTasks: Map<string, number>;
-    startPosition: number;
-    sectionStart: number;
-    sectionSizeId: string;
-  }) => {
-    updateHorizontalSectionSize({
-      board: board(),
-      sectionId: args.sectionSizeId,
-      ...args,
-    });
-  };
-
-  const updateVerticalSectionPosition = (args: {
-    position: number;
-    draggedTasks: Map<string, number>;
-    draggedEdges: Map<string, number>;
-    sectionSizeId: string;
-    startPosition: number;
-    sectionStart: number;
-  }) => {
-    updateVerticalSectionSize({
-      board: board(),
-      sectionId: args.sectionSizeId,
-      ...args,
-    });
-  };
-
-  const deleteHorizontalSection = (args: { endPosition: number; shift: number; id: string }) => {
-    deleteHorizontalSectionAndShift({
-      board: board(),
-      endPosition: args.endPosition,
-      sectionId: args.id,
-      shift: args.shift,
-    });
-  };
-
-  const deleteVerticalSection = (args: { endPosition: number; shift: number; id: string }) => {
-    deleteVerticalSectionAndShift({
-      board: board(),
-      endPosition: args.endPosition,
-      sectionId: args.id,
-      shift: args.shift,
-    });
-  };
-
-  const deleteTask = (taskId: string) => {
-    deleteTaskWithDependencies({
-      board: board(),
-      taskId,
-    });
-  };
-
-  const deleteEdge = (edgeId: string) => {
-    deleteEdgeInstance({
-      board: board(),
-      edgeId,
-    });
-  };
-
-  const insertEdgeToPoint = (args: { isSource: boolean; taskId: string; x: number; y: number }) => {
-    return insertEdgeFromPoint({
-      board: board(),
-      ...args,
-    });
-  };
-
-  const insertEdgeToTask = (args: { isSource: boolean; taskId: string; secondTaskId: string }) => {
-    return insertEdgeToSecondTask({
-      board: board(),
-      ...args,
-    });
-  };
-
-  const updateEdgePosition = (edge: Pick<EdgeModel, "id" | "breakX">) => {
-    updateEdge({
-      board: board(),
-      breakX: edge.breakX,
-      edgeId: edge.id,
-    });
-  };
-
-  const updateHorizontalSectionName = (args: Pick<SectionModel, "id" | "name">) => {
-    updateHorizontalSectionData({
-      board: board(),
-      id: args.id,
-      name: args.name,
-    });
-  };
-
-  const updateVerticalSectionName = (args: Pick<SectionModel, "id" | "name">) => {
-    updateHorizontalSectionData({
-      board: board(),
-      id: args.id,
-      name: args.name,
-    });
-  };
-
-  const updateTaskModel = (
-    args: Pick<TaskModel, "id" | "description" | "estimate" | "link" | "title">,
-  ) => {
-    updateTaskData({
-      board: board(),
-      description: args.description,
-      estimate: args.estimate,
-      link: args.link,
-      taskId: args.id,
-      title: args.title,
-    });
-  };
-
-  const updateTask = (args: Pick<TaskModel, "id" | "positionX" | "positionY">) => {
-    const position = { x: args.positionX, y: args.positionY };
-    const sectionIds = mapToSections(sectionXConfigs(), sectionYConfigs(), position);
-    updateTaskPosition({
-      board: board(),
-      position,
-      sectionX: sectionIds.sectionX?.id ?? null,
-      sectionY: sectionIds.sectionY?.id ?? null,
-      taskId: args.id,
-    });
-  };
-
   return {
     board,
-    deleteEdge,
-    deleteHorizontalSection,
-    deleteTask,
-    deleteVerticalSection,
-    insertEdgeToPoint,
-    insertEdgeToTask,
-    insertHorizontalSection,
-    insertTask,
-    insertVerticalSection,
-    sectionXConfigs,
-    sectionYConfigs,
+    edges: {
+      deleteEdge: (args: OmitBoard<DeleteEdgeInstanceArgs>) =>
+        deleteEdgeInstance({ board: board(), ...args }),
+      insertEdgeToPoint: (args: OmitBoard<InsertEdgeInstanceToPointArgs>) =>
+        insertEdgeInstanceToPoint({ board: board(), ...args }),
+      insertEdgeToTask: (args: OmitBoard<InsertEdgeInstanceToTaskArgs>) =>
+        insertEdgeInstanceToSecondTask({ board: board(), ...args }),
+      updateEdgePosition: (args: OmitBoard<UpdateEdgeInstanceArgs>) =>
+        updateEdgeInstance({ board: board(), ...args }),
+    },
+    sectionX: {
+      configs: sectionXConfigs,
+      deleteSection: (args: OmitBoard<DeleteHorizontalSectionInstanceArgs>) =>
+        deleteHorizontalSectionInstance({ board: board(), ...args }),
+      insertSection: (args: OmitBoard<InsertHorizontalSectionInstance>) =>
+        insertHorizontalSectionInstance({ board: board(), ...args }),
+      updateSectionName: (args: OmitBoard<UpdateHorizontalSectionInstanceArgs>) =>
+        updateHorizontalSectionInstance({ board: board(), ...args }),
+      updateSectionPosition: (args: OmitBoard<UpdateHorizontalSectionInstanceSizeArgs>) =>
+        updateHorizontalSectionInstanceSize({ board: board(), ...args }),
+    },
+    sectionY: {
+      configs: sectionYConfigs,
+      deleteSection: (args: OmitBoard<DeleteVerticalSectionInstanceArgs>) =>
+        deleteVerticalSectionInstance({ board: board(), ...args }),
+      insertSection: (args: OmitBoard<InsertVerticalSectionInstanceArgs>) =>
+        insertVerticalSectionInstance({ board: board(), ...args }),
+      updateSectionName: (args: OmitBoard<UpdateVerticalSectionInstanceArgs>) =>
+        updateVerticalSectionInstance({ board: board(), ...args }),
+      updateSectionPosition: (args: OmitBoard<UpdateVerticalSectionInstanceSizeArgs>) =>
+        updateVerticalSectionInstanceSize({ board: board(), ...args }),
+    },
     store,
-    updateEdgePosition,
-    updateHorizontalSectionName,
-    updateHorizontalSectionPosition,
-    updateTask,
-    updateTaskModel,
-    updateVerticalSectionName,
-    updateVerticalSectionPosition,
+    tasks: {
+      deleteTask: (args: OmitBoard<DeleteTaskInstanceArgs>) =>
+        deleteTaskInstance({ board: board(), ...args }),
+      insertTask: (args: OmitBoard<InsertTaskInstanceArgs>) =>
+        insertTaskInstance({ board: board(), ...args }),
+      updateTaskDetails: (args: OmitBoard<UpdateTaskInstanceDetailsArgs>) =>
+        updateTaskInstanceDetails({ board: board(), ...args }),
+      updateTaskPosition: (args: OmitBoard<UpdateTaskInstancePositionArgs>) =>
+        updateTaskInstancePosition({ board: board(), ...args }),
+    },
   };
 };
 

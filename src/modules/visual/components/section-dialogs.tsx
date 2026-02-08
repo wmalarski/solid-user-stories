@@ -61,14 +61,16 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
     }
 
     if (props.orientation === "horizontal") {
-      boardState.insertHorizontalSection({
+      boardState.sectionX.insertSection({
         index: props.index,
         name: parsed.output.name,
+        sectionConfigs: boardState.sectionX.configs(),
       });
     } else {
-      boardState.insertVerticalSection({
+      boardState.sectionY.insertSection({
         index: props.index,
         name: parsed.output.name,
+        sectionConfigs: boardState.sectionY.configs(),
       });
     }
 
@@ -136,16 +138,11 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
       return;
     }
 
+    const section = { id: props.section.id, name: parsed.output.name };
     if (props.orientation === "horizontal") {
-      boardState.updateHorizontalSectionName({
-        id: props.section.id,
-        name: parsed.output.name,
-      });
+      boardState.sectionX.updateSectionName(section);
     } else {
-      boardState.updateVerticalSectionName({
-        id: props.section.id,
-        name: parsed.output.name,
-      });
+      boardState.sectionY.updateSectionName(section);
     }
   };
 
@@ -229,15 +226,15 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
     closeDialog(dialogId);
 
     if (props.orientation === "horizontal") {
-      boardState.deleteHorizontalSection({
+      boardState.sectionX.deleteSection({
         endPosition: props.endPosition,
-        id: props.section.id,
+        sectionId: props.section.id,
         shift: -props.section.size,
       });
     } else {
-      boardState.deleteVerticalSection({
+      boardState.sectionY.deleteSection({
         endPosition: props.endPosition,
-        id: props.section.id,
+        sectionId: props.section.id,
         shift: -props.section.size,
       });
     }

@@ -26,6 +26,7 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
+import { mapToSections } from "../utils/section-configs";
 import type { Point2D } from "../utils/types";
 import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 
@@ -61,10 +62,19 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       const updatedX = event.x + shiftX();
       const updatedY = event.y + shiftY();
 
-      boardState.updateTask({
-        id: props.task.id,
+      const position = { x: updatedX, y: updatedY };
+      const sectionIds = mapToSections(
+        boardState.sectionX.configs(),
+        boardState.sectionY.configs(),
+        position,
+      );
+
+      boardState.tasks.updateTaskPosition({
         positionX: updatedX,
         positionY: updatedY,
+        sectionX: sectionIds.sectionX?.id ?? null,
+        sectionY: sectionIds.sectionY?.id ?? null,
+        taskId: props.task.id,
       });
     },
     ref: rectRef,
@@ -137,7 +147,7 @@ const TaskContent: Component<TaskContentProps> = (props) => {
   const isSelected = useIsSelected(() => props.task.id);
 
   const onInsertSuccess = (newTaskId: string) => {
-    boardState.insertEdgeToTask({
+    boardState.edges.insertEdgeToTask({
       isSource: props.newTaskHandle === "source",
       secondTaskId: newTaskId,
       taskId: props.task.id,
@@ -254,7 +264,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
     onDragEnded(event) {
       onDragEnd();
 
-      const edgeId = boardState.insertEdgeToPoint({
+      const edgeId = boardState.edges.insertEdgeToPoint({
         isSource: props.kind === "source",
         taskId: props.task.id,
         x: event.x,

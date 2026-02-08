@@ -125,9 +125,9 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
 
   createD3DragElement({
     onDragged(event) {
-      boardState.updateEdgePosition({
+      boardState.edges.updateEdgePosition({
         breakX: event.x,
-        id: props.entry.edge.id,
+        edgeId: props.entry.edge.id,
       });
     },
     ref: rectRef,
