@@ -1,27 +1,41 @@
 import { co, z } from "jazz-tools";
 
-export const TaskSchema = co.map({
-  description: z.string(),
-  estimate: z.number(),
-  link: z.optional(z.string()),
-  positionX: z.number(),
-  positionY: z.number(),
-  sectionX: z.string().nullable(),
-  sectionY: z.string().nullable(),
-  title: z.string(),
-});
-
-export const EdgeSchema = co.map({
-  breakX: z.number(),
-  source: z.string(),
-  target: z.string(),
+export const SectionSizeSchema = co.map({
+  value: z.number(),
 });
 
 export const SectionSchema = co.map({
-  id: z.string(),
   name: z.string(),
   orientation: z.union([z.literal("horizontal"), z.literal("vertical")]),
-  size: z.number(),
+  size: SectionSizeSchema,
+  tasks: z.array(z.string()),
+});
+
+export const TaskPositionSchema = co.map({
+  x: z.number(),
+  y: z.number(),
+});
+
+export const TaskSchema = co.map({
+  description: z.string(),
+  estimate: z.number(),
+  link: z.string().optional(),
+  position: TaskPositionSchema,
+  sectionX: z.string().nullable(),
+  sectionY: z.string().nullable(),
+  sourceEdges: z.array(z.string()),
+  targetEdges: z.array(z.string()),
+  title: z.string(),
+});
+
+export const EdgeBreakSchema = co.map({
+  value: z.number(),
+});
+
+export const EdgeSchema = co.map({
+  breakX: EdgeBreakSchema,
+  source: z.string(),
+  target: z.string(),
 });
 
 export const EdgesListSchema = co.list(EdgeSchema);
@@ -33,9 +47,8 @@ export const TaskListSchema = co.list(TaskSchema);
 export const BoardSchema = co.map({
   description: z.string(),
   edges: EdgesListSchema,
-  sectionXOrder: z.array(z.string()),
-  sectionYOrder: z.array(z.string()),
-  sections: SectionListSchema,
+  sectionX: SectionListSchema,
+  sectionY: SectionListSchema,
   tasks: TaskListSchema,
   title: z.string(),
   user: z.string(),
@@ -64,10 +77,15 @@ export type SectionInstance = co.loaded<typeof SectionSchema>;
 export type SectionInput = co.input<typeof SectionSchema>;
 export type SectionListInstance = co.loaded<typeof SectionListSchema>;
 
+export type SectionSizeInstance = co.loaded<typeof SectionSizeSchema>;
+
 export type EdgeInstance = co.loaded<typeof EdgeSchema>;
-export type EdgeOutput = co.output<typeof EdgeSchema>;
 export type EdgeInput = co.input<typeof EdgeSchema>;
 export type EdgeListInstance = co.loaded<typeof EdgesListSchema>;
+
+export type EdgeBreakInstance = co.loaded<typeof EdgeBreakSchema>;
+
+export type TaskPositionInstance = co.loaded<typeof TaskPositionSchema>;
 
 export type TaskInstance = co.loaded<typeof TaskSchema>;
 export type TaskInput = co.input<typeof TaskSchema>;

@@ -7,7 +7,6 @@ import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
 import { useJazzAccount } from "~/integrations/jazz/provider";
 import { BoardsListSchema } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
-import { createId } from "~/integrations/tanstack-db/create-id";
 import { Button } from "~/ui/button/button";
 import {
   Dialog,
@@ -53,26 +52,28 @@ export const InsertBoardDialog: Component = () => {
       return;
     }
 
-    const sectionXId = createId();
-    const sectionYId = createId();
+    const boardsValue = boards();
+    if (!boardsValue) {
+      return;
+    }
 
-    const index = boards()?.$jazz.push({
+    const index = boardsValue.$jazz.push({
       description: parsed.output.description,
       edges: [],
-      sectionXOrder: [sectionXId],
-      sectionYOrder: [sectionYId],
-      sections: [
+      sectionX: [
         {
-          id: sectionXId,
           name: t("board.forms.xSectionDefault"),
           orientation: "horizontal",
-          size: 500,
+          size: { value: 500 },
+          tasks: [],
         },
+      ],
+      sectionY: [
         {
-          id: sectionYId,
           name: t("board.forms.ySectionDefault"),
           orientation: "vertical",
-          size: 500,
+          size: { value: 50 },
+          tasks: [],
         },
       ],
       tasks: [],
@@ -80,14 +81,9 @@ export const InsertBoardDialog: Component = () => {
       user: "1",
     });
 
-    if (!index) {
-      return;
-    }
+    const boardId = boardsValue[index - 1].$jazz.id;
 
-    const boardId = boards()?.at(index - 1)?.$jazz.id;
-    if (boardId) {
-      navigate(createLink("/board/:boardId", { params: { boardId } }));
-    }
+    navigate(createLink("/board/:boardId", { params: { boardId } }));
   };
 
   return (

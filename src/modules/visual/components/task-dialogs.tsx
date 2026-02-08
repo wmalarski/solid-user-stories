@@ -37,7 +37,6 @@ import { useIsSelected, useSelectionStateContext } from "../contexts/selection-s
 import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
-import { mapToSections } from "../utils/section-configs";
 import { updateTaskData } from "../utils/task-actions";
 import type { Point2D } from "../utils/types";
 
@@ -110,16 +109,12 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
     }
 
     const taskId = createId();
-    const sectionIds = mapToSections(boardState.sectionConfigs(), positionValue);
 
     boardState.insertTask({
       description: parsed.output.description,
       estimate: parsed.output.estimate,
       link: parsed.output.link,
-      positionX: positionValue.x,
-      positionY: positionValue.y,
-      sectionX: sectionIds.sectionX,
-      sectionY: sectionIds.sectionY,
+      position: positionValue,
       title: parsed.output.title,
     });
 
