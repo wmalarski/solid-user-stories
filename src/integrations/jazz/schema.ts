@@ -80,7 +80,6 @@ export type SectionListInstance = co.loaded<typeof SectionListSchema>;
 export type SectionSizeInstance = co.loaded<typeof SectionSizeSchema>;
 
 export type EdgeInstance = co.loaded<typeof EdgeSchema>;
-export type EdgeInput = co.input<typeof EdgeSchema>;
 export type EdgeListInstance = co.loaded<typeof EdgesListSchema>;
 
 export type EdgeBreakInstance = co.loaded<typeof EdgeBreakSchema>;

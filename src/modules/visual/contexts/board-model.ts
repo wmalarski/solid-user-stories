@@ -16,7 +16,6 @@ export type SectionModel = {
   name: string;
   orientation: "horizontal" | "vertical";
   size: number;
-  tasks: string[];
 };
 
 export type TaskModel = {
@@ -106,7 +105,6 @@ const mapToSectionModel = (section: MaybeLoaded<SectionInstance>): SectionModel 
     orientation: loaded.orientation,
     size: loadedSize.value,
     sizeId: loaded.size.$jazz.id,
-    tasks: loaded.tasks,
   };
 };
 

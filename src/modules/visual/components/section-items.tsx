@@ -8,23 +8,23 @@ import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { MultilineText } from "../ui/multiline-text";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TEXT_HEIGHT, TEXT_PADDING } from "../utils/constants";
-import type { SectionConfig2 } from "../utils/section-configs";
+import type { SectionConfig } from "../utils/section-configs";
 import { DeleteSectionDialog, InsertSectionDialog, UpdateSectionDialog } from "./section-dialogs";
 
 export const SectionItems: Component = () => {
   const boardState = useBoardStateContext();
 
-  const xLength = createMemo(() => boardState.sectionXConfigs2().length);
-  const yLength = createMemo(() => boardState.sectionYConfigs2().length);
+  const xLength = createMemo(() => boardState.sectionXConfigs().length);
+  const yLength = createMemo(() => boardState.sectionYConfigs().length);
 
   return (
     <>
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
-      <Index each={boardState.sectionXConfigs2()}>
+      <Index each={boardState.sectionXConfigs()}>
         {(entry) => <HorizontalItemRect totalLength={xLength()} config={entry()} />}
       </Index>
-      <Index each={boardState.sectionYConfigs2()}>
+      <Index each={boardState.sectionYConfigs()}>
         {(entry) => <VerticalItemRect totalLength={yLength()} config={entry()} />}
       </Index>
       <CenterRect />
@@ -53,10 +53,10 @@ export const ExportableSectionItems: Component = () => {
         width={SECTION_X_OFFSET}
         filter="url(#dropshadow)"
       />
-      <Index each={boardState.sectionXConfigs2()}>
+      <Index each={boardState.sectionXConfigs()}>
         {(entry) => <ExportableHorizontalItemRect config={entry()} />}
       </Index>
-      <Index each={boardState.sectionYConfigs2()}>
+      <Index each={boardState.sectionYConfigs()}>
         {(entry) => <ExportableVerticalItemRect config={entry()} />}
       </Index>
     </>
@@ -96,7 +96,7 @@ const VerticalBackgroundRect: Component = () => {
 };
 
 type HorizontalItemRectProps = {
-  config: SectionConfig2;
+  config: SectionConfig;
   totalLength: number;
 };
 
@@ -117,7 +117,7 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
 };
 
 type VerticalItemRectProps = {
-  config: SectionConfig2;
+  config: SectionConfig;
   totalLength: number;
 };
 
@@ -138,7 +138,7 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
 };
 
 type SectionItemContentProps = {
-  config: SectionConfig2;
+  config: SectionConfig;
   totalLength: number;
 };
 
@@ -174,7 +174,7 @@ const SectionItemContent: Component<SectionItemContentProps> = (props) => {
   );
 };
 
-const createSectionItemValues = (config: Accessor<SectionConfig2>) => {
+const createSectionItemValues = (config: Accessor<SectionConfig>) => {
   const boardState = useBoardStateContext();
 
   const tasks = createMemo(() => {
@@ -218,7 +218,7 @@ const CenterRect: Component = () => {
 };
 
 type ExportableHorizontalItemRectProps = {
-  config: SectionConfig2;
+  config: SectionConfig;
 };
 
 const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps> = (props) => {
@@ -258,7 +258,7 @@ const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps>
 };
 
 type ExportableVerticalItemRectProps = {
-  config: SectionConfig2;
+  config: SectionConfig;
 };
 
 const ExportableVerticalItemRect: Component<ExportableVerticalItemRectProps> = (props) => {

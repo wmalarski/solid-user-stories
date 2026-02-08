@@ -28,12 +28,7 @@ import {
   updateSectionData,
   updateVerticalSectionSize,
 } from "../utils/section-actions";
-import {
-  getSectionConfig,
-  getSectionConfig2,
-  mapToSections,
-  mapToSections2,
-} from "../utils/section-configs";
+import { getSectionConfig, mapToSections } from "../utils/section-configs";
 import {
   deleteTaskWithDependencies,
   updateTaskData,
@@ -104,10 +99,8 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     () => new Map(sectionsY()?.map((edge) => [edge.size.$jazz.id, edge.size] as const)),
   );
 
-  const sectionXConfigs = createMemo(() => getSectionConfig(sectionsX()));
-  const sectionYConfigs = createMemo(() => getSectionConfig(sectionsY()));
-  const sectionXConfigs2 = createMemo(() => getSectionConfig2(store.sectionsX));
-  const sectionYConfigs2 = createMemo(() => getSectionConfig2(store.sectionsY));
+  const sectionXConfigs = createMemo(() => getSectionConfig(store.sectionsX));
+  const sectionYConfigs = createMemo(() => getSectionConfig(store.sectionsY));
 
   const insertTask = (
     input: Pick<TaskInput, "description" | "estimate" | "link" | "title" | "position">,
@@ -118,23 +111,13 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     }
 
     const sections = mapToSections(sectionXConfigs(), sectionYConfigs(), input.position);
-    const size = tasksValue.$jazz.push({
+    tasksValue.$jazz.push({
       ...input,
-      sectionX: sections.sectionX?.$jazz.id ?? null,
-      sectionY: sections.sectionY?.$jazz.id ?? null,
+      sectionX: sections.sectionX?.id ?? null,
+      sectionY: sections.sectionY?.id ?? null,
       sourceEdges: [],
       targetEdges: [],
     });
-    const taskId = tasksValue[size - 1].$jazz.id;
-
-    if (sections.sectionX) {
-      const updated = [...sections.sectionX.tasks, taskId];
-      sections.sectionX.$jazz.set("tasks", updated);
-    }
-    if (sections.sectionY) {
-      const updated = [...sections.sectionY.tasks, taskId];
-      sections.sectionY.$jazz.set("tasks", updated);
-    }
   };
 
   const insertSection = (
@@ -301,7 +284,7 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     const taskPosition = taskPositions().get(args.positionId);
 
     if (task && taskPosition) {
-      const sectionIds = mapToSections2(sectionXConfigs2(), sectionYConfigs2(), args.position);
+      const sectionIds = mapToSections(sectionXConfigs(), sectionYConfigs(), args.position);
       updateTaskPosition(taskPosition, args.position);
       updateTaskSections(task, {
         sectionX: sectionIds.sectionX?.id ?? null,
@@ -315,22 +298,13 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     deleteEdge,
     deleteSection,
     deleteTask,
-    edgePositions,
-    edges,
     insertEdgeToPoint,
     insertEdgeToTask,
     insertSection,
     insertTask,
     sectionXConfigs,
-    sectionXConfigs2,
     sectionYConfigs,
-    sectionYConfigs2,
-    sectionsX,
-    sectionsY,
     store,
-    taskMap,
-    taskPositions,
-    tasks,
     updateEdgePosition,
     updateHorizontalSectionPosition,
     updateSectionName,
