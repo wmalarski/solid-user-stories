@@ -21,7 +21,8 @@ export const insertTaskInstance = ({ board, ...args }: InsertTaskInstanceArgs) =
   if (!tasksValue) {
     return;
   }
-  tasksValue.$jazz.push(args);
+  const size = tasksValue.$jazz.push(args);
+  return tasksValue[size - 1].$jazz.id;
 };
 
 export type DeleteTaskInstanceArgs = {

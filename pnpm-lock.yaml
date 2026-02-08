@@ -23,9 +23,6 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2))
-      '@tanstack/solid-db':
-        specifier: ^0.2.5
-        version: 0.2.5(solid-js@1.9.11)(typescript@5.9.3)
       '@zumer/snapdom':
         specifier: ^2.0.2
         version: 2.0.2
@@ -1359,11 +1356,6 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
-  '@solid-primitives/map@0.7.2':
-    resolution: {integrity: sha512-sXK/rS68B4oq3XXNyLrzVhLtT1pnimmMUahd2FqhtYUuyQsCfnW058ptO1s+lWc2k8F/3zQSNVkZ2ifJjlcNbQ==}
-    peerDependencies:
-      solid-js: ^1.6.12
-
   '@solid-primitives/media@2.3.3':
     resolution: {integrity: sha512-hQ4hLOGvfbugQi5Eu1BFWAIJGIAzztq9x0h02xgBGl2l0Jaa3h7tg6bz5tV1NSuNYVGio4rPoa7zVQQLkkx9dA==}
     peerDependencies:
@@ -1399,11 +1391,6 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
-  '@solid-primitives/trigger@1.2.2':
-    resolution: {integrity: sha512-IWoptVc0SWYgmpBPpCMehS5b07+tpFcvw15tOQ3QbXedSYn6KP8zCjPkHNzMxcOvOicTneleeZDP7lqmz+PQ6g==}
-    peerDependencies:
-      solid-js: ^1.6.12
-
   '@solid-primitives/utils@6.3.2':
     resolution: {integrity: sha512-hZ/M/qr25QOCcwDPOHtGjxTD8w2mNyVAYvcfgwzBHq2RwNqHNdDNsMZYap20+ruRwW4A3Cdkczyoz0TSxLCAPQ==}
     peerDependencies:
@@ -1421,9 +1408,6 @@ packages:
 
   '@speed-highlight/core@1.2.14':
     resolution: {integrity: sha512-G4ewlBNhUtlLvrJTb88d2mdy2KRijzs4UhnlrOSRT4bmjh/IqNElZa3zkrZ+TC47TwtlDWzVLFADljF1Ijp5hA==}
-
-  '@standard-schema/spec@1.1.0':
-    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@tailwindcss/node@4.1.18':
     resolution: {integrity: sha512-DoR7U1P7iYhw16qJ49fgXUlry1t4CpXeErJHnQ44JgTSKMaZUdf17cfn5mHchfJ4KRBZRFA/Coo+MUF5+gOaCQ==}
@@ -1518,25 +1502,6 @@ packages:
     resolution: {integrity: sha512-jVA+/UpKL1vRLg6Hkao5jldawNmRo7mQYrZtNHMIVpLfLhDml5nMRUo/8MwoX2vNXvnaXNNMedrMfMugAVX1nA==}
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
-
-  '@tanstack/db-ivm@0.1.17':
-    resolution: {integrity: sha512-DK7vm56CDxNuRAdsbiPs+gITJ+16tUtYgZg3BRTLYKGIDsy8sdIO7sQFq5zl7Y+aIKAPmMAbVp9UjJ75FTtwgQ==}
-    peerDependencies:
-      typescript: '>=4.7'
-
-  '@tanstack/db@0.5.25':
-    resolution: {integrity: sha512-VqVchs6Mm4rw2GyiOkaoD+PJw6lCJT8EI/TzPu8KWZy3QxyOlilpMvEuDTCl0LZdp1iLYlQT1NdgDg0gimV3kQ==}
-    peerDependencies:
-      typescript: '>=4.7'
-
-  '@tanstack/pacer-lite@0.2.1':
-    resolution: {integrity: sha512-3PouiFjR4B6x1c969/Pl4ZIJleof1M0n6fNX8NRiC9Sqv1g06CVDlEaXUR4212ycGFyfq4q+t8Gi37Xy+z34iQ==}
-    engines: {node: '>=18'}
-
-  '@tanstack/solid-db@0.2.5':
-    resolution: {integrity: sha512-tunB6Nbd2UHnPGXwprc0S4OjsP1JvwG0blmLnKgoG3bKdGyJQ8yVknHc7WWwIUdeAz4tH4x/p2RDVloqEKrnCA==}
-    peerDependencies:
-      solid-js: '>=1.9.0'
 
   '@tiptap/core@2.27.2':
     resolution: {integrity: sha512-ABL1N6eoxzDzC1bYvkMbvyexHacszsKdVPYqhl5GwHLOvpZcv9VE9QaKwDILTyz5voCA0lGcAAXZp+qnXOk5lQ==}
@@ -2291,10 +2256,6 @@ packages:
     resolution: {integrity: sha512-9XNj/o4wrRFyhSMJOvsuyMwy8aUfBaZ1VrqHVfohyXf0Sw0e+yfKG+xZaY3arGCOMdwFsqObtzVOc1gU9KiT9w==}
     engines: {node: '>=18.3.0'}
     hasBin: true
-
-  fractional-indexing@3.2.0:
-    resolution: {integrity: sha512-PcOxmqwYCW7O2ovKRU8OoQQj2yqTfEB/yeTYk4gPid6dN5ODRfU1hXd9tTVZzax/0NkO7AxpHykvZnT1aYp/BQ==}
-    engines: {node: ^14.13.1 || >=16.0.0}
 
   fresh@0.5.2:
     resolution: {integrity: sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==}
@@ -3169,9 +3130,6 @@ packages:
     resolution: {integrity: sha512-nXlQEVsw7833XADV94MXW9EKwLxn4S1U7oSUEgKCQeU4dt0CwYvEFcyRjhjM0Ae2taxsJ9HnFrtw8Eb40/rX4w==}
     engines: {node: '>=20.19 || >=22.12'}
     hasBin: true
-
-  sorted-btree@1.8.1:
-    resolution: {integrity: sha512-395+XIP+wqNn3USkFSrNz7G3Ss/MXlZEqesxvzCRFwL14h6e8LukDHdLBePn5pwbm5OQ9vGu8mDyz2lLDIqamQ==}
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -4521,11 +4479,6 @@ snapshots:
     dependencies:
       solid-js: 1.9.11
 
-  '@solid-primitives/map@0.7.2(solid-js@1.9.11)':
-    dependencies:
-      '@solid-primitives/trigger': 1.2.2(solid-js@1.9.11)
-      solid-js: 1.9.11
-
   '@solid-primitives/media@2.3.3(solid-js@1.9.11)':
     dependencies:
       '@solid-primitives/event-listener': 2.4.3(solid-js@1.9.11)
@@ -4567,11 +4520,6 @@ snapshots:
       '@solid-primitives/utils': 6.3.2(solid-js@1.9.11)
       solid-js: 1.9.11
 
-  '@solid-primitives/trigger@1.2.2(solid-js@1.9.11)':
-    dependencies:
-      '@solid-primitives/utils': 6.3.2(solid-js@1.9.11)
-      solid-js: 1.9.11
-
   '@solid-primitives/utils@6.3.2(solid-js@1.9.11)':
     dependencies:
       solid-js: 1.9.11
@@ -4585,8 +4533,6 @@ snapshots:
       solid-js: 1.9.11
 
   '@speed-highlight/core@1.2.14': {}
-
-  '@standard-schema/spec@1.1.0': {}
 
   '@tailwindcss/node@4.1.18':
     dependencies:
@@ -4655,29 +4601,6 @@ snapshots:
       '@tailwindcss/oxide': 4.1.18
       tailwindcss: 4.1.18
       vite: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2)
-
-  '@tanstack/db-ivm@0.1.17(typescript@5.9.3)':
-    dependencies:
-      fractional-indexing: 3.2.0
-      sorted-btree: 1.8.1
-      typescript: 5.9.3
-
-  '@tanstack/db@0.5.25(typescript@5.9.3)':
-    dependencies:
-      '@standard-schema/spec': 1.1.0
-      '@tanstack/db-ivm': 0.1.17(typescript@5.9.3)
-      '@tanstack/pacer-lite': 0.2.1
-      typescript: 5.9.3
-
-  '@tanstack/pacer-lite@0.2.1': {}
-
-  '@tanstack/solid-db@0.2.5(solid-js@1.9.11)(typescript@5.9.3)':
-    dependencies:
-      '@solid-primitives/map': 0.7.2(solid-js@1.9.11)
-      '@tanstack/db': 0.5.25(typescript@5.9.3)
-      solid-js: 1.9.11
-    transitivePeerDependencies:
-      - typescript
 
   '@tiptap/core@2.27.2(@tiptap/pm@2.27.2)':
     dependencies:
@@ -5539,8 +5462,6 @@ snapshots:
   formatly@0.3.0:
     dependencies:
       fd-package-json: 2.0.0
-
-  fractional-indexing@3.2.0: {}
 
   fresh@0.5.2: {}
 
@@ -6638,8 +6559,6 @@ snapshots:
     dependencies:
       '@jridgewell/remapping': 2.3.5
       open: 10.2.0
-
-  sorted-btree@1.8.1: {}
 
   source-map-js@1.2.1: {}
 

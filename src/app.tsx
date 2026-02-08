@@ -5,7 +5,6 @@ import { I18nContextProvider } from "./integrations/i18n";
 import { JazzProvider } from "./integrations/jazz/provider";
 import { Head } from "./integrations/meta/head";
 import { ErrorFallback } from "./integrations/router/error-fallback";
-import { TanstackDbProvider } from "./integrations/tanstack-db/provider";
 import { ThemeProvider } from "./integrations/theme/theme-context";
 import { HomeRoute } from "./modules/home/home-route";
 
@@ -22,14 +21,12 @@ export const App: Component = () => (
       <JazzProvider>
         <ThemeProvider>
           <I18nContextProvider>
-            <TanstackDbProvider>
-              <MetaProvider>
-                <Head />
-                <ErrorBoundary fallback={ErrorFallback}>
-                  <Suspense>{props.children}</Suspense>
-                </ErrorBoundary>
-              </MetaProvider>
-            </TanstackDbProvider>
+            <MetaProvider>
+              <Head />
+              <ErrorBoundary fallback={ErrorFallback}>
+                <Suspense>{props.children}</Suspense>
+              </ErrorBoundary>
+            </MetaProvider>
           </I18nContextProvider>
         </ThemeProvider>
       </JazzProvider>

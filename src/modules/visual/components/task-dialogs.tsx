@@ -8,7 +8,6 @@ import {
 } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import { createId } from "~/integrations/tanstack-db/create-id";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
@@ -107,15 +106,13 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
       return;
     }
 
-    const taskId = createId();
-
     const sections = mapToSections(
       boardState.sectionX.configs(),
       boardState.sectionY.configs(),
       positionValue,
     );
 
-    boardState.tasks.insertTask({
+    const taskId = boardState.tasks.insertTask({
       description: parsed.output.description,
       estimate: parsed.output.estimate,
       link: parsed.output.link,
@@ -131,8 +128,11 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
     event.currentTarget.reset();
 
     onToolChage("pane");
-    onSelectionChange({ id: taskId, kind: "task" });
-    props.onInsertSuccess?.(taskId);
+
+    if (taskId) {
+      onSelectionChange({ id: taskId, kind: "task" });
+      props.onInsertSuccess?.(taskId);
+    }
   };
 
   return (
