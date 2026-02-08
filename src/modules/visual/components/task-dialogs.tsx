@@ -8,7 +8,6 @@ import {
 } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import type { TaskInstance } from "~/integrations/jazz/schema";
 import { createId } from "~/integrations/tanstack-db/create-id";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
@@ -31,12 +30,12 @@ import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
+import type { TaskModel } from "../contexts/board-model";
 import { useBoardStateContext } from "../contexts/board-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
 import { SVG_SELECTOR } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
-import { updateTaskData } from "../utils/task-actions";
 import type { Point2D } from "../utils/types";
 
 export const TaskFieldsSchema = v.object({
@@ -147,11 +146,13 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
 };
 
 type UpdateTaskDialogProps = {
-  task: TaskInstance;
+  task: TaskModel;
 };
 
 export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
   const { t } = useI18n();
+
+  const boardState = useBoardStateContext();
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
@@ -171,9 +172,10 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
       return;
     }
 
-    updateTaskData(props.task, {
+    boardState.updateTaskModel({
       description: parsed.output.description,
       estimate: parsed.output.estimate,
+      id: props.task.id,
       link: parsed.output.link,
       title: parsed.output.title,
     });
@@ -215,7 +217,7 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
 type TaskFieldsProps = {
   pending?: boolean;
   issues?: FormIssues;
-  initialValues?: Partial<TaskInstance>;
+  initialValues?: Partial<TaskModel>;
 };
 
 const TaskFields: Component<TaskFieldsProps> = (props) => {
@@ -291,7 +293,7 @@ const TaskFields: Component<TaskFieldsProps> = (props) => {
 };
 
 type DeleteTaskDialogProps = {
-  task: TaskInstance;
+  task: TaskModel;
 };
 
 export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
@@ -300,14 +302,14 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const dialogId = createUniqueId();
 
   const boardState = useBoardStateContext();
-  const isSelected = useIsSelected(() => props.task.$jazz.id);
+  const isSelected = useIsSelected(() => props.task.id);
   const { onClick, onClose } = useDialogBoardToolUtils();
   const [_selectoion, { onSelectionChange }] = useSelectionStateContext();
 
   const onConfirmClick = () => {
     closeDialog(dialogId);
 
-    boardState.deleteTask(props.task.$jazz.id);
+    boardState.deleteTask(props.task.id);
 
     if (isSelected()) {
       onSelectionChange(null);

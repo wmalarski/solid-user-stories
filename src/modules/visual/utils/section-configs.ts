@@ -1,4 +1,5 @@
 import type { SectionInstance, SectionListInstance } from "~/integrations/jazz/schema";
+import type { SectionModel } from "../contexts/board-model";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "./constants";
 import type { Point2D } from "./types";
 
@@ -34,11 +35,44 @@ export const getSectionConfigs = (
   return { x: getSectionConfig(sectionsX), y: getSectionConfig(sectionsY) } as const;
 };
 
-export type SectionConfigs = ReturnType<typeof getSectionConfigs>;
-export type SectionConfigs2 = ReturnType<typeof getSectionConfig>;
-export type SectionConfig = SectionConfigs["x"][0];
+export type SectionConfigs = ReturnType<typeof getSectionConfig>;
+export type SectionConfig = SectionConfigs[0];
 
-export const mapToSections = (
+export const mapToSections = (configX: SectionConfigs, configY: SectionConfigs, point: Point2D) => {
+  const x = point.x - SECTION_X_OFFSET;
+  const y = point.y - SECTION_Y_OFFSET;
+
+  const sectionX = configX.find((entry) => entry.start <= x && x < entry.end);
+  const sectionY = configY.find((entry) => entry.start <= y && y < entry.end);
+
+  return { sectionX: sectionX?.section ?? null, sectionY: sectionY?.section ?? null };
+};
+
+const getPositions2 = (collection: SectionModel[]) => {
+  return collection.reduce(
+    (previous, current) => {
+      const last = previous.at(-1) ?? 0;
+      previous.push(last + current.size);
+      return previous;
+    },
+    [0],
+  );
+};
+
+export const getSectionConfig2 = (sections: SectionModel[]) => {
+  const positions = getPositions2(sections);
+  return sections.map((section, index) => ({
+    end: positions[index + 1],
+    index,
+    section,
+    start: positions[index],
+  }));
+};
+
+export type SectionConfigs2 = ReturnType<typeof getSectionConfig2>;
+export type SectionConfig2 = SectionConfigs2[number];
+
+export const mapToSections2 = (
   configX: SectionConfigs2,
   configY: SectionConfigs2,
   point: Point2D,

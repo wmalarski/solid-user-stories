@@ -1,16 +1,11 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
-import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
-import {
-  SectionSizeSchema,
-  type EdgeBreakInstance,
-  type TaskPositionInstance,
-} from "~/integrations/jazz/schema";
+import type { EdgeBreakInstance, TaskPositionInstance } from "~/integrations/jazz/schema";
 import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { DottedLine } from "../ui/dotted-line";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
-import type { SectionConfig } from "../utils/section-configs";
+import type { SectionConfig2 } from "../utils/section-configs";
 
 export const SectionGridStaticPaths: Component = () => {
   return (
@@ -26,10 +21,10 @@ export const SectionGridPaths: Component = () => {
 
   return (
     <>
-      <Index each={boardState.sectionYConfigs()}>
+      <Index each={boardState.sectionYConfigs2()}>
         {(entry) => <HorizontalPath config={entry()} />}
       </Index>
-      <Index each={boardState.sectionXConfigs()}>
+      <Index each={boardState.sectionXConfigs2()}>
         {(entry) => <VerticalPath config={entry()} />}
       </Index>
     </>
@@ -68,16 +63,11 @@ const VerticalZeroPath: Component = () => {
 };
 
 type HorizontalPathProps = {
-  config: SectionConfig;
+  config: SectionConfig2;
 };
 
 const HorizontalPath: Component<HorizontalPathProps> = (props) => {
   const boardState = useBoardStateContext();
-
-  const sectionSize = createJazzResource(() => ({
-    id: props.config.section.size.$jazz.id,
-    schema: SectionSizeSchema,
-  }));
 
   const [transform] = useBoardTransformContext();
 
@@ -99,32 +89,23 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
         taskPositions: boardState.taskPositions(),
       });
 
-      console.log({
-        draggedTasks,
-        maxNotDraggedPosition,
-      });
-
       setMaxNotDraggedPosition(maxNotDraggedPosition);
       setStartPosition(props.config.end);
       setDraggedTasks(draggedTasks);
     },
     onDragged(event) {
-      const sectionSizeValue = sectionSize();
+      const transformValue = transform();
 
-      if (sectionSizeValue) {
-        const transformValue = transform();
+      const updatedY = (event.y - transformValue.y) / transformValue.k - SECTION_Y_OFFSET;
+      const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
 
-        const updatedY = (event.y - transformValue.y) / transformValue.k - SECTION_Y_OFFSET;
-        const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
-
-        boardState.updateHorizontalSectionPosition({
-          draggedTasks: draggedTasks(),
-          position: withLimit,
-          sectionSize: sectionSizeValue,
-          sectionStart: props.config.start,
-          startPosition: startPosition(),
-        });
-      }
+      boardState.updateHorizontalSectionPosition({
+        draggedTasks: draggedTasks(),
+        position: withLimit,
+        sectionSizeId: props.config.section.sizeId,
+        sectionStart: props.config.start,
+        startPosition: startPosition(),
+      });
     },
     ref,
   });
@@ -138,7 +119,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
 };
 
 type VerticalPathProps = {
-  config: SectionConfig;
+  config: SectionConfig2;
 };
 
 const VerticalPath: Component<VerticalPathProps> = (props) => {
@@ -171,12 +152,6 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
         position: props.config.end,
       });
 
-      console.log({
-        draggedEdges,
-        draggedTasks,
-        maxNotDraggedPosition,
-      });
-
       setMaxNotDraggedPosition(maxNotDraggedPosition);
       setStartPosition(props.config.end);
       setDraggedTasks(draggedTasks);
@@ -192,7 +167,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
         draggedEdges: draggedEdges(),
         draggedTasks: draggedTasks(),
         position: withLimit,
-        sectionId: props.config.section.$jazz.id,
+        sectionSizeId: props.config.section.sizeId,
         sectionStart: props.config.start,
         startPosition: startPosition(),
       });

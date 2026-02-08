@@ -1,7 +1,5 @@
 import { createMemo, Index, Show, type Accessor, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
-import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
-import { SectionSizeSchema } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
 import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
@@ -10,23 +8,23 @@ import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { MultilineText } from "../ui/multiline-text";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TEXT_HEIGHT, TEXT_PADDING } from "../utils/constants";
-import type { SectionConfig } from "../utils/section-configs";
+import type { SectionConfig2 } from "../utils/section-configs";
 import { DeleteSectionDialog, InsertSectionDialog, UpdateSectionDialog } from "./section-dialogs";
 
 export const SectionItems: Component = () => {
   const boardState = useBoardStateContext();
 
-  const xLength = createMemo(() => boardState.sectionXConfigs().length);
-  const yLength = createMemo(() => boardState.sectionYConfigs().length);
+  const xLength = createMemo(() => boardState.sectionXConfigs2().length);
+  const yLength = createMemo(() => boardState.sectionYConfigs2().length);
 
   return (
     <>
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
-      <Index each={boardState.sectionXConfigs()}>
+      <Index each={boardState.sectionXConfigs2()}>
         {(entry) => <HorizontalItemRect totalLength={xLength()} config={entry()} />}
       </Index>
-      <Index each={boardState.sectionYConfigs()}>
+      <Index each={boardState.sectionYConfigs2()}>
         {(entry) => <VerticalItemRect totalLength={yLength()} config={entry()} />}
       </Index>
       <CenterRect />
@@ -55,10 +53,10 @@ export const ExportableSectionItems: Component = () => {
         width={SECTION_X_OFFSET}
         filter="url(#dropshadow)"
       />
-      <Index each={boardState.sectionXConfigs()}>
+      <Index each={boardState.sectionXConfigs2()}>
         {(entry) => <ExportableHorizontalItemRect config={entry()} />}
       </Index>
-      <Index each={boardState.sectionYConfigs()}>
+      <Index each={boardState.sectionYConfigs2()}>
         {(entry) => <ExportableVerticalItemRect config={entry()} />}
       </Index>
     </>
@@ -98,7 +96,7 @@ const VerticalBackgroundRect: Component = () => {
 };
 
 type HorizontalItemRectProps = {
-  config: SectionConfig;
+  config: SectionConfig2;
   totalLength: number;
 };
 
@@ -109,12 +107,7 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
     translateX(transform(), props.config.start + SECTION_X_OFFSET),
   );
 
-  const size = createJazzResource(() => ({
-    id: props.config.section.size.$jazz.id,
-    schema: SectionSizeSchema,
-  }));
-
-  const width = createMemo(() => (size()?.value ?? 0) * transform().k);
+  const width = createMemo(() => props.config.section.size * transform().k);
 
   return (
     <foreignObject width={width()} x={transformed()} y={0} height={SECTION_Y_OFFSET}>
@@ -124,7 +117,7 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
 };
 
 type VerticalItemRectProps = {
-  config: SectionConfig;
+  config: SectionConfig2;
   totalLength: number;
 };
 
@@ -135,12 +128,7 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
     translateY(transform(), props.config.start + SECTION_Y_OFFSET),
   );
 
-  const size = createJazzResource(() => ({
-    id: props.config.section.size.$jazz.id,
-    schema: SectionSizeSchema,
-  }));
-
-  const height = createMemo(() => (size()?.value ?? 0) * transform().k);
+  const height = createMemo(() => props.config.section.size * transform().k);
 
   return (
     <foreignObject height={height()} x={0} y={transformed()} width={SECTION_X_OFFSET}>
@@ -150,7 +138,7 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
 };
 
 type SectionItemContentProps = {
-  config: SectionConfig;
+  config: SectionConfig2;
   totalLength: number;
 };
 
@@ -186,18 +174,16 @@ const SectionItemContent: Component<SectionItemContentProps> = (props) => {
   );
 };
 
-const createSectionItemValues = (config: Accessor<SectionConfig>) => {
+const createSectionItemValues = (config: Accessor<SectionConfig2>) => {
   const boardState = useBoardStateContext();
 
   const tasks = createMemo(() => {
     const configValue = config();
     const isVerticalValue = configValue.section.orientation === "vertical";
-    const sectionId = configValue.section.$jazz.id;
-    return boardState
-      .tasks()
-      ?.filter((entry) =>
-        isVerticalValue ? entry.sectionY === sectionId : entry.sectionX === sectionId,
-      );
+    const sectionId = configValue.section.id;
+    return boardState.store.tasks.filter((entry) =>
+      isVerticalValue ? entry.sectionY === sectionId : entry.sectionX === sectionId,
+    );
   });
 
   const esitmationSum = createMemo(() => {
@@ -232,21 +218,16 @@ const CenterRect: Component = () => {
 };
 
 type ExportableHorizontalItemRectProps = {
-  config: SectionConfig;
+  config: SectionConfig2;
 };
 
 const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps> = (props) => {
   const { esitmationSum } = createSectionItemValues(() => props.config);
 
-  const size = createJazzResource(() => ({
-    id: props.config.section.size.$jazz.id,
-    schema: SectionSizeSchema,
-  }));
-
   return (
     <>
       <rect
-        width={size()?.value}
+        width={props.config.section.size}
         x={props.config.start + SECTION_X_OFFSET}
         y={0}
         height={SECTION_Y_OFFSET}
@@ -258,7 +239,7 @@ const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps>
         font-weight={600}
         class="fill-base-content"
         content={props.config.section.name}
-        maxWidth={(size()?.value ?? 0) - 2 * TEXT_PADDING}
+        maxWidth={props.config.section.size - 2 * TEXT_PADDING}
         maxLines={3}
         font-size="12"
       />
@@ -277,21 +258,16 @@ const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps>
 };
 
 type ExportableVerticalItemRectProps = {
-  config: SectionConfig;
+  config: SectionConfig2;
 };
 
 const ExportableVerticalItemRect: Component<ExportableVerticalItemRectProps> = (props) => {
   const { esitmationSum } = createSectionItemValues(() => props.config);
 
-  const size = createJazzResource(() => ({
-    id: props.config.section.size.$jazz.id,
-    schema: SectionSizeSchema,
-  }));
-
   return (
     <>
       <rect
-        height={size()?.value}
+        height={props.config.section.size}
         x={0}
         y={props.config.start + SECTION_Y_OFFSET}
         width={SECTION_X_OFFSET}

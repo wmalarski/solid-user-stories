@@ -6,7 +6,7 @@ import type {
   SectionSizeInstance,
   TaskPositionInstance,
 } from "~/integrations/jazz/schema";
-import type { SectionConfigs2 } from "./section-configs";
+import type { SectionConfigs } from "./section-configs";
 
 type UpdateTaskPositionsArgs = {
   attribute: "y" | "x";
@@ -83,7 +83,7 @@ const shiftEdges = ({ shift, position, edgePositions }: ShiftEdgesArgs) => {
 type InsertHorizontalSectionAndShiftArgs = {
   name: string;
   index: number;
-  sectionConfigs: SectionConfigs2;
+  sectionConfigs: SectionConfigs;
   sections: SectionListInstance;
   taskPositions: Map<string, TaskPositionInstance>;
   edgePositions: Map<string, EdgeBreakInstance>;
@@ -108,7 +108,7 @@ export const insertHorizonalSectionAndShift = ({
 type InsertVerticalSectionAndShiftArgs = {
   name: string;
   index: number;
-  sectionConfigs: SectionConfigs2;
+  sectionConfigs: SectionConfigs;
   sections: SectionListInstance;
   taskPositions: Map<string, TaskPositionInstance>;
 };
@@ -146,8 +146,6 @@ export const updateHorizontalSectionSize = ({
 }: UpdateHorizontalSectionSizeArgs) => {
   sectionSize.$jazz.set("value", position - sectionStart);
   const shift = position - startPosition;
-
-  console.log({ position, sectionSize, sectionStart, startPosition });
 
   updateTaskPositions({
     attribute: "y",

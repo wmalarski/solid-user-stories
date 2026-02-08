@@ -32,7 +32,6 @@ export const VisualRoute: Component = () => {
 
   const board = createJazzResource(() => ({
     id: boardId(),
-    options: { resolve: { edges: false } },
     schema: BoardSchema,
   }));
 
@@ -99,14 +98,10 @@ const SelectableGroup: Component = () => {
       <SectionGridPaths />
       <g transform={transform() as unknown as string}>
         <Key each={boardState.store.edges} by={(edge) => edge.id}>
-          {(edge) => (
-            <EdgePath edgeId={edge().id} sourceId={edge().source} targetId={edge().target} />
-          )}
+          {(edge) => <EdgePath edge={edge()} />}
         </Key>
-        <Key each={boardState.tasks()} by={(task) => task.$jazz.id}>
-          {(task) => (
-            <TaskGroup taskPositionId={task().position.$jazz.id} taskId={task().$jazz.id} />
-          )}
+        <Key each={boardState.store.tasks} by={(task) => task.id}>
+          {(task) => <TaskGroup task={task()} />}
         </Key>
       </g>
     </g>
@@ -180,18 +175,8 @@ const ExportableBoard: Component = () => {
         class="bg-base-100"
       >
         <ExportableSectionGridPaths />
-        <For each={boardState.tasks()}>
-          {(task) => <ExportableTaskGroup position={task.position} task={task} />}
-        </For>
-        <For each={boardState.edges()}>
-          {(edge) => (
-            <ExportableEdgePath
-              edgeId={edge.$jazz.id}
-              sourceId={edge.source}
-              targetId={edge.target}
-            />
-          )}
-        </For>
+        <For each={boardState.store.tasks}>{(task) => <ExportableTaskGroup task={task} />}</For>
+        <For each={boardState.store.edges}>{(edge) => <ExportableEdgePath edge={edge} />}</For>
         <ExportableSectionItems />
       </svg>
     </Show>

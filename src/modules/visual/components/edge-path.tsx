@@ -1,12 +1,7 @@
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Accessor, type Component } from "solid-js";
-import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
-import {
-  EdgeSchema,
-  TaskSchema,
-  type EdgeBreakInstance,
-  type TaskPositionInstance,
-} from "~/integrations/jazz/schema";
+import type { EdgeModel, TaskModel } from "../contexts/board-model";
+import { useBoardStateContext } from "../contexts/board-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { AnimatedPath } from "../ui/animated-path";
 import { HandleRect } from "../ui/handle-rect";
@@ -20,54 +15,32 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
-import { updateEdge } from "../utils/edge-actions";
 
 type EdgeEntry = {
-  edge: EdgeBreakInstance;
-  source: TaskPositionInstance;
-  target: TaskPositionInstance;
+  edge: EdgeModel;
+  source: TaskModel;
+  target: TaskModel;
 };
 
 type EdgePathProps = {
-  edgeId: string;
-  targetId: string;
-  sourceId: string;
+  edge: EdgeModel;
 };
 
 export const EdgePath: Component<EdgePathProps> = (props) => {
-  const entry = createEntryResource(
-    () => props.edgeId,
-    () => props.sourceId,
-    () => props.targetId,
-  );
+  const entry = createEntryResource(() => props.edge);
 
   return <Show when={entry()}>{(entry) => <EdgeContainer entry={entry()} />}</Show>;
 };
 
-const createEntryResource = (
-  edgeId: Accessor<string>,
-  sourceId: Accessor<string>,
-  targetId: Accessor<string>,
-) => {
-  const edge = createJazzResource(() => ({
-    id: edgeId(),
-    schema: EdgeSchema,
-  }));
-  const source = createJazzResource(() => ({
-    id: sourceId(),
-    schema: TaskSchema,
-  }));
-  const target = createJazzResource(() => ({
-    id: targetId(),
-    schema: TaskSchema,
-  }));
+const createEntryResource = (edge: Accessor<EdgeModel>) => {
+  const boardState = useBoardStateContext();
 
   const entry = createMemo((): EdgeEntry | null => {
     const edgeValue = edge();
-    const sourceValue = source();
-    const targetValue = target();
-    return edgeValue && sourceValue && targetValue
-      ? { edge: edgeValue.breakX, source: sourceValue.position, target: targetValue.position }
+    const source = boardState.store.tasks.find((task) => task.id === edgeValue.source);
+    const target = boardState.store.tasks.find((task) => task.id === edgeValue.target);
+    return edgeValue && source && target
+      ? { edge: edgeValue, source: source, target: target }
       : null;
   });
 
@@ -83,13 +56,13 @@ const EdgeContainer: Component<EdgeContainerProps> = (props) => {
 
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
-  const isSelected = useIsSelected(() => props.entry.edge.$jazz.id);
+  const isSelected = useIsSelected(() => props.entry.edge.id);
 
   const path = createEdgePath(() => props.entry);
 
   createD3ClickListener({
     onClick() {
-      onSelectionChange({ id: props.entry.edge.$jazz.id, kind: "edge" });
+      onSelectionChange({ id: props.entry.edge.id, kind: "edge" });
     },
     ref,
   });
@@ -106,17 +79,11 @@ const EdgeContainer: Component<EdgeContainerProps> = (props) => {
 };
 
 type ExportableEdgePathProps = {
-  edgeId: string;
-  targetId: string;
-  sourceId: string;
+  edge: EdgeModel;
 };
 
 export const ExportableEdgePath: Component<ExportableEdgePathProps> = (props) => {
-  const entry = createEntryResource(
-    () => props.edgeId,
-    () => props.sourceId,
-    () => props.targetId,
-  );
+  const entry = createEntryResource(() => props.edge);
 
   return (
     <Show when={entry()}>
@@ -132,16 +99,16 @@ export const createEdgePath = (entry: Accessor<EdgeEntry>) => {
   return createMemo(() => {
     const value = entry();
 
-    const startX = value.source.x + TASK_RECT_WIDTH;
-    const endX = value.target.x;
+    const startX = value.source.position.x + TASK_RECT_WIDTH;
+    const endX = value.target.position.x;
 
-    const startY = value.source.y + TASK_RECT_HEIGHT_HALF;
-    const endY = value.target.y + TASK_RECT_HEIGHT_HALF;
+    const startY = value.source.position.y + TASK_RECT_HEIGHT_HALF;
+    const endY = value.target.position.y + TASK_RECT_HEIGHT_HALF;
 
     const context = d3.path();
     context.moveTo(startX, startY);
-    context.lineTo(value.edge.value, startY);
-    context.lineTo(value.edge.value, endY);
+    context.lineTo(value.edge.breakX, startY);
+    context.lineTo(value.edge.breakX, endY);
     context.lineTo(endX, endY);
     return context.toString();
   });
@@ -152,11 +119,16 @@ type EdgeHandleProps = {
 };
 
 const EdgeHandle: Component<EdgeHandleProps> = (props) => {
+  const boardState = useBoardStateContext();
+
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
   createD3DragElement({
     onDragged(event) {
-      updateEdge(props.entry.edge, { value: event.x });
+      boardState.updateEdgePosition({
+        breakX: event.x,
+        positionId: props.entry.edge.positionId,
+      });
     },
     ref: rectRef,
   });
@@ -164,9 +136,9 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
   return (
     <HandleRect
       ref={setRectRef}
-      x={props.entry.edge.value - EDGE_HANDLE_SIZE_HALF}
+      x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF}
       y={
-        (props.entry.source.y + props.entry.target.y) / 2 +
+        (props.entry.source.position.y + props.entry.target.position.y) / 2 +
         TASK_RECT_HEIGHT_HALF -
         EDGE_HANDLE_SIZE_HALF
       }

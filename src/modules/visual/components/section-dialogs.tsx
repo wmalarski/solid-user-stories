@@ -2,7 +2,6 @@ import { decode } from "decode-formdata";
 import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import type { SectionInstance } from "~/integrations/jazz/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
 import {
@@ -24,16 +23,16 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
+import type { SectionModel } from "../contexts/board-model";
 import { useBoardStateContext } from "../contexts/board-state";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
-import { updateSectionData } from "../utils/section-actions";
 
 const SectionFieldsSchema = v.object({
   name: v.string(),
 });
 
 type InsertSectionDialogProps = {
-  orientation: SectionInstance["orientation"];
+  orientation: SectionModel["orientation"];
   index: number;
 };
 
@@ -102,7 +101,7 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
 };
 
 type UpdateSectionDialogProps = {
-  section: SectionInstance;
+  section: SectionModel;
 };
 
 export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) => {
@@ -113,6 +112,7 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
 
   const [issues, setIssues] = createSignal<FormIssues>();
 
+  const boardState = useBoardStateContext();
   const { onClick, onClose } = useDialogBoardToolUtils();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
@@ -129,8 +129,10 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
       return;
     }
 
-    updateSectionData(props.section, {
+    boardState.updateSectionName({
+      id: props.section.id,
       name: parsed.output.name,
+      orientation: props.section.orientation,
     });
   };
 
@@ -168,7 +170,7 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
 type SectionFieldsProps = {
   pending?: boolean;
   issues?: FormIssues;
-  initialValues?: Partial<SectionInstance>;
+  initialValues?: Partial<SectionModel>;
 };
 
 const SectionFields: Component<SectionFieldsProps> = (props) => {
@@ -197,7 +199,7 @@ const SectionFields: Component<SectionFieldsProps> = (props) => {
 };
 
 type DeleteSectionDialogProps = {
-  section: SectionInstance;
+  section: SectionModel;
   endPosition: number;
 };
 
@@ -214,7 +216,7 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
 
     boardState.deleteSection({
       endPosition: props.endPosition,
-      id: props.section.$jazz.id,
+      id: props.section.id,
       orientation: props.section.orientation,
       shift: -props.section.size,
     });

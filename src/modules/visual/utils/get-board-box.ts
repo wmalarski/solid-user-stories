@@ -1,14 +1,14 @@
 import type { EdgeBreakInstance, TaskPositionInstance } from "~/integrations/jazz/schema";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
-import type { SectionConfigs2 } from "./section-configs";
+import type { SectionConfigs } from "./section-configs";
 
 const numberSortAscending = (left: number, right: number) => left - right;
 
 type GetBoardBoxArgs = {
   taskPositions: Map<string, TaskPositionInstance>;
   edgePositions: Map<string, EdgeBreakInstance>;
-  sectionsX: SectionConfigs2;
-  sectionsY: SectionConfigs2;
+  sectionsX: SectionConfigs;
+  sectionsY: SectionConfigs;
 };
 
 export const getBoardBox = ({
