@@ -8,21 +8,5 @@
         "directory": "./dist/client",
         "not_found_handling": "single-page-application",
         "run_worker_first": true
-    },
-    "durable_objects": {
-        "bindings": [
-            {
-                "class_name": "SyncDurableObject",
-                "name": "SYNC_DURABLE_OBJECT"
-            }
-        ]
-    },
-    "migrations": [
-        {
-            "tag": "v1",
-            "new_sqlite_classes": [
-                "SyncDurableObject"
-            ]
-        }
-    ]
+    }
 }

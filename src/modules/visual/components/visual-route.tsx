@@ -1,4 +1,3 @@
-import { Key } from "@solid-primitives/keyed";
 import { useParams } from "@solidjs/router";
 import { createMemo, createSignal, For, Show, Suspense, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
@@ -97,12 +96,8 @@ const SelectableGroup: Component = () => {
     <g cursor={isDragging() ? "grabbing" : "grab"}>
       <SectionGridPaths />
       <g transform={transform() as unknown as string}>
-        <Key each={boardState.store.edges} by={(edge) => edge.id}>
-          {(edge) => <EdgePath edge={edge()} />}
-        </Key>
-        <Key each={boardState.store.tasks} by={(task) => task.id}>
-          {(task) => <TaskGroup task={task()} />}
-        </Key>
+        <For each={boardState.store.edges}>{(edge) => <EdgePath edge={edge} />}</For>
+        <For each={boardState.store.tasks}>{(task) => <TaskGroup task={task} />}</For>
       </g>
     </g>
   );
