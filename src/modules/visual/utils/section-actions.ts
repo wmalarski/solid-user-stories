@@ -5,6 +5,7 @@ import type {
   SectionInstance,
   TaskInstance,
 } from "~/integrations/jazz/schema";
+import { getEdgeMap, getSectionXMap, getSectionYMap, getTaskMap } from "./instance-maps";
 import type { SectionConfigs } from "./section-configs";
 
 type UpdateTaskPositionsArgs = {
@@ -84,20 +85,18 @@ type InsertHorizontalSectionAndShiftArgs = {
   name: string;
   index: number;
   sectionConfigs: SectionConfigs;
-  taskPositions: Map<string, TaskInstance>;
-  edgePositions: Map<string, EdgeInstance>;
 };
 
 export const insertHorizonalSectionAndShift = ({
   name,
   index,
   sectionConfigs,
-  taskPositions,
-  edgePositions,
   board,
 }: InsertHorizontalSectionAndShiftArgs) => {
   const shift = 500;
   const orientation = "horizontal";
+  const edgePositions = getEdgeMap(board);
+  const taskPositions = getTaskMap(board);
 
   getLoadedOrUndefined(board.sectionX)?.$jazz.splice(index + 1, 0, {
     name,
@@ -105,6 +104,7 @@ export const insertHorizonalSectionAndShift = ({
     size: shift,
     tasks: [],
   });
+
   const position = sectionConfigs[index].end;
   shiftTasks({ attribute: "positionX", position, shift, taskPositions });
   shiftEdges({ edgePositions, position, shift });
@@ -115,7 +115,6 @@ type InsertVerticalSectionAndShiftArgs = {
   name: string;
   index: number;
   sectionConfigs: SectionConfigs;
-  taskPositions: Map<string, TaskInstance>;
 };
 
 export const insertVerticalSectionAndShift = ({
@@ -123,38 +122,44 @@ export const insertVerticalSectionAndShift = ({
   name,
   index,
   sectionConfigs,
-  taskPositions,
 }: InsertVerticalSectionAndShiftArgs) => {
   const shift = 500;
   const orientation = "vertical";
+  const taskPositions = getTaskMap(board);
+
   getLoadedOrUndefined(board.sectionY)?.$jazz.splice(index + 1, 0, {
     name,
     orientation,
     size: shift,
     tasks: [],
   });
+
   const position = sectionConfigs[index].end;
   shiftTasks({ attribute: "positionY", position, shift, taskPositions });
 };
 
 type UpdateHorizontalSectionSizeArgs = {
+  board: BoardInstance;
   position: number;
   draggedTasks: Map<string, number>;
   startPosition: number;
   sectionStart: number;
-  sectionSize: SectionInstance;
-  taskPositions: Map<string, TaskInstance>;
+  sectionId: string;
 };
 
 export const updateHorizontalSectionSize = ({
+  board,
+  sectionId,
   position,
   draggedTasks,
   startPosition,
   sectionStart,
-  sectionSize,
-  taskPositions,
 }: UpdateHorizontalSectionSizeArgs) => {
-  sectionSize.$jazz.set("size", position - sectionStart);
+  const sectionsYMap = getSectionYMap(board);
+  const taskPositions = getTaskMap(board);
+  const sectionSize = sectionsYMap.get(sectionId);
+
+  sectionSize?.$jazz.set("size", position - sectionStart);
   const shift = position - startPosition;
 
   updateTaskPositions({
@@ -166,27 +171,30 @@ export const updateHorizontalSectionSize = ({
 };
 
 type UpdateVerticalSectionSizeArgs = {
+  board: BoardInstance;
   position: number;
   draggedTasks: Map<string, number>;
   draggedEdges: Map<string, number>;
   startPosition: number;
   sectionStart: number;
-  sectionSize: SectionInstance;
-  taskPositions: Map<string, TaskInstance>;
-  edgePositions: Map<string, EdgeInstance>;
+  sectionId: string;
 };
 
 export const updateVerticalSectionSize = ({
+  board,
   position,
   draggedTasks,
   draggedEdges,
   startPosition,
   sectionStart,
-  taskPositions,
-  edgePositions,
-  sectionSize,
+  sectionId,
 }: UpdateVerticalSectionSizeArgs) => {
-  sectionSize.$jazz.set("size", position - sectionStart);
+  const edgePositions = getEdgeMap(board);
+  const taskPositions = getTaskMap(board);
+  const sectionsXMap = getSectionXMap(board);
+  const sectionSize = sectionsXMap.get(sectionId);
+
+  sectionSize?.$jazz.set("size", position - sectionStart);
 
   const shift = position - startPosition;
 
@@ -209,8 +217,6 @@ type DeleteSectionAndShiftArgs = {
   orientation: SectionInstance["orientation"];
   endPosition: number;
   shift: number;
-  taskPositions: Map<string, TaskInstance>;
-  edgePositions: Map<string, EdgeInstance>;
 };
 
 export const deleteSectionAndShift = ({
@@ -219,9 +225,10 @@ export const deleteSectionAndShift = ({
   orientation,
   endPosition,
   shift,
-  taskPositions,
-  edgePositions,
 }: DeleteSectionAndShiftArgs) => {
+  const edgePositions = getEdgeMap(board);
+  const taskPositions = getTaskMap(board);
+
   if (orientation === "horizontal") {
     getLoadedOrUndefined(board.sectionX)?.$jazz.remove((section) => section.$jazz.id === sectionId);
     shiftTasks({ attribute: "positionX", position: endPosition, shift, taskPositions });

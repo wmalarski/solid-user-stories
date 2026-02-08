@@ -1,5 +1,6 @@
 import { getLoadedOrUndefined } from "jazz-tools";
-import type { BoardInstance, TaskInput, TaskInstance } from "~/integrations/jazz/schema";
+import type { BoardInstance, TaskInstance } from "~/integrations/jazz/schema";
+import { getTaskMap } from "./instance-maps";
 import type { Point2D } from "./types";
 
 type DeleteTaskWithDependenciesArgs = {
@@ -14,25 +15,54 @@ export const deleteTaskWithDependencies = ({ board, taskId }: DeleteTaskWithDepe
   getLoadedOrUndefined(board.tasks)?.$jazz.remove((task) => task.$jazz.id === taskId);
 };
 
-export const updateTaskSections = (
-  instance: TaskInstance,
-  task: Pick<TaskInput, "sectionX" | "sectionY">,
-) => {
-  instance.$jazz.set("sectionX", task.sectionX);
-  instance.$jazz.set("sectionY", task.sectionY);
+type UpdateTaskPositionArgs = Pick<TaskInstance, "sectionX" | "sectionY"> & {
+  board: BoardInstance;
+  taskId: string;
+  position: Point2D;
 };
 
-export const updateTaskPosition = (instance: TaskInstance, position: Point2D) => {
+export const updateTaskPosition = ({
+  board,
+  position,
+  taskId,
+  sectionX,
+  sectionY,
+}: UpdateTaskPositionArgs) => {
+  const taskMap = getTaskMap(board);
+  const instance = taskMap.get(taskId);
+
+  if (!instance) {
+    return;
+  }
+
   instance.$jazz.set("positionX", position.x);
   instance.$jazz.set("positionY", position.y);
+  instance.$jazz.set("sectionX", sectionX);
+  instance.$jazz.set("sectionY", sectionY);
 };
 
-export const updateTaskData = (
-  instance: TaskInstance,
-  task: Pick<TaskInstance, "description" | "estimate" | "link" | "title">,
-) => {
-  instance.$jazz.set("description", task.description);
-  instance.$jazz.set("estimate", task.estimate);
-  instance.$jazz.set("link", task.link);
-  instance.$jazz.set("title", task.title);
+type UpdateTaskDataArgs = Pick<TaskInstance, "description" | "estimate" | "link" | "title"> & {
+  board: BoardInstance;
+  taskId: string;
+};
+
+export const updateTaskData = ({
+  board,
+  description,
+  estimate,
+  link,
+  taskId,
+  title,
+}: UpdateTaskDataArgs) => {
+  const taskMap = getTaskMap(board);
+  const instance = taskMap.get(taskId);
+
+  if (!instance) {
+    return;
+  }
+
+  instance.$jazz.set("description", description);
+  instance.$jazz.set("estimate", estimate);
+  instance.$jazz.set("link", link);
+  instance.$jazz.set("title", title);
 };

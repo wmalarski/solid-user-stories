@@ -1,6 +1,7 @@
 import { getLoadedOrUndefined } from "jazz-tools";
-import type { BoardInstance, EdgeInstance, TaskInstance } from "~/integrations/jazz/schema";
+import type { BoardInstance } from "~/integrations/jazz/schema";
 import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
+import { getEdgeMap, getTaskMap } from "./instance-maps";
 
 type InsertEdgeFromPointArgs = {
   board: BoardInstance;
@@ -8,18 +9,11 @@ type InsertEdgeFromPointArgs = {
   y: number;
   taskId: string;
   isSource: boolean;
-  taskPositions: Map<string, TaskInstance>;
 };
 
-export const insertEdgeFromPoint = ({
-  board,
-  x,
-  y,
-  taskId,
-  isSource,
-  taskPositions,
-}: InsertEdgeFromPointArgs) => {
+export const insertEdgeFromPoint = ({ board, x, y, taskId, isSource }: InsertEdgeFromPointArgs) => {
   const edges = getLoadedOrUndefined(board.edges);
+  const taskPositions = getTaskMap(board);
 
   if (!edges) {
     return;
@@ -73,7 +67,6 @@ type InsertEdgeToTaskArgs = {
   taskId: string;
   secondTaskId: string;
   isSource: boolean;
-  taskPositions: Map<string, TaskInstance>;
 };
 
 export const insertEdgeToSecondTask = ({
@@ -81,8 +74,8 @@ export const insertEdgeToSecondTask = ({
   taskId,
   isSource,
   secondTaskId,
-  taskPositions,
 }: InsertEdgeToTaskArgs) => {
+  const taskPositions = getTaskMap(board);
   const currentTask = taskPositions.get(taskId);
   const secondTask = taskPositions.get(secondTaskId);
 
@@ -103,6 +96,14 @@ export const insertEdgeToSecondTask = ({
   return edges[size - 1].$jazz.id;
 };
 
-export const updateEdge = (instance: EdgeInstance, edge: Pick<EdgeInstance, "breakX">) => {
-  instance.$jazz.set("breakX", edge.breakX);
+type UpdateEdgeArgs = {
+  board: BoardInstance;
+  edgeId: string;
+  breakX: number;
+};
+
+export const updateEdge = ({ board, breakX, edgeId }: UpdateEdgeArgs) => {
+  const edgeMap = getEdgeMap(board);
+  const instance = edgeMap.get(edgeId);
+  instance?.$jazz.set("breakX", breakX);
 };

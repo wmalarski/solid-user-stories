@@ -10,15 +10,7 @@ import {
   type ParentProps,
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
-import {
-  BoardSchema,
-  EdgesListSchema,
-  SectionListSchema,
-  TaskListSchema,
-  type BoardInstance,
-  type SectionInstance,
-} from "~/integrations/jazz/schema";
+import { BoardSchema, type BoardInstance, type SectionInstance } from "~/integrations/jazz/schema";
 import { insertEdgeFromPoint, insertEdgeToSecondTask, updateEdge } from "../utils/edge-actions";
 import {
   deleteSectionAndShift,
@@ -33,7 +25,6 @@ import {
   deleteTaskWithDependencies,
   updateTaskData,
   updateTaskPosition,
-  updateTaskSections,
 } from "../utils/task-actions";
 import {
   mapToBoardModel,
@@ -60,35 +51,6 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
       }),
     );
   });
-
-  const tasks = createJazzResource(() => ({
-    id: board().tasks.$jazz.id,
-    schema: TaskListSchema,
-  }));
-
-  const edges = createJazzResource(() => ({
-    id: board().edges.$jazz.id,
-    schema: EdgesListSchema,
-  }));
-
-  const sectionsX = createJazzResource(() => ({
-    id: board().sectionX.$jazz.id,
-    schema: SectionListSchema,
-  }));
-
-  const sectionsY = createJazzResource(() => ({
-    id: board().sectionY.$jazz.id,
-    schema: SectionListSchema,
-  }));
-
-  const taskMap = createMemo(() => new Map(tasks()?.map((task) => [task.$jazz.id, task] as const)));
-  const edgeMap = createMemo(() => new Map(edges()?.map((edge) => [edge.$jazz.id, edge] as const)));
-  const sectionsXMap = createMemo(
-    () => new Map(sectionsX()?.map((edge) => [edge.$jazz.id, edge] as const)),
-  );
-  const sectionsYMap = createMemo(
-    () => new Map(sectionsY()?.map((edge) => [edge.$jazz.id, edge] as const)),
-  );
 
   const sectionXConfigs = createMemo(() => getSectionConfig(store.sectionsX));
   const sectionYConfigs = createMemo(() => getSectionConfig(store.sectionsY));
@@ -124,11 +86,9 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     if (args.orientation === "horizontal") {
       insertHorizonalSectionAndShift({
         board: board(),
-        edgePositions: edgeMap(),
         index: args.index,
         name: args.name,
         sectionConfigs: sectionXConfigs(),
-        taskPositions: taskMap(),
       });
     } else {
       insertVerticalSectionAndShift({
@@ -136,7 +96,6 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
         index: args.index,
         name: args.name,
         sectionConfigs: sectionYConfigs(),
-        taskPositions: taskMap(),
       });
     }
   };
@@ -148,14 +107,11 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     sectionStart: number;
     sectionSizeId: string;
   }) => {
-    const sectionSize = sectionsYMap().get(args.sectionSizeId);
-    if (sectionSize) {
-      updateHorizontalSectionSize({
-        sectionSize,
-        taskPositions: taskMap(),
-        ...args,
-      });
-    }
+    updateHorizontalSectionSize({
+      board: board(),
+      sectionId: args.sectionSizeId,
+      ...args,
+    });
   };
 
   const updateVerticalSectionPosition = (args: {
@@ -166,15 +122,11 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     startPosition: number;
     sectionStart: number;
   }) => {
-    const sectionSize = sectionsXMap().get(args.sectionSizeId);
-    if (sectionSize) {
-      updateVerticalSectionSize({
-        edgePositions: edgeMap(),
-        sectionSize,
-        taskPositions: taskMap(),
-        ...args,
-      });
-    }
+    updateVerticalSectionSize({
+      board: board(),
+      sectionId: args.sectionSizeId,
+      ...args,
+    });
   };
 
   const deleteSection = (
@@ -186,12 +138,10 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   ) => {
     deleteSectionAndShift({
       board: board(),
-      edgePositions: edgeMap(),
       endPosition: args.endPosition,
       orientation: args.orientation,
       sectionId: args.id,
       shift: args.shift,
-      taskPositions: taskMap(),
     });
   };
 
@@ -206,7 +156,6 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const insertEdgeToPoint = (args: { isSource: boolean; taskId: string; x: number; y: number }) => {
     return insertEdgeFromPoint({
       board: board(),
-      taskPositions: taskMap(),
       ...args,
     });
   };
@@ -214,16 +163,12 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const insertEdgeToTask = (args: { isSource: boolean; taskId: string; secondTaskId: string }) => {
     return insertEdgeToSecondTask({
       board: board(),
-      taskPositions: taskMap(),
       ...args,
     });
   };
 
   const updateEdgePosition = (edge: Pick<EdgeModel, "id" | "breakX">) => {
-    const edgePosition = edgeMap().get(edge.id);
-    if (edgePosition) {
-      updateEdge(edgePosition, { breakX: edge.breakX });
-    }
+    updateEdge({ board: board(), breakX: edge.breakX, edgeId: edge.id });
   };
 
   const updateSectionName = (args: Pick<SectionModel, "id" | "name" | "orientation">) => {
@@ -238,30 +183,25 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const updateTaskModel = (
     args: Pick<TaskModel, "id" | "description" | "estimate" | "link" | "title">,
   ) => {
-    const task = taskMap().get(args.id);
-
-    if (task) {
-      updateTaskData(task, {
-        description: args.description,
-        estimate: args.estimate,
-        link: args.link,
-        title: args.title,
-      });
-    }
+    updateTaskData({
+      board: board(),
+      description: args.description,
+      estimate: args.estimate,
+      link: args.link,
+      taskId: args.id,
+      title: args.title,
+    });
   };
 
   const updateTask = (args: Pick<TaskModel, "id" | "position">) => {
-    const task = taskMap().get(args.id);
-    const taskPosition = taskMap().get(args.id);
-
-    if (task && taskPosition) {
-      const sectionIds = mapToSections(sectionXConfigs(), sectionYConfigs(), args.position);
-      updateTaskPosition(taskPosition, args.position);
-      updateTaskSections(task, {
-        sectionX: sectionIds.sectionX?.id ?? null,
-        sectionY: sectionIds.sectionY?.id ?? null,
-      });
-    }
+    const sectionIds = mapToSections(sectionXConfigs(), sectionYConfigs(), args.position);
+    updateTaskPosition({
+      board: board(),
+      position: args.position,
+      sectionX: sectionIds.sectionX?.id ?? null,
+      sectionY: sectionIds.sectionY?.id ?? null,
+      taskId: args.id,
+    });
   };
 
   return {
