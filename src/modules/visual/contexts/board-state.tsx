@@ -1,13 +1,16 @@
 import {
   createContext,
   createMemo,
+  onCleanup,
   useContext,
   type Accessor,
   type Component,
   type ParentProps,
 } from "solid-js";
+import { createStore, reconcile } from "solid-js/store";
 import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
 import {
+  BoardSchema,
   EdgesListSchema,
   SectionListSchema,
   TaskListSchema,
@@ -26,12 +29,31 @@ import {
 } from "../utils/section-actions";
 import { getSectionConfig, getSectionConfigs, mapToSections } from "../utils/section-configs";
 import { deleteTaskWithDependencies } from "../utils/task-actions";
+import { mapToBoardModel, type BoardModel } from "./board-model";
 
 const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const tasks = createJazzResource(() => ({
     id: board().tasks.$jazz.id,
     schema: TaskListSchema,
   }));
+
+  const boardId = createMemo(() => board().$jazz.id);
+
+  const [store, setStore] = createStore<BoardModel>({
+    edges: [],
+    sectionsX: [],
+    sectionsY: [],
+    tasks: [],
+  });
+
+  createMemo(() => {
+    const boardIdValue = boardId();
+    onCleanup(
+      BoardSchema.subscribe(boardIdValue, (value) => {
+        setStore(reconcile(mapToBoardModel(value)));
+      }),
+    );
+  });
 
   const taskMap = createMemo(() => new Map(tasks()?.map((task) => [task.$jazz.id, task] as const)));
 
@@ -237,6 +259,7 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     sectionYConfigs,
     sectionsX,
     sectionsY,
+    store,
     taskMap,
     taskPositions,
     tasks,

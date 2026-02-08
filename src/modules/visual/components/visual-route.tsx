@@ -98,9 +98,9 @@ const SelectableGroup: Component = () => {
     <g cursor={isDragging() ? "grabbing" : "grab"}>
       <SectionGridPaths />
       <g transform={transform() as unknown as string}>
-        <Key each={boardState.edges()} by={(edge) => edge.$jazz.id}>
+        <Key each={boardState.store.edges} by={(edge) => edge.id}>
           {(edge) => (
-            <EdgePath edgeId={edge().$jazz.id} sourceId={edge().source} targetId={edge().target} />
+            <EdgePath edgeId={edge().id} sourceId={edge().source} targetId={edge().target} />
           )}
         </Key>
         <Key each={boardState.tasks()} by={(task) => task.$jazz.id}>
