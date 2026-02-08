@@ -35,14 +35,19 @@ export const getSectionConfigs = (
 };
 
 export type SectionConfigs = ReturnType<typeof getSectionConfigs>;
+export type SectionConfigs2 = ReturnType<typeof getSectionConfig>;
 export type SectionConfig = SectionConfigs["x"][0];
 
-export const mapToSections = (config: SectionConfigs, point: Point2D) => {
+export const mapToSections = (
+  configX: SectionConfigs2,
+  configY: SectionConfigs2,
+  point: Point2D,
+) => {
   const x = point.x - SECTION_X_OFFSET;
   const y = point.y - SECTION_Y_OFFSET;
 
-  const sectionX = config.x.find((entry) => entry.start <= x && x < entry.end);
-  const sectionY = config.y.find((entry) => entry.start <= y && y < entry.end);
+  const sectionX = configX.find((entry) => entry.start <= x && x < entry.end);
+  const sectionY = configY.find((entry) => entry.start <= y && y < entry.end);
 
   return { sectionX: sectionX?.section ?? null, sectionY: sectionY?.section ?? null };
 };

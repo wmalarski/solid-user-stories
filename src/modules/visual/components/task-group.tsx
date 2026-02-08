@@ -93,7 +93,10 @@ const TaskContainer: Component<TaskContainerProps> = (props) => {
       const updatedX = event.x + shiftX();
       const updatedY = event.y + shiftY();
 
-      const sectionIds = mapToSections(boardState.sectionConfigs(), { x: updatedX, y: updatedY });
+      const sectionIds = mapToSections(boardState.sectionXConfigs(), boardState.sectionYConfigs(), {
+        x: updatedX,
+        y: updatedY,
+      });
 
       const taskValue = task();
 

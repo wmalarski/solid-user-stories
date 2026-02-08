@@ -46,8 +46,8 @@ export const createJazzResource = <
   createEffect(() =>
     onCleanup(
       // oxlint-disable-next-line typescript/no-explicit-any
-      usafeArgs().schema.subscribe(id(), (args: any) => {
-        console.log("[args]", JSON.stringify(args, null, 2));
+      usafeArgs().schema.subscribe(id(), (args: any, ...rest) => {
+        console.log("[args]", JSON.stringify({ args, rest }, null, 2));
         mutate(args);
       }),
     ),

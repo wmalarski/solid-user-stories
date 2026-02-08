@@ -7,13 +7,13 @@ import {
   type ParentProps,
 } from "solid-js";
 import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
-import type { SectionSizeInstance } from "~/integrations/jazz/schema";
 import {
   EdgesListSchema,
   SectionListSchema,
   TaskListSchema,
   type BoardInstance,
   type SectionInstance,
+  type SectionSizeInstance,
   type TaskInput,
 } from "~/integrations/jazz/schema";
 import { insertEdgeFromPoint, insertEdgeToSecondTask } from "../utils/edge-actions";
@@ -53,10 +53,6 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     schema: SectionListSchema,
   }));
 
-  const sectionsXSizes = createMemo(
-    () => new Map(sectionsX()?.map((edge) => [edge.$jazz.id, edge.size] as const)),
-  );
-
   const sectionsY = createJazzResource(() => ({
     id: board().sectionY.$jazz.id,
     schema: SectionListSchema,
@@ -79,7 +75,7 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
       return;
     }
 
-    const sections = mapToSections(sectionConfigs(), input.position);
+    const sections = mapToSections(sectionXConfigs(), sectionYConfigs(), input.position);
     const size = tasksValue.$jazz.push({
       ...input,
       sectionX: sections.sectionX?.$jazz.id ?? null,
@@ -111,7 +107,7 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
           edgePositions: edgePositions(),
           index: args.index,
           name: args.name,
-          sectionConfigs: sectionConfigs(),
+          sectionConfigs: sectionXConfigs(),
           sections: sectionsXValue,
           taskPositions: taskPositions(),
         });
@@ -122,7 +118,7 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
         insertVerticalSectionAndShift({
           index: args.index,
           name: args.name,
-          sectionConfigs: sectionConfigs(),
+          sectionConfigs: sectionYConfigs(),
           sections: sectionsYValue,
           taskPositions: taskPositions(),
         });

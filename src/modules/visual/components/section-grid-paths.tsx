@@ -26,10 +26,10 @@ export const SectionGridPaths: Component = () => {
 
   return (
     <>
-      <Index each={boardState.sectionConfigs().y}>
+      <Index each={boardState.sectionYConfigs()}>
         {(entry) => <HorizontalPath config={entry()} />}
       </Index>
-      <Index each={boardState.sectionConfigs().x}>
+      <Index each={boardState.sectionXConfigs()}>
         {(entry) => <VerticalPath config={entry()} />}
       </Index>
     </>
@@ -41,10 +41,10 @@ export const ExportableSectionGridPaths: Component = () => {
 
   return (
     <>
-      <Index each={boardState.sectionConfigs().y}>
+      <Index each={boardState.sectionYConfigs()}>
         {(entry) => <ExportableHorizontalPath position={entry().end} />}
       </Index>
-      <Index each={boardState.sectionConfigs().x}>
+      <Index each={boardState.sectionXConfigs()}>
         {(entry) => <ExportableVerticalPath position={entry().end} />}
       </Index>
     </>

@@ -32,6 +32,7 @@ export const VisualRoute: Component = () => {
 
   const board = createJazzResource(() => ({
     id: boardId(),
+    options: { resolve: { edges: false } },
     schema: BoardSchema,
   }));
 
@@ -164,7 +165,8 @@ const ExportableBoard: Component = () => {
   const boardBox = createMemo(() =>
     getBoardBox({
       edgePositions: boardState.edgePositions(),
-      sections: boardState.sectionConfigs(),
+      sectionsX: boardState.sectionXConfigs(),
+      sectionsY: boardState.sectionYConfigs(),
       taskPositions: boardState.taskPositions(),
     }),
   );

@@ -1,29 +1,35 @@
 import type { EdgeBreakInstance, TaskPositionInstance } from "~/integrations/jazz/schema";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
-import type { SectionConfigs } from "./section-configs";
+import type { SectionConfigs2 } from "./section-configs";
 
 const numberSortAscending = (left: number, right: number) => left - right;
 
 type GetBoardBoxArgs = {
   taskPositions: Map<string, TaskPositionInstance>;
   edgePositions: Map<string, EdgeBreakInstance>;
-  sections: SectionConfigs;
+  sectionsX: SectionConfigs2;
+  sectionsY: SectionConfigs2;
 };
 
-export const getBoardBox = ({ edgePositions, taskPositions, sections }: GetBoardBoxArgs) => {
+export const getBoardBox = ({
+  edgePositions,
+  taskPositions,
+  sectionsX,
+  sectionsY,
+}: GetBoardBoxArgs) => {
   const xValues = [
     ...taskPositions
       .values()
       .flatMap((task) => [task.x + SECTION_X_OFFSET, task.x + TASK_RECT_HEIGHT + SECTION_X_OFFSET]),
     ...edgePositions.values().map((edge) => edge.value + SECTION_X_OFFSET),
-    ...sections.x.flatMap((section) => [section.start, section.end]),
+    ...sectionsX.flatMap((section) => [section.start, section.end]),
   ];
 
   const yValues = [
     ...taskPositions
       .values()
       .flatMap((task) => [task.y + SECTION_Y_OFFSET, task.y + SECTION_Y_OFFSET + TASK_RECT_WIDTH]),
-    ...sections.y.flatMap((section) => [section.start, section.end]),
+    ...sectionsY.flatMap((section) => [section.start, section.end]),
   ];
 
   xValues.sort(numberSortAscending);

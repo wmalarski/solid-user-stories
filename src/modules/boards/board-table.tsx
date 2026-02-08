@@ -36,6 +36,7 @@ type BoardTableItemProps = {
 const BoardTableItem: Component<BoardTableItemProps> = (props) => {
   const board = createJazzResource(() => ({
     id: props.boardId,
+    options: { resolve: false },
     schema: BoardSchema,
   }));
 
