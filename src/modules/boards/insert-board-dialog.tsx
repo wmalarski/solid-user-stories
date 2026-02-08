@@ -72,7 +72,7 @@ export const InsertBoardDialog: Component = () => {
         {
           name: t("board.forms.ySectionDefault"),
           orientation: "vertical",
-          size: { value: 50 },
+          size: { value: 500 },
           tasks: [],
         },
       ],

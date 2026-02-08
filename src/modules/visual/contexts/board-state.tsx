@@ -7,6 +7,7 @@ import {
   type ParentProps,
 } from "solid-js";
 import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
+import type { SectionSizeInstance } from "~/integrations/jazz/schema";
 import {
   EdgesListSchema,
   SectionListSchema,
@@ -23,7 +24,7 @@ import {
   updateHorizontalSectionSize,
   updateVerticalSectionSize,
 } from "../utils/section-actions";
-import { getSectionConfigs, mapToSections } from "../utils/section-configs";
+import { getSectionConfig, getSectionConfigs, mapToSections } from "../utils/section-configs";
 import { deleteTaskWithDependencies } from "../utils/task-actions";
 
 const createBoardStateContext = (board: Accessor<BoardInstance>) => {
@@ -66,6 +67,9 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   );
 
   const sectionConfigs = createMemo(() => getSectionConfigs(sectionsX(), sectionsY()));
+
+  const sectionXConfigs = createMemo(() => getSectionConfig(sectionsX()));
+  const sectionYConfigs = createMemo(() => getSectionConfig(sectionsY()));
 
   const insertTask = (
     input: Pick<TaskInput, "description" | "estimate" | "link" | "title" | "position">,
@@ -129,18 +133,18 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const updateHorizontalSectionPosition = (args: {
     position: number;
     draggedTasks: Map<string, number>;
-    sectionId: string;
     startPosition: number;
     sectionStart: number;
+    sectionSize: SectionSizeInstance;
   }) => {
-    const sectionSize = sectionsXSizes().get(args.sectionId);
-    if (sectionSize) {
-      updateHorizontalSectionSize({
-        sectionSize,
-        taskPositions: taskPositions(),
-        ...args,
-      });
-    }
+    // const sectionSize = sectionsXSizes().get(args.sectionId);
+
+    console.log("[updateHorizontalSectionPosition]", { args });
+
+    updateHorizontalSectionSize({
+      taskPositions: taskPositions(),
+      ...args,
+    });
   };
 
   const updateVerticalSectionPosition = (args: {
@@ -233,6 +237,8 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     insertSection,
     insertTask,
     sectionConfigs,
+    sectionXConfigs,
+    sectionYConfigs,
     sectionsX,
     sectionsY,
     taskMap,

@@ -1,5 +1,10 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
-import type { EdgeBreakInstance, TaskPositionInstance } from "~/integrations/jazz/schema";
+import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
+import {
+  SectionSizeSchema,
+  type EdgeBreakInstance,
+  type TaskPositionInstance,
+} from "~/integrations/jazz/schema";
 import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { DottedLine } from "../ui/dotted-line";
@@ -69,6 +74,11 @@ type HorizontalPathProps = {
 const HorizontalPath: Component<HorizontalPathProps> = (props) => {
   const boardState = useBoardStateContext();
 
+  const sectionSize = createJazzResource(() => ({
+    id: props.config.section.size.$jazz.id,
+    schema: SectionSizeSchema,
+  }));
+
   const [transform] = useBoardTransformContext();
 
   const transformed = createMemo(() =>
@@ -89,23 +99,32 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
         taskPositions: boardState.taskPositions(),
       });
 
+      console.log({
+        draggedTasks,
+        maxNotDraggedPosition,
+      });
+
       setMaxNotDraggedPosition(maxNotDraggedPosition);
       setStartPosition(props.config.end);
       setDraggedTasks(draggedTasks);
     },
     onDragged(event) {
-      const transformValue = transform();
+      const sectionSizeValue = sectionSize();
 
-      const updatedY = (event.y - transformValue.y) / transformValue.k - SECTION_Y_OFFSET;
-      const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
+      if (sectionSizeValue) {
+        const transformValue = transform();
 
-      boardState.updateHorizontalSectionPosition({
-        draggedTasks: draggedTasks(),
-        position: withLimit,
-        sectionId: props.config.section.$jazz.id,
-        sectionStart: props.config.start,
-        startPosition: startPosition(),
-      });
+        const updatedY = (event.y - transformValue.y) / transformValue.k - SECTION_Y_OFFSET;
+        const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
+
+        boardState.updateHorizontalSectionPosition({
+          draggedTasks: draggedTasks(),
+          position: withLimit,
+          sectionSize: sectionSizeValue,
+          sectionStart: props.config.start,
+          startPosition: startPosition(),
+        });
+      }
     },
     ref,
   });
@@ -150,6 +169,12 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
         edgePositions: boardState.edgePositions(),
         offset: SECTION_X_OFFSET,
         position: props.config.end,
+      });
+
+      console.log({
+        draggedEdges,
+        draggedTasks,
+        maxNotDraggedPosition,
       });
 
       setMaxNotDraggedPosition(maxNotDraggedPosition);

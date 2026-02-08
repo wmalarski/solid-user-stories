@@ -147,6 +147,8 @@ export const updateHorizontalSectionSize = ({
   sectionSize.$jazz.set("value", position - sectionStart);
   const shift = position - startPosition;
 
+  console.log({ position, sectionSize, sectionStart, startPosition });
+
   updateTaskPositions({
     attribute: "y",
     shift,

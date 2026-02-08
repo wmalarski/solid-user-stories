@@ -43,6 +43,14 @@ export const createJazzResource = <
     return root.$isLoaded ? root : null;
   });
   const id = createMemo(() => args().id);
-  createEffect(() => onCleanup(usafeArgs().schema.subscribe(id(), mutate)));
+  createEffect(() =>
+    onCleanup(
+      // oxlint-disable-next-line typescript/no-explicit-any
+      usafeArgs().schema.subscribe(id(), (args: any) => {
+        console.log("[args]", JSON.stringify(args, null, 2));
+        mutate(args);
+      }),
+    ),
+  );
   return boards as Resource<InstanceOfSchema<S>>;
 };

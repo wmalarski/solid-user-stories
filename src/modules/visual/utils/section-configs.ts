@@ -14,34 +14,24 @@ const getPositions = (collection: SectionInstance[]) => {
   );
 };
 
-export const getSectionConfigs = <X extends SectionListInstance, Y extends SectionListInstance>(
-  sectionsX?: X,
-  sectionsY?: Y,
+export const getSectionConfig = (sections?: SectionListInstance) => {
+  const loadedSections = sections?.flatMap((section) => (section.$isLoaded ? [section] : [])) ?? [];
+
+  const positions = getPositions(loadedSections);
+
+  return loadedSections.map((section, index) => ({
+    end: positions[index + 1],
+    index,
+    section,
+    start: positions[index],
+  }));
+};
+
+export const getSectionConfigs = (
+  sectionsX?: SectionListInstance,
+  sectionsY?: SectionListInstance,
 ) => {
-  const loadedSectionsX =
-    sectionsX?.flatMap((section) => (section.$isLoaded ? [section] : [])) ?? [];
-
-  const loadedSectionsY =
-    sectionsY?.flatMap((section) => (section.$isLoaded ? [section] : [])) ?? [];
-
-  const horizontalPositions = getPositions(loadedSectionsX);
-  const verticalPositions = getPositions(loadedSectionsY);
-
-  const x = loadedSectionsX.map((section, index) => ({
-    end: horizontalPositions[index + 1],
-    index,
-    section,
-    start: horizontalPositions[index],
-  }));
-
-  const y = loadedSectionsY.map((section, index) => ({
-    end: verticalPositions[index + 1],
-    index,
-    section,
-    start: verticalPositions[index],
-  }));
-
-  return { x, y } as const;
+  return { x: getSectionConfig(sectionsX), y: getSectionConfig(sectionsY) } as const;
 };
 
 export type SectionConfigs = ReturnType<typeof getSectionConfigs>;
