@@ -9,7 +9,7 @@ import {
   type ParentProps,
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { BoardSchema, type BoardInstance, type SectionInstance } from "~/integrations/jazz/schema";
+import { BoardSchema, type BoardInstance } from "~/integrations/jazz/schema";
 import {
   deleteEdgeInstance,
   insertEdgeFromPoint,
@@ -17,11 +17,12 @@ import {
   updateEdge,
 } from "../utils/edge-actions";
 import {
-  deleteSectionAndShift,
+  deleteHorizontalSectionAndShift,
+  deleteVerticalSectionAndShift,
   insertHorizonalSectionAndShift,
   insertVerticalSectionAndShift,
+  updateHorizontalSectionData,
   updateHorizontalSectionSize,
-  updateSectionData,
   updateVerticalSectionSize,
 } from "../utils/section-actions";
 import { getSectionConfig, mapToSections } from "../utils/section-configs";
@@ -77,26 +78,22 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     });
   };
 
-  const insertSection = (
-    args: Pick<SectionInstance, "name" | "orientation"> & {
-      index: number;
-    },
-  ) => {
-    if (args.orientation === "horizontal") {
-      insertHorizonalSectionAndShift({
-        board: board(),
-        index: args.index,
-        name: args.name,
-        sectionConfigs: sectionXConfigs(),
-      });
-    } else {
-      insertVerticalSectionAndShift({
-        board: board(),
-        index: args.index,
-        name: args.name,
-        sectionConfigs: sectionYConfigs(),
-      });
-    }
+  const insertHorizontalSection = (args: Pick<SectionModel, "name"> & { index: number }) => {
+    insertHorizonalSectionAndShift({
+      board: board(),
+      index: args.index,
+      name: args.name,
+      sectionConfigs: sectionXConfigs(),
+    });
+  };
+
+  const insertVerticalSection = (args: Pick<SectionModel, "name"> & { index: number }) => {
+    insertVerticalSectionAndShift({
+      board: board(),
+      index: args.index,
+      name: args.name,
+      sectionConfigs: sectionYConfigs(),
+    });
   };
 
   const updateHorizontalSectionPosition = (args: {
@@ -128,17 +125,19 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     });
   };
 
-  const deleteSection = (
-    args: Pick<SectionInstance, "orientation"> & {
-      endPosition: number;
-      shift: number;
-      id: string;
-    },
-  ) => {
-    deleteSectionAndShift({
+  const deleteHorizontalSection = (args: { endPosition: number; shift: number; id: string }) => {
+    deleteHorizontalSectionAndShift({
       board: board(),
       endPosition: args.endPosition,
-      orientation: args.orientation,
+      sectionId: args.id,
+      shift: args.shift,
+    });
+  };
+
+  const deleteVerticalSection = (args: { endPosition: number; shift: number; id: string }) => {
+    deleteVerticalSectionAndShift({
+      board: board(),
+      endPosition: args.endPosition,
       sectionId: args.id,
       shift: args.shift,
     });
@@ -180,12 +179,19 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     });
   };
 
-  const updateSectionName = (args: Pick<SectionModel, "id" | "name" | "orientation">) => {
-    updateSectionData({
+  const updateHorizontalSectionName = (args: Pick<SectionModel, "id" | "name">) => {
+    updateHorizontalSectionData({
       board: board(),
       id: args.id,
       name: args.name,
-      orientation: args.orientation,
+    });
+  };
+
+  const updateVerticalSectionName = (args: Pick<SectionModel, "id" | "name">) => {
+    updateHorizontalSectionData({
+      board: board(),
+      id: args.id,
+      name: args.name,
     });
   };
 
@@ -216,20 +222,23 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   return {
     board,
     deleteEdge,
-    deleteSection,
+    deleteHorizontalSection,
     deleteTask,
+    deleteVerticalSection,
     insertEdgeToPoint,
     insertEdgeToTask,
-    insertSection,
+    insertHorizontalSection,
     insertTask,
+    insertVerticalSection,
     sectionXConfigs,
     sectionYConfigs,
     store,
     updateEdgePosition,
+    updateHorizontalSectionName,
     updateHorizontalSectionPosition,
-    updateSectionName,
     updateTask,
     updateTaskModel,
+    updateVerticalSectionName,
     updateVerticalSectionPosition,
   };
 };

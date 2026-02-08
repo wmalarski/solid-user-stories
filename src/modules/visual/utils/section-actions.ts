@@ -1,10 +1,5 @@
 import { getLoadedOrUndefined } from "jazz-tools";
-import type {
-  BoardInstance,
-  EdgeInstance,
-  SectionInstance,
-  TaskInstance,
-} from "~/integrations/jazz/schema";
+import type { BoardInstance, EdgeInstance, TaskInstance } from "~/integrations/jazz/schema";
 import { getEdgeMap, getSectionXMap, getSectionYMap, getTaskMap } from "./instance-maps";
 import type { SectionConfigs } from "./section-configs";
 
@@ -94,13 +89,11 @@ export const insertHorizonalSectionAndShift = ({
   board,
 }: InsertHorizontalSectionAndShiftArgs) => {
   const shift = 500;
-  const orientation = "horizontal";
   const edgePositions = getEdgeMap(board);
   const taskPositions = getTaskMap(board);
 
   getLoadedOrUndefined(board.sectionX)?.$jazz.splice(index + 1, 0, {
     name,
-    orientation,
     size: shift,
     tasks: [],
   });
@@ -124,12 +117,10 @@ export const insertVerticalSectionAndShift = ({
   sectionConfigs,
 }: InsertVerticalSectionAndShiftArgs) => {
   const shift = 500;
-  const orientation = "vertical";
   const taskPositions = getTaskMap(board);
 
   getLoadedOrUndefined(board.sectionY)?.$jazz.splice(index + 1, 0, {
     name,
-    orientation,
     size: shift,
     tasks: [],
   });
@@ -211,45 +202,70 @@ export const updateVerticalSectionSize = ({
   });
 };
 
-type DeleteSectionAndShiftArgs = {
+type DeleteHorizontalSectionAndShiftArgs = {
   board: BoardInstance;
   sectionId: string;
-  orientation: SectionInstance["orientation"];
   endPosition: number;
   shift: number;
 };
 
-export const deleteSectionAndShift = ({
+export const deleteHorizontalSectionAndShift = ({
   board,
   sectionId,
-  orientation,
   endPosition,
   shift,
-}: DeleteSectionAndShiftArgs) => {
+}: DeleteHorizontalSectionAndShiftArgs) => {
   const edgePositions = getEdgeMap(board);
   const taskPositions = getTaskMap(board);
 
-  if (orientation === "horizontal") {
-    getLoadedOrUndefined(board.sectionX)?.$jazz.remove((section) => section.$jazz.id === sectionId);
-    shiftTasks({ attribute: "positionX", position: endPosition, shift, taskPositions });
-    shiftEdges({ edgePositions, position: endPosition, shift });
-  } else {
-    getLoadedOrUndefined(board.sectionY)?.$jazz.remove((section) => section.$jazz.id === sectionId);
-    shiftTasks({ attribute: "positionY", position: endPosition, shift, taskPositions });
-  }
+  getLoadedOrUndefined(board.sectionX)?.$jazz.remove((section) => section.$jazz.id === sectionId);
+  shiftTasks({ attribute: "positionX", position: endPosition, shift, taskPositions });
+  shiftEdges({ edgePositions, position: endPosition, shift });
 };
 
-type UpdateSectionDataArgs = {
+type DeleteVerticalSectionAndShiftArgs = {
+  board: BoardInstance;
+  sectionId: string;
+  endPosition: number;
+  shift: number;
+};
+
+export const deleteVerticalSectionAndShift = ({
+  board,
+  sectionId,
+  endPosition,
+  shift,
+}: DeleteVerticalSectionAndShiftArgs) => {
+  const taskPositions = getTaskMap(board);
+
+  getLoadedOrUndefined(board.sectionY)?.$jazz.remove((section) => section.$jazz.id === sectionId);
+  shiftTasks({ attribute: "positionY", position: endPosition, shift, taskPositions });
+};
+
+type UpdateHorizontalSectionDataArgs = {
   board: BoardInstance;
   name: string;
   id: string;
-  orientation: SectionInstance["orientation"];
 };
 
-export const updateSectionData = ({ board, id, name, orientation }: UpdateSectionDataArgs) => {
-  const sections = getLoadedOrUndefined(
-    board[orientation === "horizontal" ? "sectionX" : "sectionY"],
-  );
+export const updateHorizontalSectionData = ({
+  board,
+  id,
+  name,
+}: UpdateHorizontalSectionDataArgs) => {
+  const sections = getLoadedOrUndefined(board.sectionX);
+  const section = sections?.find((section) => section.$jazz.id === id);
+  getLoadedOrUndefined(section)?.$jazz.set("name", name);
+};
+
+type UpdateVerticalSectionDataArgs = {
+  board: BoardInstance;
+  name: string;
+  id: string;
+};
+
+export const updateVerticalSectionData = ({ board, id, name }: UpdateVerticalSectionDataArgs) => {
+  const sections = getLoadedOrUndefined(board.sectionY);
   const section = sections?.find((section) => section.$jazz.id === id);
   getLoadedOrUndefined(section)?.$jazz.set("name", name);
 };

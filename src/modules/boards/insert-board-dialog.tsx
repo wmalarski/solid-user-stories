@@ -60,22 +60,8 @@ export const InsertBoardDialog: Component = () => {
     const index = boardsValue.$jazz.push({
       description: parsed.output.description,
       edges: [],
-      sectionX: [
-        {
-          name: t("board.forms.xSectionDefault"),
-          orientation: "horizontal",
-          size: 500,
-          tasks: [],
-        },
-      ],
-      sectionY: [
-        {
-          name: t("board.forms.ySectionDefault"),
-          orientation: "vertical",
-          size: 500,
-          tasks: [],
-        },
-      ],
+      sectionX: [{ name: t("board.forms.xSectionDefault"), size: 500, tasks: [] }],
+      sectionY: [{ name: t("board.forms.ySectionDefault"), size: 500, tasks: [] }],
       tasks: [],
       title: parsed.output.title,
       user: "1",

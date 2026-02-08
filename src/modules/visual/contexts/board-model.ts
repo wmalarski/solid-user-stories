@@ -10,10 +10,11 @@ import type {
 } from "~/integrations/jazz/schema";
 import type { Point2D } from "../utils/types";
 
+export type Orientation = "horizontal" | "vertical";
+
 export type SectionModel = {
   id: string;
   name: string;
-  orientation: "horizontal" | "vertical";
   size: number;
 };
 
@@ -94,7 +95,6 @@ const mapToSectionModel = (section: MaybeLoaded<SectionInstance>): SectionModel 
   return {
     id: section.$jazz.id,
     name: loaded.name,
-    orientation: loaded.orientation,
     size: loaded.size,
   };
 };

@@ -4,6 +4,7 @@ import { createLink } from "~/integrations/router/create-link";
 import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
 import { ChevronLeftIcon } from "~/ui/icons/chevron-left-icon";
+import type { Orientation } from "../contexts/board-model";
 import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { MultilineText } from "../ui/multiline-text";
@@ -111,7 +112,11 @@ const HorizontalItemRect: Component<HorizontalItemRectProps> = (props) => {
 
   return (
     <foreignObject width={width()} x={transformed()} y={0} height={SECTION_Y_OFFSET}>
-      <SectionItemContent config={props.config} totalLength={props.totalLength} />
+      <SectionItemContent
+        orientation="horizontal"
+        config={props.config}
+        totalLength={props.totalLength}
+      />
     </foreignObject>
   );
 };
@@ -132,7 +137,11 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
 
   return (
     <foreignObject height={height()} x={0} y={transformed()} width={SECTION_X_OFFSET}>
-      <SectionItemContent config={props.config} totalLength={props.totalLength} />
+      <SectionItemContent
+        orientation="vertical"
+        config={props.config}
+        totalLength={props.totalLength}
+      />
     </foreignObject>
   );
 };
@@ -140,14 +149,18 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
 type SectionItemContentProps = {
   config: SectionConfig;
   totalLength: number;
+  orientation: Orientation;
 };
 
 const SectionItemContent: Component<SectionItemContentProps> = (props) => {
   const isVertical = createMemo(() => {
-    return props.config.section.orientation === "vertical";
+    return props.orientation === "vertical";
   });
 
-  const { esitmationSum, tasks } = createSectionItemValues(() => props.config);
+  const { esitmationSum, tasks } = createSectionItemValues(
+    () => props.orientation,
+    () => props.config,
+  );
 
   return (
     <div class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[1fr_auto] p-2">
@@ -158,13 +171,14 @@ const SectionItemContent: Component<SectionItemContentProps> = (props) => {
           "items-center": !isVertical(),
         })}
       >
-        <InsertSectionDialog
-          orientation={props.config.section.orientation}
-          index={props.config.index}
-        />
-        <UpdateSectionDialog section={props.config.section} />
+        <InsertSectionDialog orientation={props.orientation} index={props.config.index} />
+        <UpdateSectionDialog orientation={props.orientation} section={props.config.section} />
         <Show when={props.totalLength > 1 && tasks()?.length === 0}>
-          <DeleteSectionDialog section={props.config.section} endPosition={props.config.end} />
+          <DeleteSectionDialog
+            orientation={props.orientation}
+            section={props.config.section}
+            endPosition={props.config.end}
+          />
         </Show>
         <Badge size="sm" color="accent" class="my-1">
           {esitmationSum()}
@@ -174,12 +188,15 @@ const SectionItemContent: Component<SectionItemContentProps> = (props) => {
   );
 };
 
-const createSectionItemValues = (config: Accessor<SectionConfig>) => {
+const createSectionItemValues = (
+  orientation: Accessor<Orientation>,
+  config: Accessor<SectionConfig>,
+) => {
   const boardState = useBoardStateContext();
 
   const tasks = createMemo(() => {
     const configValue = config();
-    const isVerticalValue = configValue.section.orientation === "vertical";
+    const isVerticalValue = orientation() === "vertical";
     const sectionId = configValue.section.id;
     return boardState.store.tasks.filter((entry) =>
       isVerticalValue ? entry.sectionY === sectionId : entry.sectionX === sectionId,
@@ -222,7 +239,10 @@ type ExportableHorizontalItemRectProps = {
 };
 
 const ExportableHorizontalItemRect: Component<ExportableHorizontalItemRectProps> = (props) => {
-  const { esitmationSum } = createSectionItemValues(() => props.config);
+  const { esitmationSum } = createSectionItemValues(
+    () => "horizontal",
+    () => props.config,
+  );
 
   return (
     <>
@@ -262,7 +282,10 @@ type ExportableVerticalItemRectProps = {
 };
 
 const ExportableVerticalItemRect: Component<ExportableVerticalItemRectProps> = (props) => {
-  const { esitmationSum } = createSectionItemValues(() => props.config);
+  const { esitmationSum } = createSectionItemValues(
+    () => "vertical",
+    () => props.config,
+  );
 
   return (
     <>

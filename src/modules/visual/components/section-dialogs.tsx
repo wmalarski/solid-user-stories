@@ -23,7 +23,7 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
-import type { SectionModel } from "../contexts/board-model";
+import type { Orientation, SectionModel } from "../contexts/board-model";
 import { useBoardStateContext } from "../contexts/board-state";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
 
@@ -32,7 +32,7 @@ const SectionFieldsSchema = v.object({
 });
 
 type InsertSectionDialogProps = {
-  orientation: SectionModel["orientation"];
+  orientation: Orientation;
   index: number;
 };
 
@@ -60,11 +60,17 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
       return;
     }
 
-    boardState.insertSection({
-      index: props.index,
-      name: parsed.output.name,
-      orientation: props.orientation,
-    });
+    if (props.orientation === "horizontal") {
+      boardState.insertHorizontalSection({
+        index: props.index,
+        name: parsed.output.name,
+      });
+    } else {
+      boardState.insertVerticalSection({
+        index: props.index,
+        name: parsed.output.name,
+      });
+    }
 
     event.currentTarget.reset();
   };
@@ -102,6 +108,7 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
 
 type UpdateSectionDialogProps = {
   section: SectionModel;
+  orientation: Orientation;
 };
 
 export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) => {
@@ -129,11 +136,17 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
       return;
     }
 
-    boardState.updateSectionName({
-      id: props.section.id,
-      name: parsed.output.name,
-      orientation: props.section.orientation,
-    });
+    if (props.orientation === "horizontal") {
+      boardState.updateHorizontalSectionName({
+        id: props.section.id,
+        name: parsed.output.name,
+      });
+    } else {
+      boardState.updateVerticalSectionName({
+        id: props.section.id,
+        name: parsed.output.name,
+      });
+    }
   };
 
   return (
@@ -199,6 +212,7 @@ const SectionFields: Component<SectionFieldsProps> = (props) => {
 };
 
 type DeleteSectionDialogProps = {
+  orientation: Orientation;
   section: SectionModel;
   endPosition: number;
 };
@@ -214,12 +228,19 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
   const onSave = () => {
     closeDialog(dialogId);
 
-    boardState.deleteSection({
-      endPosition: props.endPosition,
-      id: props.section.id,
-      orientation: props.section.orientation,
-      shift: -props.section.size,
-    });
+    if (props.orientation === "horizontal") {
+      boardState.deleteHorizontalSection({
+        endPosition: props.endPosition,
+        id: props.section.id,
+        shift: -props.section.size,
+      });
+    } else {
+      boardState.deleteVerticalSection({
+        endPosition: props.endPosition,
+        id: props.section.id,
+        shift: -props.section.size,
+      });
+    }
   };
 
   return (

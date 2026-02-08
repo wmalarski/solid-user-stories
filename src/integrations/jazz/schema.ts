@@ -2,7 +2,6 @@ import { co, z } from "jazz-tools";
 
 export const SectionSchema = co.map({
   name: z.string(),
-  orientation: z.union([z.literal("horizontal"), z.literal("vertical")]),
   size: z.number(),
   tasks: z.array(z.string()),
 });
