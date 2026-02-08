@@ -64,7 +64,6 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
       boardState.updateTask({
         id: props.task.id,
         position: { x: updatedX, y: updatedY },
-        positionId: props.task.positionId,
       });
     },
     ref: rectRef,

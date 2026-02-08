@@ -1,8 +1,8 @@
 import type {
-  EdgeBreakInstance,
+  EdgeInstance,
   EdgeListInstance,
+  TaskInstance,
   TaskListInstance,
-  TaskPositionInstance,
 } from "~/integrations/jazz/schema";
 import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
 
@@ -12,7 +12,7 @@ type InsertEdgeFromPointArgs = {
   y: number;
   taskId: string;
   isSource: boolean;
-  taskPositions: Map<string, TaskPositionInstance>;
+  taskPositions: Map<string, TaskInstance>;
 };
 
 export const insertEdgeFromPoint = ({
@@ -31,7 +31,10 @@ export const insertEdgeFromPoint = ({
     .entries()
     .find(
       ([_taskId, task]) =>
-        task.x < x && x < task.x + TASK_RECT_WIDTH && task.y < y && y < task.y + TASK_RECT_HEIGHT,
+        task.positionX < x &&
+        x < task.positionX + TASK_RECT_WIDTH &&
+        task.positionY < y &&
+        y < task.positionY + TASK_RECT_HEIGHT,
     );
 
   if (!found || !currentTask) {
@@ -57,9 +60,9 @@ export const insertEdgeFromPoint = ({
     return;
   }
 
-  const breakX = (currentTask.x + cursorTask.x + TASK_RECT_WIDTH) / 2;
+  const breakX = (currentTask.positionX + cursorTask.positionX + TASK_RECT_WIDTH) / 2;
 
-  const size = edges.$jazz.push({ breakX: { value: breakX }, source, target });
+  const size = edges.$jazz.push({ breakX, source, target });
   return edges[size - 1].$jazz.id;
 };
 
@@ -69,7 +72,7 @@ type InsertEdgeToTaskArgs = {
   isSource: boolean;
   tasks: TaskListInstance;
   edges: EdgeListInstance;
-  taskPositions: Map<string, TaskPositionInstance>;
+  taskPositions: Map<string, TaskInstance>;
 };
 
 export const insertEdgeToSecondTask = ({
@@ -86,10 +89,10 @@ export const insertEdgeToSecondTask = ({
     return;
   }
 
-  const breakX = (currentTask.x + secondTask.x + TASK_RECT_WIDTH) / 2;
+  const breakX = (currentTask.positionX + secondTask.positionX + TASK_RECT_WIDTH) / 2;
 
   const size = edges.$jazz.push({
-    breakX: { value: breakX },
+    breakX,
     source: isSource ? taskId : secondTaskId,
     target: isSource ? secondTaskId : taskId,
   });
@@ -97,6 +100,6 @@ export const insertEdgeToSecondTask = ({
   return edges[size - 1].$jazz.id;
 };
 
-export const updateEdge = (instance: EdgeBreakInstance, edge: Pick<EdgeBreakInstance, "value">) => {
-  instance.$jazz.set("value", edge.value);
+export const updateEdge = (instance: EdgeInstance, edge: Pick<EdgeInstance, "breakX">) => {
+  instance.$jazz.set("breakX", edge.breakX);
 };

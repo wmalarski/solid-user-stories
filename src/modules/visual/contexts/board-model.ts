@@ -12,7 +12,6 @@ import type { Point2D } from "../utils/types";
 
 export type SectionModel = {
   id: string;
-  sizeId: string;
   name: string;
   orientation: "horizontal" | "vertical";
   size: number;
@@ -20,21 +19,17 @@ export type SectionModel = {
 
 export type TaskModel = {
   id: string;
-  positionId: string;
   description: string;
   estimate: number;
   link?: string;
   position: Point2D;
   sectionX: string | null;
   sectionY: string | null;
-  sourceEdges: string[];
-  targetEdges: string[];
   title: string;
 };
 
 export type EdgeModel = {
   id: string;
-  positionId: string;
   breakX: number;
   source: string;
   target: string;
@@ -67,16 +62,14 @@ export const mapToEdgeModels = (edges: MaybeLoaded<EdgeListInstance>): EdgeModel
 
 const mapToEdgeModel = (edge: MaybeLoaded<EdgeInstance>): EdgeModel | null => {
   const loaded = getLoadedOrUndefined(edge);
-  const loadedBreak = loaded && getLoadedOrUndefined(loaded.breakX);
 
-  if (!loaded || !loadedBreak) {
+  if (!loaded) {
     return null;
   }
 
   return {
-    breakX: loadedBreak.value,
+    breakX: loaded.breakX,
     id: edge.$jazz.id,
-    positionId: loaded.breakX.$jazz.id,
     source: loaded.source,
     target: loaded.target,
   };
@@ -93,9 +86,8 @@ export const mapToSectionModels = (sections: MaybeLoaded<SectionListInstance>): 
 
 const mapToSectionModel = (section: MaybeLoaded<SectionInstance>): SectionModel | null => {
   const loaded = getLoadedOrUndefined(section);
-  const loadedSize = loaded && getLoadedOrUndefined(loaded.size);
 
-  if (!loaded || !loadedSize) {
+  if (!loaded) {
     return null;
   }
 
@@ -103,8 +95,7 @@ const mapToSectionModel = (section: MaybeLoaded<SectionInstance>): SectionModel 
     id: section.$jazz.id,
     name: loaded.name,
     orientation: loaded.orientation,
-    size: loadedSize.value,
-    sizeId: loaded.size.$jazz.id,
+    size: loaded.size,
   };
 };
 
@@ -119,9 +110,8 @@ export const mapToTaskModels = (tasks: MaybeLoaded<TaskListInstance>): TaskModel
 
 const mapToTaskModel = (task: MaybeLoaded<TaskInstance>): TaskModel | null => {
   const loaded = getLoadedOrUndefined(task);
-  const loadedPosition = loaded && getLoadedOrUndefined(loaded.position);
 
-  if (!loaded || !loadedPosition) {
+  if (!loaded) {
     return null;
   }
 
@@ -130,15 +120,9 @@ const mapToTaskModel = (task: MaybeLoaded<TaskInstance>): TaskModel | null => {
     estimate: loaded.estimate,
     id: task.$jazz.id,
     link: loaded.link,
-    position: {
-      x: loadedPosition.x,
-      y: loadedPosition.y,
-    },
-    positionId: loaded.position.$jazz.id,
+    position: { x: loaded.positionX, y: loaded.positionY },
     sectionX: loaded.sectionX,
     sectionY: loaded.sectionY,
-    sourceEdges: loaded.sourceEdges,
-    targetEdges: loaded.targetEdges,
     title: loaded.title,
   };
 };

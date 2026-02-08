@@ -1,26 +1,18 @@
 import { co, z } from "jazz-tools";
 
-export const SectionSizeSchema = co.map({
-  value: z.number(),
-});
-
 export const SectionSchema = co.map({
   name: z.string(),
   orientation: z.union([z.literal("horizontal"), z.literal("vertical")]),
-  size: SectionSizeSchema,
+  size: z.number(),
   tasks: z.array(z.string()),
-});
-
-export const TaskPositionSchema = co.map({
-  x: z.number(),
-  y: z.number(),
 });
 
 export const TaskSchema = co.map({
   description: z.string(),
   estimate: z.number(),
   link: z.string().optional(),
-  position: TaskPositionSchema,
+  positionX: z.number(),
+  positionY: z.number(),
   sectionX: z.string().nullable(),
   sectionY: z.string().nullable(),
   sourceEdges: z.array(z.string()),
@@ -28,12 +20,8 @@ export const TaskSchema = co.map({
   title: z.string(),
 });
 
-export const EdgeBreakSchema = co.map({
-  value: z.number(),
-});
-
 export const EdgeSchema = co.map({
-  breakX: EdgeBreakSchema,
+  breakX: z.number(),
   source: z.string(),
   target: z.string(),
 });
@@ -77,14 +65,8 @@ export type SectionInstance = co.loaded<typeof SectionSchema>;
 export type SectionInput = co.input<typeof SectionSchema>;
 export type SectionListInstance = co.loaded<typeof SectionListSchema>;
 
-export type SectionSizeInstance = co.loaded<typeof SectionSizeSchema>;
-
 export type EdgeInstance = co.loaded<typeof EdgeSchema>;
 export type EdgeListInstance = co.loaded<typeof EdgesListSchema>;
-
-export type EdgeBreakInstance = co.loaded<typeof EdgeBreakSchema>;
-
-export type TaskPositionInstance = co.loaded<typeof TaskPositionSchema>;
 
 export type TaskInstance = co.loaded<typeof TaskSchema>;
 export type TaskInput = co.input<typeof TaskSchema>;

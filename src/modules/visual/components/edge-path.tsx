@@ -127,7 +127,7 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
     onDragged(event) {
       boardState.updateEdgePosition({
         breakX: event.x,
-        positionId: props.entry.edge.positionId,
+        id: props.entry.edge.id,
       });
     },
     ref: rectRef,

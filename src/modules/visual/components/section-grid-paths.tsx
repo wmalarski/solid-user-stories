@@ -102,7 +102,7 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       boardState.updateHorizontalSectionPosition({
         draggedTasks: draggedTasks(),
         position: withLimit,
-        sectionSizeId: props.config.section.sizeId,
+        sectionSizeId: props.config.section.id,
         sectionStart: props.config.start,
         startPosition: startPosition(),
       });
@@ -167,7 +167,7 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
         draggedEdges: draggedEdges(),
         draggedTasks: draggedTasks(),
         position: withLimit,
-        sectionSizeId: props.config.section.sizeId,
+        sectionSizeId: props.config.section.id,
         sectionStart: props.config.start,
         startPosition: startPosition(),
       });
