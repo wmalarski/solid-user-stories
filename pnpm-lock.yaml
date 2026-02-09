@@ -33,8 +33,8 @@ importers:
         specifier: ^0.9.0
         version: 0.9.0
       jazz-tools:
-        specifier: ^0.20.7
-        version: 0.20.7(@tiptap/pm@2.27.2)(csstype@3.1.3)(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
+        specifier: ^0.20.8
+        version: 0.20.8(@tiptap/pm@2.27.2)(csstype@3.1.3)(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
       solid-js:
         specifier: ^1.9.11
         version: 1.9.11
@@ -61,23 +61,23 @@ importers:
         specifier: ^5.5.18
         version: 5.5.18
       knip:
-        specifier: ^5.83.0
-        version: 5.83.0(@types/node@25.0.10)(typescript@5.9.3)
+        specifier: ^5.83.1
+        version: 5.83.1(@types/node@25.0.10)(typescript@5.9.3)
       oxfmt:
         specifier: ^0.28.0
         version: 0.28.0
       oxlint:
         specifier: ^1.43.0
-        version: 1.43.0(oxlint-tsgolint@0.11.4)
+        version: 1.43.0(oxlint-tsgolint@0.11.5)
       oxlint-tsgolint:
-        specifier: ^0.11.4
-        version: 0.11.4
+        specifier: ^0.11.5
+        version: 0.11.5
       solid-devtools:
         specifier: ^0.34.5
         version: 0.34.5(solid-js@1.9.11)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2))
       sonda:
-        specifier: ^0.10.1
-        version: 0.10.1
+        specifier: ^0.10.2
+        version: 0.10.2
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -88,8 +88,8 @@ importers:
         specifier: ^2.11.10
         version: 2.11.10(solid-js@1.9.11)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2))
       vite-tsconfig-paths:
-        specifier: ^6.0.5
-        version: 6.0.5(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2))
+        specifier: ^6.1.0
+        version: 6.1.0(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2))
       wrangler:
         specifier: ^4.63.0
         version: 4.63.0
@@ -1036,33 +1036,33 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@oxlint-tsgolint/darwin-arm64@0.11.4':
-    resolution: {integrity: sha512-IhdhiC183s5wdFDZSQC8PaFFq1QROiVT5ahz7ysgEKVnkNDjy82ieM7ZKiUfm2ncXNX2RcFGSSZrQO6plR+VAQ==}
+  '@oxlint-tsgolint/darwin-arm64@0.11.5':
+    resolution: {integrity: sha512-mzsjJVIUgcGJovBXME63VW2Uau7MS/xCe7xdYj2BplSCuRb5Yoy7WuwCIlbD5ISHjnS6rx26oD2kmzHLRV5Wfw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@oxlint-tsgolint/darwin-x64@0.11.4':
-    resolution: {integrity: sha512-KJmBg10Z1uGpJqxDzETXOytYyeVrKUepo8rCXeVkRlZ2QzZqMElgalFN4BI3ccgIPkQpzzu4SVzWNFz7yiKavQ==}
+  '@oxlint-tsgolint/darwin-x64@0.11.5':
+    resolution: {integrity: sha512-zItUS0qLzSzVy0ZQHc4MOphA9lVeP5jffsgZFLCdo+JqmkbVZ14aDtiVUHSHi2hia+qatbb109CHQ9YIl0x7+A==}
     cpu: [x64]
     os: [darwin]
 
-  '@oxlint-tsgolint/linux-arm64@0.11.4':
-    resolution: {integrity: sha512-P6I3dSSpoEnjFzTMlrbcBHNbErSxceZmcVUslBxrrIUH1NSVS1XfSz6S75vT2Gay7Jv6LI7zTTVAk4cSqkfe+w==}
+  '@oxlint-tsgolint/linux-arm64@0.11.5':
+    resolution: {integrity: sha512-R0r/3QTdMtIjfUOM1oxIaCV0s+j7xrnUe4CXo10ZbBzlXfMesWYNcf/oCrhsy87w0kCPFsg58nAdKaIR8xylFg==}
     cpu: [arm64]
     os: [linux]
 
-  '@oxlint-tsgolint/linux-x64@0.11.4':
-    resolution: {integrity: sha512-G0eAW3S7cp/vP7Kx6e7+Ze7WfNgSt1tc/rOexfLKnnIi+9BelyOa2wF9bWFPpxk3n3AdkBwKttU1/adDZlD87Q==}
+  '@oxlint-tsgolint/linux-x64@0.11.5':
+    resolution: {integrity: sha512-g23J3T29EHWUQYC6aTwLnhwcFtjQh+VfxyGuFjYGGTLhESdlQH9E/pwsN8K9HaAiYWjI51m3r3BqQjXxEW8Jjg==}
     cpu: [x64]
     os: [linux]
 
-  '@oxlint-tsgolint/win32-arm64@0.11.4':
-    resolution: {integrity: sha512-prgQEBiwp4TAxarh6dYbVOKw6riRJ6hB49vDD6DxQlOZQky7xHQ9qTec5/rf0JTUZ16YaJ9YfHycbJS3QVpTYw==}
+  '@oxlint-tsgolint/win32-arm64@0.11.5':
+    resolution: {integrity: sha512-MJNT/MPUIZKQCRtCX5s6pCnoe7If/i3RjJzFMe4kSLomRsHrNFYOJBwt4+w/Hqfyg9jNOgR8tbgdx6ofjHaPMQ==}
     cpu: [arm64]
     os: [win32]
 
-  '@oxlint-tsgolint/win32-x64@0.11.4':
-    resolution: {integrity: sha512-5xXTzZIT/1meWMmS60Q+FYWvWncc6iTfC8tyQt7GDfPUoqQvE5WVgHm1QjDSJvxTD+6AHphpCqdhXq/KtxagRw==}
+  '@oxlint-tsgolint/win32-x64@0.11.5':
+    resolution: {integrity: sha512-IQmj4EkcZOBlLnj1CdxKFrWT7NAWXZ9ypZ874X/w7S5gRzB2sO4KmE6Z0MWxx05pL9AQF+CWVRjZrKVIYWTzPg==}
     cpu: [x64]
     os: [win32]
 
@@ -1837,73 +1837,73 @@ packages:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
 
-  cojson-core-napi-darwin-arm64@0.20.7:
-    resolution: {integrity: sha512-3Xnx88Lpf3GIf1l6mXp1YhXwPKnZ6pI0JYdF9mWFC16pNei26JsWlasxLAIZvyIjaFAweyiAFD967Tfuib+jdg==}
+  cojson-core-napi-darwin-arm64@0.20.8:
+    resolution: {integrity: sha512-Icet/QT4zmLMprGmsDnTp1MGVFM2503Lb/DY2+FYtEvzU2cV9GHrQGjKFkdTMqgf4lWFldLMRkGESlMGpunDHg==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [darwin]
 
-  cojson-core-napi-darwin-x64@0.20.7:
-    resolution: {integrity: sha512-CAsLtCk9DkALaTbX7uHYZhR4Ua4OHWM7HPsWTkWp9Y5VXugMYqtyBV+avIm2vnjcJ/UduZt5ZXCgkHYJ/yoiZQ==}
+  cojson-core-napi-darwin-x64@0.20.8:
+    resolution: {integrity: sha512-cz2WHDBMNkVJPVUqdz1MX0OHj12S9WqtXkOBrRAvzs6T/dn387OHFa+dqYOONsSvNt2Ij5eZtNejw8dK+akuEw==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [darwin]
 
-  cojson-core-napi-linux-arm-gnueabihf@0.20.7:
-    resolution: {integrity: sha512-L+0sCqxLoJE5+SKs6D5UTDWFT1mtMMP9xLML5zvL1J80MeiquHsNbnNQNdXCB0406xNBZqHeG6QeQP9nT9m6Ig==}
+  cojson-core-napi-linux-arm-gnueabihf@0.20.8:
+    resolution: {integrity: sha512-mN08d4TtVazhl9fP8KDjxgWCabJ62bfcIGR5p01KDm29UXv1LULzXhl9c2QE/tSJVoxT3ds7tqEh11vJUk7F8w==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm]
     os: [linux]
 
-  cojson-core-napi-linux-arm64-gnu@0.20.7:
-    resolution: {integrity: sha512-AsL9mzXIDjabodBatm8j1ftp2J9PZ69UFtF3S0MPbMRRWijClNWox/pnu3AH0aSeX/L9CqkqOdaUPcsgKmuoow==}
+  cojson-core-napi-linux-arm64-gnu@0.20.8:
+    resolution: {integrity: sha512-MOG+itaufeDsevZyjjSavxVUICkESDQqf6msvWZ/df4XSa1UFjAUrUY29wSW07BR8VsCuMZbFDyNTfQyNJejIA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  cojson-core-napi-linux-arm64-musl@0.20.7:
-    resolution: {integrity: sha512-2TAiQH6xBjZKpnQuGgj2snXiMDguq74lzU0KdNjucucw2bkBCwor/iNrPqZrywQu63JSxF1xUm1ut4GhwUtsKA==}
+  cojson-core-napi-linux-arm64-musl@0.20.8:
+    resolution: {integrity: sha512-mU++DBBfeVAMI9iqETROuWxslgm+SEwe6NqRESpeCynkKk2Vr5ss5c1cINA4mBDcdFN5bV1bHiL0D2PSBoLAQA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  cojson-core-napi-linux-x64-gnu@0.20.7:
-    resolution: {integrity: sha512-noTNYwrhL+xI10VI0knvoP8YHt8vh1Pdu7hLFkzE8vQ8cHAGAhia0ELbbLKGy7dbpTMW8qLlKK9m8sUixfcXLQ==}
+  cojson-core-napi-linux-x64-gnu@0.20.8:
+    resolution: {integrity: sha512-1Cc79VNLBe5noDFjDd3udfYXrN3sGnuQrR8FAHzxRRtENN5cId5oV7wQ8fhD4ezgH2MsjvZlFLXVLsyPTsQ27g==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  cojson-core-napi-linux-x64-musl@0.20.7:
-    resolution: {integrity: sha512-cre5hMg3eN2ak/enwCUS0/0JrsfXO5KhbQgXfRISNNYX45ngQ1+Xg67gEfDB5k3R1HVTLvhgHX654ID2Fas5qg==}
+  cojson-core-napi-linux-x64-musl@0.20.8:
+    resolution: {integrity: sha512-mUeSzl3ooFKRmxbBdGL7Rn7vCD/d9Yb9JwcoTClyBIwcBTt+obccaj90ZhpoIVxBN300VTTDd6DrzBWXbBVwUA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  cojson-core-napi@0.20.7:
-    resolution: {integrity: sha512-7/F21JYh1jRuwtxofN92F/xSsdr3pVjP2700c/1BM8LkXmD88n4+xyamxMJRX4cQ67miHBQqBYFvH10PP0DYWA==}
+  cojson-core-napi@0.20.8:
+    resolution: {integrity: sha512-uKNNmfNfNCTnljEnDQh6PQqxdfBrpu/wC/FaSIPlzcpyADU58FsrCjGc78xggvdi1tQ7JaiXqZhy5tOkUqw8sw==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
 
-  cojson-core-rn@0.20.7:
-    resolution: {integrity: sha512-1kjM+d1Rg6wIjX5DXlLAq7/p25krzkbZ/3aRuWYuAx7zPn/aSSKUTs3/J1NzvTSwSIz/eO63Pll3TGN82nnjgA==}
+  cojson-core-rn@0.20.8:
+    resolution: {integrity: sha512-oQvjg0yEp7Fys1Y7JI/Z/ZC94U+3wCPl9K6tK+9Rdpjhb7HsZOvoNatNcnVS+b++JUoBCL9FWEwqTEoBL0qqKw==}
     peerDependencies:
       react: '*'
       react-native: '*'
 
-  cojson-core-wasm@0.20.7:
-    resolution: {integrity: sha512-I8OPUbVqJ4MpBVoax2G+ZDRfnMUhSc/4oSJ8rfkGWxZd4/rzW6LIONoXliw/SvMMNkWGCSj3ipx9pU2lzmUOpA==}
+  cojson-core-wasm@0.20.8:
+    resolution: {integrity: sha512-sO4bB+1DUAebKmx396zUBjqVzIV/jhB1DA5khy3b17+0T1AcTktZQqvpVZ5gZzkej02blPYxqwzcaFopN0Y1Pw==}
 
-  cojson-storage-indexeddb@0.20.7:
-    resolution: {integrity: sha512-IxVzxSiN88P7VnsC7M7wjERKbxpEpULleWAdvq3dPVrjQfQ6FLEI176bMvgrPo0P6LEDOmx1jQyq/AmW1Yr/0w==}
+  cojson-storage-indexeddb@0.20.8:
+    resolution: {integrity: sha512-k2lmEA2em7Gpo1dbi89pDcDod24UhU7AvF2MmHzYLQnDr5RxFzlIx4OQs4oc3WdUscHWadDe4WQLTJhrigM2qA==}
 
-  cojson-transport-ws@0.20.7:
-    resolution: {integrity: sha512-QrS3h336UaugDpQgHUHSM2TdpWZwDcJmI6o+TCiprpZWeGmC4T6dUP6msm4G4419mWXnvOfEfWmelavx1NyI9Q==}
+  cojson-transport-ws@0.20.8:
+    resolution: {integrity: sha512-IISYqFGYg26vpI6SuLRsAjfofwyxiO766bTBNXkmYDVdTFUM4fGkSVSnTFoF38BXvm0vRUbKRQ4/D3MW6d8j9w==}
 
-  cojson@0.20.7:
-    resolution: {integrity: sha512-i6IDmxaXDKHNciDeVIhKEqyzsbvBh4lkjMI4f45ARorXvErbZNzIFH3CaV1XhRT8lTEPrXrwArrX8xkwWlrwow==}
+  cojson@0.20.8:
+    resolution: {integrity: sha512-SujoIbt7LEQY31JeDMqOJXXKR3Gj0VzAaf45AHTzHlxK0dOTWNP06QTRJZVFJb2NSosilMhZJCym5lAjdISAoA==}
 
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
@@ -2373,6 +2373,10 @@ packages:
     resolution: {integrity: sha512-xelSayHH36ZgE7ZWhli7pW34hNbNl8Ojv5KVmkJD4hBdD3th8Tfk9vYasLM+mXWOZhFkgZfxhLSnrwRr4elSSg==}
     engines: {node: '>=0.10.0'}
 
+  is-in-ssh@1.0.0:
+    resolution: {integrity: sha512-jYa6Q9rH90kR1vKB6NM7qqd1mge3Fx4Dhw5TVlK1MUBqhEOuCagrEHMevNuCcbECmXZ0ThXkRm+Ymr51HwEPAw==}
+    engines: {node: '>=20'}
+
   is-inside-container@1.0.0:
     resolution: {integrity: sha512-KIYLCCJghfHZxqjYBE7rEy0OBuTd5xCHS7tHVgvCLkx7StIoaxwNW3hCALgEUjFfeRk+MG/Qxmp/vtETEF3tRA==}
     engines: {node: '>=14.16'}
@@ -2405,8 +2409,8 @@ packages:
     resolution: {integrity: sha512-pzqtp31nLv/XFOzXGuvhCb8qhjmTVo5vjVk19XE4CRlSWz0KoeJ3bw9XsA7nOp9YBf4qHjwBxkDzKcME/J29Yg==}
     engines: {node: '>=8'}
 
-  jazz-tools@0.20.7:
-    resolution: {integrity: sha512-xDH9PWDu8vvQMwvoKSoNtYnanJN/LeEGSVbIKx99GMZ5sRkGkxi5lVahKwpX0J3P21lkxnbfeQXYzfYWjkyxwg==}
+  jazz-tools@0.20.8:
+    resolution: {integrity: sha512-xV+LbumIGKZ1zAurTCIkmoyfUE1nf9QrRvruHPYuKKX78Lz7yxlhyC/w/R7XVWCByqJZdEgPZqfgoFW5FhVWVg==}
     peerDependencies:
       '@bam.tech/react-native-image-resizer': '*'
       '@op-engineering/op-sqlite': '*'
@@ -2529,8 +2533,8 @@ packages:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
 
-  knip@5.83.0:
-    resolution: {integrity: sha512-FfmaHMntpZB13B1oJQMSs1hTOZxd0TOn+FYB3oWEI02XlxTW3RH4H7d8z5Us3g0ziHCYyl7z0B1xi8ENP3QEKA==}
+  knip@5.83.1:
+    resolution: {integrity: sha512-av3ZG/Nui6S/BNL8Tmj12yGxYfTnwWnslouW97m40him7o8MwiMjZBY9TPvlEWUci45aVId0/HbgTwSKIDGpMw==}
     engines: {node: '>=18.18.0'}
     hasBin: true
     peerDependencies:
@@ -2799,9 +2803,9 @@ packages:
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
 
-  open@10.2.0:
-    resolution: {integrity: sha512-YgBpdJHPyQ2UE5x+hlSXcnejzAvD0b22U2OuAP+8OnlJT+PjWPxtgmGqKKc+RgTM63U9gN0YzrYc71R2WT/hTA==}
-    engines: {node: '>=18'}
+  open@11.0.0:
+    resolution: {integrity: sha512-smsWv2LzFjP03xmvFoJ331ss6h+jixfA4UUV/Bsiyuu4YJPfN+FIQGOIiv4w9/+MoHkfkJ22UIaQWRVFRfH6Vw==}
+    engines: {node: '>=20'}
 
   open@7.4.2:
     resolution: {integrity: sha512-MVHddDVweXZF3awtlAS+6pgKLlm/JgxZ90+/NBurBoQctVOOB/zDdVjcyPzQ+0laDGbsWgrRkflI65sQeOgT9Q==}
@@ -2818,8 +2822,8 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
-  oxlint-tsgolint@0.11.4:
-    resolution: {integrity: sha512-VyQc+69TxQwUdsEPiVFN7vNZdDVO/FHaEcHltnWs3O6rvwxv67uADlknQQO714sbRdEahOjgO5dFf+K9ili0gg==}
+  oxlint-tsgolint@0.11.5:
+    resolution: {integrity: sha512-4uVv43EhkeMvlxDU1GUsR5P5c0q74rB/pQRhjGsTOnMIrDbg3TABTntRyeAkmXItqVEJTcDRv9+Yk+LFXkHKlg==}
     hasBin: true
 
   oxlint@1.43.0:
@@ -2887,6 +2891,10 @@ packages:
   postcss@8.5.6:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
     engines: {node: ^10 || ^12 || >=14}
+
+  powershell-utils@0.1.0:
+    resolution: {integrity: sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A==}
+    engines: {node: '>=20'}
 
   pretty-format@29.7.0:
     resolution: {integrity: sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ==}
@@ -3126,8 +3134,8 @@ packages:
     peerDependencies:
       solid-js: ^1.3
 
-  sonda@0.10.1:
-    resolution: {integrity: sha512-nXlQEVsw7833XADV94MXW9EKwLxn4S1U7oSUEgKCQeU4dt0CwYvEFcyRjhjM0Ae2taxsJ9HnFrtw8Eb40/rX4w==}
+  sonda@0.10.2:
+    resolution: {integrity: sha512-LYStDIhOipXMRC9BQGL05SUZrYqfm//hfccCS+jo0HhJc3N4uChZXap0cqqyOE6iWWUs0uJbHgX/+2bin0FqPg==}
     engines: {node: '>=20.19 || >=22.12'}
     hasBin: true
 
@@ -3329,8 +3337,8 @@ packages:
       '@testing-library/jest-dom':
         optional: true
 
-  vite-tsconfig-paths@6.0.5:
-    resolution: {integrity: sha512-f/WvY6ekHykUF1rWJUAbCU7iS/5QYDIugwpqJA+ttwKbxSbzNlqlE8vZSrsnxNQciUW+z6lvhlXMaEyZn9MSig==}
+  vite-tsconfig-paths@6.1.0:
+    resolution: {integrity: sha512-kpd3sY9glHIDaq4V/Tlc1Y8WaKtutoc3B525GHxEVKWX42FKfQsXvjFOemu1I8VIN8pNbrMLWVTbW79JaRUxKg==}
     peerDependencies:
       vite: '*'
 
@@ -3453,9 +3461,9 @@ packages:
       utf-8-validate:
         optional: true
 
-  wsl-utils@0.1.0:
-    resolution: {integrity: sha512-h3Fbisa2nKGPxCpm89Hk33lBLsnaGBvctQopaBSOW/uIs6FTe1ATyAnKFJrzVs9vpGdsTe73WF3V4lIsk4Gacw==}
-    engines: {node: '>=18'}
+  wsl-utils@0.3.1:
+    resolution: {integrity: sha512-g/eziiSUNBSsdDJtCLB8bdYEUMj4jR7AGeUo96p/3dTafgjHhpF4RiCFPiRILwjQoDXx5MqkBr4fwWtR3Ky4Wg==}
+    engines: {node: '>=20'}
 
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
@@ -4217,22 +4225,22 @@ snapshots:
   '@oxfmt/win32-x64@0.28.0':
     optional: true
 
-  '@oxlint-tsgolint/darwin-arm64@0.11.4':
+  '@oxlint-tsgolint/darwin-arm64@0.11.5':
     optional: true
 
-  '@oxlint-tsgolint/darwin-x64@0.11.4':
+  '@oxlint-tsgolint/darwin-x64@0.11.5':
     optional: true
 
-  '@oxlint-tsgolint/linux-arm64@0.11.4':
+  '@oxlint-tsgolint/linux-arm64@0.11.5':
     optional: true
 
-  '@oxlint-tsgolint/linux-x64@0.11.4':
+  '@oxlint-tsgolint/linux-x64@0.11.5':
     optional: true
 
-  '@oxlint-tsgolint/win32-arm64@0.11.4':
+  '@oxlint-tsgolint/win32-arm64@0.11.5':
     optional: true
 
-  '@oxlint-tsgolint/win32-x64@0.11.4':
+  '@oxlint-tsgolint/win32-x64@0.11.5':
     optional: true
 
   '@oxlint/darwin-arm64@1.43.0':
@@ -5018,68 +5026,68 @@ snapshots:
 
   clsx@2.1.1: {}
 
-  cojson-core-napi-darwin-arm64@0.20.7:
+  cojson-core-napi-darwin-arm64@0.20.8:
     optional: true
 
-  cojson-core-napi-darwin-x64@0.20.7:
+  cojson-core-napi-darwin-x64@0.20.8:
     optional: true
 
-  cojson-core-napi-linux-arm-gnueabihf@0.20.7:
+  cojson-core-napi-linux-arm-gnueabihf@0.20.8:
     optional: true
 
-  cojson-core-napi-linux-arm64-gnu@0.20.7:
+  cojson-core-napi-linux-arm64-gnu@0.20.8:
     optional: true
 
-  cojson-core-napi-linux-arm64-musl@0.20.7:
+  cojson-core-napi-linux-arm64-musl@0.20.8:
     optional: true
 
-  cojson-core-napi-linux-x64-gnu@0.20.7:
+  cojson-core-napi-linux-x64-gnu@0.20.8:
     optional: true
 
-  cojson-core-napi-linux-x64-musl@0.20.7:
+  cojson-core-napi-linux-x64-musl@0.20.8:
     optional: true
 
-  cojson-core-napi@0.20.7:
+  cojson-core-napi@0.20.8:
     optionalDependencies:
-      cojson-core-napi-darwin-arm64: 0.20.7
-      cojson-core-napi-darwin-x64: 0.20.7
-      cojson-core-napi-linux-arm-gnueabihf: 0.20.7
-      cojson-core-napi-linux-arm64-gnu: 0.20.7
-      cojson-core-napi-linux-arm64-musl: 0.20.7
-      cojson-core-napi-linux-x64-gnu: 0.20.7
-      cojson-core-napi-linux-x64-musl: 0.20.7
+      cojson-core-napi-darwin-arm64: 0.20.8
+      cojson-core-napi-darwin-x64: 0.20.8
+      cojson-core-napi-linux-arm-gnueabihf: 0.20.8
+      cojson-core-napi-linux-arm64-gnu: 0.20.8
+      cojson-core-napi-linux-arm64-musl: 0.20.8
+      cojson-core-napi-linux-x64-gnu: 0.20.8
+      cojson-core-napi-linux-x64-musl: 0.20.8
 
-  cojson-core-rn@0.20.7(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4):
+  cojson-core-rn@0.20.8(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4):
     dependencies:
       react: 19.2.4
       react-native: 0.83.1(@babel/core@7.28.4)(react@19.2.4)
       uniffi-bindgen-react-native: 0.29.3-1
 
-  cojson-core-wasm@0.20.7: {}
+  cojson-core-wasm@0.20.8: {}
 
-  cojson-storage-indexeddb@0.20.7(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4):
+  cojson-storage-indexeddb@0.20.8(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4):
     dependencies:
-      cojson: 0.20.7(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
+      cojson: 0.20.8(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
     transitivePeerDependencies:
       - react
       - react-native
 
-  cojson-transport-ws@0.20.7(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4):
+  cojson-transport-ws@0.20.8(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4):
     dependencies:
       '@opentelemetry/api': 1.9.0
-      cojson: 0.20.7(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
+      cojson: 0.20.8(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
     transitivePeerDependencies:
       - react
       - react-native
 
-  cojson@0.20.7(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4):
+  cojson@0.20.8(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4):
     dependencies:
       '@noble/hashes': 1.8.0
       '@opentelemetry/api': 1.9.0
       '@scure/base': 1.2.1
-      cojson-core-napi: 0.20.7
-      cojson-core-rn: 0.20.7(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
-      cojson-core-wasm: 0.20.7
+      cojson-core-napi: 0.20.8
+      cojson-core-rn: 0.20.8(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
+      cojson-core-wasm: 0.20.8
       unicode-segmenter: 0.12.0
     transitivePeerDependencies:
       - react
@@ -5559,6 +5567,8 @@ snapshots:
     dependencies:
       is-extglob: 2.1.1
 
+  is-in-ssh@1.0.0: {}
+
   is-inside-container@1.0.0:
     dependencies:
       is-docker: 3.0.0
@@ -5589,16 +5599,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  jazz-tools@0.20.7(@tiptap/pm@2.27.2)(csstype@3.1.3)(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4):
+  jazz-tools@0.20.8(@tiptap/pm@2.27.2)(csstype@3.1.3)(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4):
     dependencies:
       '@manuscripts/prosemirror-recreate-steps': 0.1.4
       '@scure/base': 1.2.1
       '@scure/bip39': 1.6.0
       '@tiptap/core': 2.27.2(@tiptap/pm@2.27.2)
       clsx: 2.1.1
-      cojson: 0.20.7(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
-      cojson-storage-indexeddb: 0.20.7(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
-      cojson-transport-ws: 0.20.7(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
+      cojson: 0.20.8(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
+      cojson-storage-indexeddb: 0.20.8(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
+      cojson-transport-ws: 0.20.8(react-native@0.83.1(@babel/core@7.28.4)(react@19.2.4))(react@19.2.4)
       fast-myers-diff: 3.2.0
       goober: 2.1.18(csstype@3.1.3)
       prosemirror-example-setup: 1.2.3
@@ -5709,7 +5719,7 @@ snapshots:
 
   kleur@4.1.5: {}
 
-  knip@5.83.0(@types/node@25.0.10)(typescript@5.9.3):
+  knip@5.83.1(@types/node@25.0.10)(typescript@5.9.3):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
       '@types/node': 25.0.10
@@ -6073,12 +6083,14 @@ snapshots:
     dependencies:
       wrappy: 1.0.2
 
-  open@10.2.0:
+  open@11.0.0:
     dependencies:
       default-browser: 5.4.0
       define-lazy-prop: 3.0.0
+      is-in-ssh: 1.0.0
       is-inside-container: 1.0.0
-      wsl-utils: 0.1.0
+      powershell-utils: 0.1.0
+      wsl-utils: 0.3.1
 
   open@7.4.2:
     dependencies:
@@ -6123,16 +6135,16 @@ snapshots:
       '@oxfmt/win32-arm64': 0.28.0
       '@oxfmt/win32-x64': 0.28.0
 
-  oxlint-tsgolint@0.11.4:
+  oxlint-tsgolint@0.11.5:
     optionalDependencies:
-      '@oxlint-tsgolint/darwin-arm64': 0.11.4
-      '@oxlint-tsgolint/darwin-x64': 0.11.4
-      '@oxlint-tsgolint/linux-arm64': 0.11.4
-      '@oxlint-tsgolint/linux-x64': 0.11.4
-      '@oxlint-tsgolint/win32-arm64': 0.11.4
-      '@oxlint-tsgolint/win32-x64': 0.11.4
+      '@oxlint-tsgolint/darwin-arm64': 0.11.5
+      '@oxlint-tsgolint/darwin-x64': 0.11.5
+      '@oxlint-tsgolint/linux-arm64': 0.11.5
+      '@oxlint-tsgolint/linux-x64': 0.11.5
+      '@oxlint-tsgolint/win32-arm64': 0.11.5
+      '@oxlint-tsgolint/win32-x64': 0.11.5
 
-  oxlint@1.43.0(oxlint-tsgolint@0.11.4):
+  oxlint@1.43.0(oxlint-tsgolint@0.11.5):
     optionalDependencies:
       '@oxlint/darwin-arm64': 1.43.0
       '@oxlint/darwin-x64': 1.43.0
@@ -6142,7 +6154,7 @@ snapshots:
       '@oxlint/linux-x64-musl': 1.43.0
       '@oxlint/win32-arm64': 1.43.0
       '@oxlint/win32-x64': 1.43.0
-      oxlint-tsgolint: 0.11.4
+      oxlint-tsgolint: 0.11.5
 
   p-limit@2.3.0:
     dependencies:
@@ -6183,6 +6195,8 @@ snapshots:
       nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  powershell-utils@0.1.0: {}
 
   pretty-format@29.7.0:
     dependencies:
@@ -6555,10 +6569,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  sonda@0.10.1:
+  sonda@0.10.2:
     dependencies:
       '@jridgewell/remapping': 2.3.5
-      open: 10.2.0
+      open: 11.0.0
 
   source-map-js@1.2.1: {}
 
@@ -6711,7 +6725,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  vite-tsconfig-paths@6.0.5(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2)):
+  vite-tsconfig-paths@6.1.0(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(yaml@2.8.2)):
     dependencies:
       debug: 4.4.1
       globrex: 0.1.2
@@ -6798,9 +6812,10 @@ snapshots:
 
   ws@8.18.0: {}
 
-  wsl-utils@0.1.0:
+  wsl-utils@0.3.1:
     dependencies:
       is-wsl: 3.1.0
+      powershell-utils: 0.1.0
 
   y18n@5.0.8: {}
 
