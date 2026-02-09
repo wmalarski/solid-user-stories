@@ -1,4 +1,5 @@
 import { getLoadedOrUndefined } from "jazz-tools";
+import { EdgeSchema } from "~/integrations/jazz/schema";
 import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "../utils/constants";
 import type { BoardStateContextValue } from "./board-state";
 import { findEdge, findTask, getTaskMap } from "./instance-maps";
@@ -65,8 +66,10 @@ export const insertEdgeInstanceToPoint = ({
 
   const breakX = (currentTask.positionX + cursorTask.positionX + TASK_RECT_WIDTH) / 2;
 
-  const size = edges.$jazz.push({ breakX, source, target });
-  return edges[size - 1].$jazz.id;
+  const edge = EdgeSchema.create({ breakX, source, target });
+  edges.$jazz.push(edge);
+
+  return edge.$jazz.id;
 };
 
 export type InsertEdgeInstanceToTaskArgs = {
@@ -94,13 +97,14 @@ export const insertEdgeInstanceToSecondTask = ({
 
   const breakX = (currentTask.positionX + secondTask.positionX + TASK_RECT_WIDTH) / 2;
 
-  const size = edges.$jazz.push({
+  const edge = EdgeSchema.create({
     breakX,
     source: isSource ? taskId : secondTaskId,
     target: isSource ? secondTaskId : taskId,
   });
+  edges.$jazz.push(edge);
 
-  return edges[size - 1].$jazz.id;
+  return edge.$jazz.id;
 };
 
 export type UpdateEdgeInstanceArgs = {

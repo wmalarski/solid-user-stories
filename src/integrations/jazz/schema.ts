@@ -35,7 +35,6 @@ export const BoardSchema = co.map({
   sectionY: SectionListSchema,
   tasks: TaskListSchema,
   title: z.string(),
-  user: z.string(),
 });
 
 export const BoardsListSchema = co.list(BoardSchema);

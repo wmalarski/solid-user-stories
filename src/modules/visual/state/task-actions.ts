@@ -1,5 +1,5 @@
 import { getLoadedOrUndefined } from "jazz-tools";
-import type { TaskInstanceInput } from "~/integrations/jazz/schema";
+import { TaskSchema, type TaskInstanceInput } from "~/integrations/jazz/schema";
 import type { BoardStateContextValue } from "./board-state";
 import { findTask } from "./instance-maps";
 
@@ -13,8 +13,9 @@ export const insertTaskInstance = ({ boardState, ...args }: InsertTaskInstanceAr
   if (!tasksValue) {
     return;
   }
-  const size = tasksValue.$jazz.push(args);
-  return tasksValue[size - 1].$jazz.id;
+  const task = TaskSchema.create(args);
+  tasksValue.$jazz.push(task);
+  return task.$jazz.id;
 };
 
 export type DeleteTaskInstanceArgs = {

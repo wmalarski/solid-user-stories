@@ -1,11 +1,12 @@
 import { useNavigate } from "@solidjs/router";
 import { decode } from "decode-formdata";
+import { Group } from "jazz-tools";
 import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
 import { useJazzAccount } from "~/integrations/jazz/provider";
-import { BoardsListSchema } from "~/integrations/jazz/schema";
+import { BoardSchema, BoardsListSchema } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
 import { Button } from "~/ui/button/button";
 import {
@@ -52,22 +53,27 @@ export const InsertBoardDialog: Component = () => {
       return;
     }
 
+    const accountValue = account();
     const boardsValue = boards();
-    if (!boardsValue) {
+    if (!boardsValue || !accountValue) {
       return;
     }
 
-    const index = boardsValue.$jazz.push({
-      description: parsed.output.description,
-      edges: [],
-      sectionX: [{ name: t("board.forms.xSectionDefault"), size: 500 }],
-      sectionY: [{ name: t("board.forms.ySectionDefault"), size: 500 }],
-      tasks: [],
-      title: parsed.output.title,
-      user: "1",
-    });
+    const group = Group.create({ owner: accountValue });
 
-    const boardId = boardsValue[index - 1].$jazz.id;
+    const board = BoardSchema.create(
+      {
+        description: parsed.output.description,
+        edges: [],
+        sectionX: [{ name: t("board.forms.xSectionDefault"), size: 500 }],
+        sectionY: [{ name: t("board.forms.ySectionDefault"), size: 500 }],
+        tasks: [],
+        title: parsed.output.title,
+      },
+      { owner: group },
+    );
+
+    const boardId = board.$jazz.id;
 
     navigate(createLink("/board/:boardId", { params: { boardId } }));
   };
