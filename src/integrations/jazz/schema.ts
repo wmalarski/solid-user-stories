@@ -3,7 +3,6 @@ import { co, z } from "jazz-tools";
 export const SectionSchema = co.map({
   name: z.string(),
   size: z.number(),
-  tasks: z.array(z.string()),
 });
 
 export const TaskSchema = co.map({
@@ -65,3 +64,7 @@ export type EdgeListInstance = co.loaded<typeof EdgesListSchema>;
 export type TaskInstance = co.loaded<typeof TaskSchema>;
 export type TaskListInstance = co.loaded<typeof TaskListSchema>;
 export type BoardInstance = co.loaded<typeof BoardSchema>;
+
+export type SectionInstanceInput = co.input<typeof SectionSchema>;
+export type EdgeInstanceInput = co.input<typeof EdgeSchema>;
+export type TaskInstanceInput = co.input<typeof TaskSchema>;

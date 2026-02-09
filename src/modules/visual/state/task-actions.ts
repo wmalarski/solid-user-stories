@@ -1,19 +1,9 @@
 import { getLoadedOrUndefined } from "jazz-tools";
-import type { TaskInstance } from "~/integrations/jazz/schema";
+import type { TaskInstanceInput } from "~/integrations/jazz/schema";
 import type { BoardStateContextValue } from "./board-state";
 import { findTask } from "./instance-maps";
 
-export type InsertTaskInstanceArgs = Pick<
-  TaskInstance,
-  | "description"
-  | "estimate"
-  | "link"
-  | "title"
-  | "positionX"
-  | "positionY"
-  | "sectionX"
-  | "sectionY"
-> & {
+export type InsertTaskInstanceArgs = TaskInstanceInput & {
   boardState: BoardStateContextValue;
 };
 
@@ -41,7 +31,7 @@ export const deleteTaskInstance = ({ boardState, taskId }: DeleteTaskInstanceArg
 };
 
 export type UpdateTaskInstancePositionArgs = Pick<
-  TaskInstance,
+  TaskInstanceInput,
   "sectionX" | "sectionY" | "positionX" | "positionY"
 > & {
   boardState: BoardStateContextValue;
@@ -70,7 +60,7 @@ export const updateTaskInstancePosition = ({
 };
 
 export type UpdateTaskInstanceDetailsArgs = Pick<
-  TaskInstance,
+  TaskInstanceInput,
   "description" | "estimate" | "link" | "title"
 > & {
   boardState: BoardStateContextValue;

@@ -2,39 +2,21 @@ import { getLoadedOrUndefined, type MaybeLoaded } from "jazz-tools";
 import type {
   BoardInstance,
   EdgeInstance,
+  EdgeInstanceInput,
   EdgeListInstance,
   SectionInstance,
+  SectionInstanceInput,
   SectionListInstance,
   TaskInstance,
+  TaskInstanceInput,
   TaskListInstance,
 } from "~/integrations/jazz/schema";
 
-export type Orientation = "horizontal" | "vertical";
+export type WithId<T> = T & { id: string };
 
-export type SectionModel = {
-  id: string;
-  name: string;
-  size: number;
-};
-
-export type TaskModel = {
-  id: string;
-  description: string;
-  estimate: number;
-  link?: string;
-  positionX: number;
-  positionY: number;
-  sectionX: string | null;
-  sectionY: string | null;
-  title: string;
-};
-
-export type EdgeModel = {
-  id: string;
-  breakX: number;
-  source: string;
-  target: string;
-};
+export type SectionModel = WithId<SectionInstanceInput>;
+export type TaskModel = WithId<TaskInstanceInput>;
+export type EdgeModel = WithId<EdgeInstanceInput>;
 
 export type BoardModel = {
   edges: EdgeModel[];

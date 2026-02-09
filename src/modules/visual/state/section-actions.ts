@@ -95,7 +95,6 @@ export const insertHorizontalSectionInstance = ({
   getLoadedOrUndefined(board.sectionX)?.$jazz.splice(index + 1, 0, {
     name,
     size: shift,
-    tasks: [],
   });
 
   shiftTasks({ attribute: "positionX", position, shift, taskMap: taskMap });
@@ -121,7 +120,6 @@ export const insertVerticalSectionInstance = ({
   getLoadedOrUndefined(board.sectionY)?.$jazz.splice(index + 1, 0, {
     name,
     size: shift,
-    tasks: [],
   });
 
   shiftTasks({ attribute: "positionY", position, shift, taskMap: taskMap });
