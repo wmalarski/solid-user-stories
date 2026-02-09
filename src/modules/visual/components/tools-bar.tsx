@@ -23,6 +23,8 @@ import {
   type ToolType,
 } from "../contexts/tools-state";
 import { SVG_EXPORT_SELECTOR } from "../utils/constants";
+import { deleteEdgeInstance } from "../utils/edge-actions";
+import { deleteTaskInstance } from "../utils/task-actions";
 
 export const ToolsBar: Component = () => {
   const { t } = useI18n();
@@ -92,9 +94,9 @@ const DeleteSelectedElementDialog: Component = () => {
     }
 
     if (selection.kind === "task") {
-      boardState.tasks.deleteTask({ taskId: selection.id });
+      deleteTaskInstance({ boardState, taskId: selection.id });
     } else {
-      boardState.edges.deleteEdge({ edgeId: selection.id });
+      deleteEdgeInstance({ boardState, edgeId: selection.id });
     }
 
     onSelectionChange(null);

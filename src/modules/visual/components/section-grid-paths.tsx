@@ -5,6 +5,10 @@ import { translateX, translateY, useBoardTransformContext } from "../contexts/bo
 import { DottedLine } from "../ui/dotted-line";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
+import {
+  updateHorizontalSectionInstanceSize,
+  updateVerticalSectionInstanceSize,
+} from "../utils/section-actions";
 import type { SectionConfig } from "../utils/section-configs";
 
 export const SectionGridStaticPaths: Component = () => {
@@ -21,10 +25,10 @@ export const SectionGridPaths: Component = () => {
 
   return (
     <>
-      <Index each={boardState.sectionY.configs()}>
+      <Index each={boardState.sectionYConfigs()}>
         {(entry) => <HorizontalPath config={entry()} />}
       </Index>
-      <Index each={boardState.sectionX.configs()}>
+      <Index each={boardState.sectionXConfigs()}>
         {(entry) => <VerticalPath config={entry()} />}
       </Index>
     </>
@@ -36,10 +40,10 @@ export const ExportableSectionGridPaths: Component = () => {
 
   return (
     <>
-      <Index each={boardState.sectionY.configs()}>
+      <Index each={boardState.sectionYConfigs()}>
         {(entry) => <ExportableHorizontalPath position={entry().end} />}
       </Index>
-      <Index each={boardState.sectionX.configs()}>
+      <Index each={boardState.sectionXConfigs()}>
         {(entry) => <ExportableVerticalPath position={entry().end} />}
       </Index>
     </>
@@ -99,7 +103,8 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
       const updatedY = (event.y - transformValue.y) / transformValue.k - SECTION_Y_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedY);
 
-      boardState.sectionX.updateSectionPosition({
+      updateHorizontalSectionInstanceSize({
+        boardState,
         draggedTasks: draggedTasks(),
         position: withLimit,
         sectionId: props.config.section.id,
@@ -163,7 +168,8 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
       const updatedX = (event.x - transformValue.x) / transformValue.k - SECTION_X_OFFSET;
       const withLimit = Math.max(maxNotDraggedPosition(), updatedX);
 
-      boardState.sectionY.updateSectionPosition({
+      updateVerticalSectionInstanceSize({
+        boardState,
         draggedEdges: draggedEdges(),
         draggedTasks: draggedTasks(),
         position: withLimit,

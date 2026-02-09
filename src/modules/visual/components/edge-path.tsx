@@ -15,6 +15,7 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
+import { updateEdgeInstance } from "../utils/edge-actions";
 
 type EdgeEntry = {
   edge: EdgeModel;
@@ -125,7 +126,8 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
 
   createD3DragElement({
     onDragged(event) {
-      boardState.edges.updateEdgePosition({
+      updateEdgeInstance({
+        boardState,
         breakX: event.x,
         edgeId: props.entry.edge.id,
       });

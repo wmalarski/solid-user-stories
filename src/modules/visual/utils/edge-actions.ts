@@ -1,10 +1,10 @@
 import { getLoadedOrUndefined } from "jazz-tools";
-import type { BoardInstance } from "~/integrations/jazz/schema";
+import type { BoardStateContextValue } from "../contexts/board-state";
 import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
 import { getEdgeMap, getTaskMap } from "./instance-maps";
 
 export type InsertEdgeInstanceToPointArgs = {
-  board: BoardInstance;
+  boardState: BoardStateContextValue;
   x: number;
   y: number;
   taskId: string;
@@ -12,12 +12,13 @@ export type InsertEdgeInstanceToPointArgs = {
 };
 
 export const insertEdgeInstanceToPoint = ({
-  board,
+  boardState,
   x,
   y,
   taskId,
   isSource,
 }: InsertEdgeInstanceToPointArgs) => {
+  const board = boardState.board();
   const edges = getLoadedOrUndefined(board.edges);
   const taskPositions = getTaskMap(board);
 
@@ -69,18 +70,19 @@ export const insertEdgeInstanceToPoint = ({
 };
 
 export type InsertEdgeInstanceToTaskArgs = {
-  board: BoardInstance;
+  boardState: BoardStateContextValue;
   taskId: string;
   secondTaskId: string;
   isSource: boolean;
 };
 
 export const insertEdgeInstanceToSecondTask = ({
-  board,
+  boardState,
   taskId,
   isSource,
   secondTaskId,
 }: InsertEdgeInstanceToTaskArgs) => {
+  const board = boardState.board();
   const taskPositions = getTaskMap(board);
   const currentTask = taskPositions.get(taskId);
   const secondTask = taskPositions.get(secondTaskId);
@@ -103,22 +105,24 @@ export const insertEdgeInstanceToSecondTask = ({
 };
 
 export type UpdateEdgeInstanceArgs = {
-  board: BoardInstance;
+  boardState: BoardStateContextValue;
   edgeId: string;
   breakX: number;
 };
 
-export const updateEdgeInstance = ({ board, breakX, edgeId }: UpdateEdgeInstanceArgs) => {
+export const updateEdgeInstance = ({ boardState, breakX, edgeId }: UpdateEdgeInstanceArgs) => {
+  const board = boardState.board();
   const edgeMap = getEdgeMap(board);
   const instance = edgeMap.get(edgeId);
   instance?.$jazz.set("breakX", breakX);
 };
 
 export type DeleteEdgeInstanceArgs = {
-  board: BoardInstance;
+  boardState: BoardStateContextValue;
   edgeId: string;
 };
 
-export const deleteEdgeInstance = ({ board, edgeId }: DeleteEdgeInstanceArgs) => {
+export const deleteEdgeInstance = ({ boardState, edgeId }: DeleteEdgeInstanceArgs) => {
+  const board = boardState.board();
   getLoadedOrUndefined(board.edges)?.$jazz.remove((edge) => edge.$jazz.id === edgeId);
 };

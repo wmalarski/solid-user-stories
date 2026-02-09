@@ -1,5 +1,6 @@
 import { getLoadedOrUndefined } from "jazz-tools";
-import type { BoardInstance, TaskInstance } from "~/integrations/jazz/schema";
+import type { TaskInstance } from "~/integrations/jazz/schema";
+import type { BoardStateContextValue } from "../contexts/board-state";
 import { getTaskMap } from "./instance-maps";
 
 export type InsertTaskInstanceArgs = Pick<
@@ -13,10 +14,11 @@ export type InsertTaskInstanceArgs = Pick<
   | "sectionX"
   | "sectionY"
 > & {
-  board: BoardInstance;
+  boardState: BoardStateContextValue;
 };
 
-export const insertTaskInstance = ({ board, ...args }: InsertTaskInstanceArgs) => {
+export const insertTaskInstance = ({ boardState, ...args }: InsertTaskInstanceArgs) => {
+  const board = boardState.board();
   const tasksValue = getLoadedOrUndefined(board.tasks);
   if (!tasksValue) {
     return;
@@ -26,11 +28,12 @@ export const insertTaskInstance = ({ board, ...args }: InsertTaskInstanceArgs) =
 };
 
 export type DeleteTaskInstanceArgs = {
-  board: BoardInstance;
+  boardState: BoardStateContextValue;
   taskId: string;
 };
 
-export const deleteTaskInstance = ({ board, taskId }: DeleteTaskInstanceArgs) => {
+export const deleteTaskInstance = ({ boardState, taskId }: DeleteTaskInstanceArgs) => {
+  const board = boardState.board();
   getLoadedOrUndefined(board.edges)?.$jazz.remove((edge) =>
     edge.$isLoaded ? edge.target === taskId || edge.source === taskId : false,
   );
@@ -41,18 +44,19 @@ export type UpdateTaskInstancePositionArgs = Pick<
   TaskInstance,
   "sectionX" | "sectionY" | "positionX" | "positionY"
 > & {
-  board: BoardInstance;
+  boardState: BoardStateContextValue;
   taskId: string;
 };
 
 export const updateTaskInstancePosition = ({
-  board,
+  boardState,
   positionX,
   positionY,
   taskId,
   sectionX,
   sectionY,
 }: UpdateTaskInstancePositionArgs) => {
+  const board = boardState.board();
   const taskMap = getTaskMap(board);
   const instance = taskMap.get(taskId);
 
@@ -70,18 +74,19 @@ export type UpdateTaskInstanceDetailsArgs = Pick<
   TaskInstance,
   "description" | "estimate" | "link" | "title"
 > & {
-  board: BoardInstance;
+  boardState: BoardStateContextValue;
   taskId: string;
 };
 
 export const updateTaskInstanceDetails = ({
-  board,
+  boardState,
   description,
   estimate,
   link,
   taskId,
   title,
 }: UpdateTaskInstanceDetailsArgs) => {
+  const board = boardState.board();
   const taskMap = getTaskMap(board);
   const instance = taskMap.get(taskId);
 

@@ -155,8 +155,8 @@ const ExportableBoard: Component = () => {
   const boardBox = createMemo(() =>
     getBoardBox({
       edges: boardState.store.edges,
-      sectionsX: boardState.sectionX.configs(),
-      sectionsY: boardState.sectionY.configs(),
+      sectionsX: boardState.sectionXConfigs(),
+      sectionsY: boardState.sectionYConfigs(),
       tasks: boardState.store.tasks,
     }),
   );

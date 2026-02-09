@@ -15,17 +15,17 @@ import { DeleteSectionDialog, InsertSectionDialog, UpdateSectionDialog } from ".
 export const SectionItems: Component = () => {
   const boardState = useBoardStateContext();
 
-  const xLength = createMemo(() => boardState.sectionX.configs().length);
-  const yLength = createMemo(() => boardState.sectionY.configs().length);
+  const xLength = createMemo(() => boardState.sectionXConfigs().length);
+  const yLength = createMemo(() => boardState.sectionYConfigs().length);
 
   return (
     <>
       <HorizontalBackgroundRect />
       <VerticalBackgroundRect />
-      <Index each={boardState.sectionX.configs()}>
+      <Index each={boardState.sectionXConfigs()}>
         {(entry) => <HorizontalItemRect totalLength={xLength()} config={entry()} />}
       </Index>
-      <Index each={boardState.sectionY.configs()}>
+      <Index each={boardState.sectionYConfigs()}>
         {(entry) => <VerticalItemRect totalLength={yLength()} config={entry()} />}
       </Index>
       <CenterRect />
@@ -54,10 +54,10 @@ export const ExportableSectionItems: Component = () => {
         width={SECTION_X_OFFSET}
         filter="url(#dropshadow)"
       />
-      <Index each={boardState.sectionX.configs()}>
+      <Index each={boardState.sectionXConfigs()}>
         {(entry) => <ExportableHorizontalItemRect config={entry()} />}
       </Index>
-      <Index each={boardState.sectionY.configs()}>
+      <Index each={boardState.sectionYConfigs()}>
         {(entry) => <ExportableVerticalItemRect config={entry()} />}
       </Index>
     </>

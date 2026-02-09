@@ -26,6 +26,14 @@ import { getInvalidStateProps, parseFormValidationError, type FormIssues } from 
 import type { Orientation, SectionModel } from "../contexts/board-model";
 import { useBoardStateContext } from "../contexts/board-state";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
+import {
+  deleteHorizontalSectionInstance,
+  deleteVerticalSectionInstance,
+  insertHorizontalSectionInstance,
+  insertVerticalSectionInstance,
+  updateHorizontalSectionInstance,
+  updateVerticalSectionInstance,
+} from "../utils/section-actions";
 
 const SectionFieldsSchema = v.object({
   name: v.string(),
@@ -61,16 +69,16 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
     }
 
     if (props.orientation === "horizontal") {
-      boardState.sectionX.insertSection({
+      insertHorizontalSectionInstance({
+        boardState,
         index: props.index,
         name: parsed.output.name,
-        sectionConfigs: boardState.sectionX.configs(),
       });
     } else {
-      boardState.sectionY.insertSection({
+      insertVerticalSectionInstance({
+        boardState,
         index: props.index,
         name: parsed.output.name,
-        sectionConfigs: boardState.sectionY.configs(),
       });
     }
 
@@ -138,11 +146,11 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
       return;
     }
 
-    const section = { id: props.section.id, name: parsed.output.name };
+    const section = { boardState, id: props.section.id, name: parsed.output.name };
     if (props.orientation === "horizontal") {
-      boardState.sectionX.updateSectionName(section);
+      updateHorizontalSectionInstance(section);
     } else {
-      boardState.sectionY.updateSectionName(section);
+      updateVerticalSectionInstance(section);
     }
   };
 
@@ -225,18 +233,17 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
   const onSave = () => {
     closeDialog(dialogId);
 
+    const section = {
+      boardState,
+      endPosition: props.endPosition,
+      sectionId: props.section.id,
+      shift: -props.section.size,
+    };
+
     if (props.orientation === "horizontal") {
-      boardState.sectionX.deleteSection({
-        endPosition: props.endPosition,
-        sectionId: props.section.id,
-        shift: -props.section.size,
-      });
+      deleteHorizontalSectionInstance(section);
     } else {
-      boardState.sectionY.deleteSection({
-        endPosition: props.endPosition,
-        sectionId: props.section.id,
-        shift: -props.section.size,
-      });
+      deleteVerticalSectionInstance(section);
     }
   };
 

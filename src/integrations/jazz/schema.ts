@@ -59,14 +59,9 @@ export const BoardAccount = co
   });
 
 export type SectionInstance = co.loaded<typeof SectionSchema>;
-export type SectionInput = co.input<typeof SectionSchema>;
 export type SectionListInstance = co.loaded<typeof SectionListSchema>;
-
 export type EdgeInstance = co.loaded<typeof EdgeSchema>;
 export type EdgeListInstance = co.loaded<typeof EdgesListSchema>;
-
 export type TaskInstance = co.loaded<typeof TaskSchema>;
-export type TaskInput = co.input<typeof TaskSchema>;
 export type TaskListInstance = co.loaded<typeof TaskListSchema>;
-
 export type BoardInstance = co.loaded<typeof BoardSchema>;
