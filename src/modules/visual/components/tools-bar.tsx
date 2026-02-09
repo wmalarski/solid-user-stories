@@ -1,6 +1,9 @@
-import { createUniqueId, type Component, type ParentProps } from "solid-js";
+import { createInviteLink } from "jazz-tools";
+import { createUniqueId, Show, type Component, type ParentProps } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
+import { useJazzAccount } from "~/integrations/jazz/provider";
+import { createLink } from "~/integrations/router/create-link";
 import { ThemeToggle } from "~/integrations/theme/theme-toggle";
 import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
@@ -8,6 +11,7 @@ import { Button } from "~/ui/button/button";
 import { closeDialog, DialogTrigger } from "~/ui/dialog/dialog";
 import { DownloadIcon } from "~/ui/icons/download-icon";
 import { HandIcon } from "~/ui/icons/hand-icon";
+import { LinkIcon } from "~/ui/icons/link-icon";
 import { MinusIcon } from "~/ui/icons/minus-icon";
 import { PlusIcon } from "~/ui/icons/plus-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
@@ -66,6 +70,7 @@ export const ToolsBar: Component = () => {
           </Button>
         </Tooltip>
         <DeleteSelectedElementDialog />
+        <InviteButton />
         <ExportToPngButton />
         <Tooltip data-tip={t("board.forms.update")} placement="top">
           <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
@@ -233,5 +238,34 @@ const ToolContainer: Component<ToolContainerProps> = (props) => {
     <div class={cx("flex gap-1 rounded-3xl bg-base-200 p-1 shadow-lg", props.class)}>
       {props.children}
     </div>
+  );
+};
+
+const InviteButton = () => {
+  const { t } = useI18n();
+
+  const account = useJazzAccount();
+  const boardState = useBoardStateContext();
+
+  const onClick = () => {
+    const boardValue = boardState.board();
+    const url = createLink("/invite", {});
+    createInviteLink(boardValue, "writer", url);
+  };
+
+  return (
+    <Show when={account().canAdmin(boardState.board())}>
+      <Tooltip data-tip={t("board.invite.invite")}>
+        <Button
+          aria-label={t("board.invite.invite")}
+          onClick={onClick}
+          shape="circle"
+          size="sm"
+          variant="ghost"
+        >
+          <LinkIcon />
+        </Button>
+      </Tooltip>
+    </Show>
   );
 };

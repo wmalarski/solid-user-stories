@@ -22,6 +22,9 @@ const enDict = {
       xSectionDefault: "Sprint 1",
       ySectionDefault: "Feature 1",
     },
+    invite: {
+      invite: "Invite",
+    },
     sections: {
       confirmDelete: "Confirm delete task",
       deleteSection: "Delete axis",
@@ -61,6 +64,7 @@ const enDict = {
     confirm: "Are you sure you want to proceed?",
     delete: "Delete",
     edit: "Edit",
+    loading: "Loading...",
     openMenu: "Open Menu",
     save: "Save",
     update: "Update",

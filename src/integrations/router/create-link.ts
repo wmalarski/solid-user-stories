@@ -3,6 +3,10 @@ export interface NavigationPaths {
     params: { boardId: string };
     search: never;
   };
+  "/invite": {
+    params: never;
+    search: never;
+  };
   "/": {
     params: never;
     search: never;

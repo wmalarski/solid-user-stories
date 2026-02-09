@@ -7,6 +7,7 @@ import { Head } from "./integrations/meta/head";
 import { ErrorFallback } from "./integrations/router/error-fallback";
 import { ThemeProvider } from "./integrations/theme/theme-context";
 import { HomeRoute } from "./modules/home/home-route";
+import { InviteRoute } from "./modules/invite/invite-route";
 
 const VisualRoute = lazy(() =>
   // oxlint-disable-next-line promise/prefer-await-to-then
@@ -33,6 +34,7 @@ export const App: Component = () => (
     )}
   >
     <Route path="/" component={HomeRoute} />
+    <Route path="/invite" component={InviteRoute} />
     <Route path="/board/:boardId" component={VisualRoute} />
   </Router>
 );
