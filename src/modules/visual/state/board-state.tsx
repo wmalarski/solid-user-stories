@@ -11,8 +11,8 @@ import {
 import { createStore, reconcile } from "solid-js/store";
 import { BoardSchema, type BoardInstance } from "~/integrations/jazz/schema";
 
-import { getSectionConfig } from "../utils/section-configs";
 import { mapToBoardModel, type BoardModel } from "./board-model";
+import { getSectionConfig } from "./section-configs";
 
 const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const [store, setStore] = createStore<BoardModel>({

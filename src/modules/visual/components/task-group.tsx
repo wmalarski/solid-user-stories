@@ -6,12 +6,15 @@ import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
 import { openDialog } from "~/ui/dialog/dialog";
 import { LinkIcon } from "~/ui/icons/link-icon";
-import type { TaskModel } from "../contexts/board-model";
-import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
+import type { TaskModel } from "../state/board-model";
+import { useBoardStateContext } from "../state/board-state";
+import { insertEdgeInstanceToPoint, insertEdgeInstanceToSecondTask } from "../state/edge-actions";
+import { mapToSections } from "../state/section-configs";
+import { updateTaskInstancePosition } from "../state/task-actions";
 import { MultilineText } from "../ui/multiline-text";
 import {
   TASK_ARROW_OFFSET,
@@ -26,9 +29,6 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
-import { insertEdgeInstanceToPoint, insertEdgeInstanceToSecondTask } from "../utils/edge-actions";
-import { mapToSections } from "../utils/section-configs";
-import { updateTaskInstancePosition } from "../utils/task-actions";
 import type { Point2D } from "../utils/types";
 import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 

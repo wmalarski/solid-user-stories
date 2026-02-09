@@ -1,5 +1,10 @@
-import type { EdgeModel, TaskModel } from "../contexts/board-model";
-import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
+import {
+  SECTION_X_OFFSET,
+  SECTION_Y_OFFSET,
+  TASK_RECT_HEIGHT,
+  TASK_RECT_WIDTH,
+} from "../utils/constants";
+import type { EdgeModel, TaskModel } from "./board-model";
 import type { SectionConfigs } from "./section-configs";
 
 const numberSortAscending = (left: number, right: number) => left - right;

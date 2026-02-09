@@ -29,18 +29,18 @@ import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
-import type { TaskModel } from "../contexts/board-model";
-import { useBoardStateContext } from "../contexts/board-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
-import { SVG_SELECTOR } from "../utils/constants";
-import { createD3ClickListener } from "../utils/create-d3-click-listener";
-import { mapToSections } from "../utils/section-configs";
+import type { TaskModel } from "../state/board-model";
+import { useBoardStateContext } from "../state/board-state";
+import { mapToSections } from "../state/section-configs";
 import {
   deleteTaskInstance,
   insertTaskInstance,
   updateTaskInstanceDetails,
-} from "../utils/task-actions";
+} from "../state/task-actions";
+import { SVG_SELECTOR } from "../utils/constants";
+import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import type { Point2D } from "../utils/types";
 
 export const TaskFieldsSchema = v.object({

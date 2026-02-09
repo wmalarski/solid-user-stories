@@ -1,8 +1,9 @@
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Accessor, type Component } from "solid-js";
-import type { EdgeModel, TaskModel } from "../contexts/board-model";
-import { useBoardStateContext } from "../contexts/board-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
+import type { EdgeModel, TaskModel } from "../state/board-model";
+import { useBoardStateContext } from "../state/board-state";
+import { updateEdgeInstance } from "../state/edge-actions";
 import { AnimatedPath } from "../ui/animated-path";
 import { HandleRect } from "../ui/handle-rect";
 import { SelectablePath } from "../ui/selectable-path";
@@ -15,7 +16,6 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
-import { updateEdgeInstance } from "../utils/edge-actions";
 
 type EdgeEntry = {
   edge: EdgeModel;

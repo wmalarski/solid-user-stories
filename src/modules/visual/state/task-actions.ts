@@ -1,6 +1,6 @@
 import { getLoadedOrUndefined } from "jazz-tools";
 import type { TaskInstance } from "~/integrations/jazz/schema";
-import type { BoardStateContextValue } from "../contexts/board-state";
+import type { BoardStateContextValue } from "./board-state";
 import { getTaskMap } from "./instance-maps";
 
 export type InsertTaskInstanceArgs = Pick<

@@ -3,16 +3,16 @@ import { createMemo, createSignal, For, Show, Suspense, type Component } from "s
 import { cx } from "tailwind-variants";
 import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
 import { BoardSchema, type BoardInstance } from "~/integrations/jazz/schema";
-import { BoardStateProvider, useBoardStateContext } from "../contexts/board-state";
 import { BoardTransformProvider, useBoardTransformContext } from "../contexts/board-transform";
 import { DragStateProvider, useDragStateContext } from "../contexts/drag-state";
 import { EdgeDragStateProvider } from "../contexts/edge-drag-state";
 import { ExportStateProvider, useExportStateContext } from "../contexts/export-state";
 import { SelectionStateProvider, useSelectionStateContext } from "../contexts/selection-state";
 import { ToolsStateProvider } from "../contexts/tools-state";
+import { BoardStateProvider, useBoardStateContext } from "../state/board-state";
+import { getBoardBox } from "../state/get-board-box";
 import { SVG_CLASS, SVG_EXPORT_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
-import { getBoardBox } from "../utils/get-board-box";
 import { DraggedEdge } from "./dragged-edge";
 import { EdgePath, ExportableEdgePath } from "./edge-path";
 import {

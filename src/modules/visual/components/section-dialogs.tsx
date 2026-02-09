@@ -23,9 +23,9 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
-import type { Orientation, SectionModel } from "../contexts/board-model";
-import { useBoardStateContext } from "../contexts/board-state";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
+import type { Orientation, SectionModel } from "../state/board-model";
+import { useBoardStateContext } from "../state/board-state";
 import {
   deleteHorizontalSectionInstance,
   deleteVerticalSectionInstance,
@@ -33,7 +33,7 @@ import {
   insertVerticalSectionInstance,
   updateHorizontalSectionInstance,
   updateVerticalSectionInstance,
-} from "../utils/section-actions";
+} from "../state/section-actions";
 
 const SectionFieldsSchema = v.object({
   name: v.string(),

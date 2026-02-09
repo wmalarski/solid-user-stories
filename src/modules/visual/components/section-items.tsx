@@ -4,12 +4,12 @@ import { createLink } from "~/integrations/router/create-link";
 import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
 import { ChevronLeftIcon } from "~/ui/icons/chevron-left-icon";
-import type { Orientation } from "../contexts/board-model";
-import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
+import type { Orientation } from "../state/board-model";
+import { useBoardStateContext } from "../state/board-state";
+import type { SectionConfig } from "../state/section-configs";
 import { MultilineText } from "../ui/multiline-text";
 import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TEXT_HEIGHT, TEXT_PADDING } from "../utils/constants";
-import type { SectionConfig } from "../utils/section-configs";
 import { DeleteSectionDialog, InsertSectionDialog, UpdateSectionDialog } from "./section-dialogs";
 
 export const SectionItems: Component = () => {

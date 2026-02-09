@@ -1,6 +1,6 @@
-import type { SectionModel } from "../contexts/board-model";
-import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "./constants";
-import type { Point2D } from "./types";
+import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
+import type { Point2D } from "../utils/types";
+import type { SectionModel } from "./board-model";
 
 const getPositions = (collection: SectionModel[]) => {
   return collection.reduce(

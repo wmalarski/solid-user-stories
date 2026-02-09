@@ -1,15 +1,15 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
-import type { EdgeModel, TaskModel } from "../contexts/board-model";
-import { useBoardStateContext } from "../contexts/board-state";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
-import { DottedLine } from "../ui/dotted-line";
-import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
-import { createD3DragElement } from "../utils/create-d3-drag-element";
+import type { EdgeModel, TaskModel } from "../state/board-model";
+import { useBoardStateContext } from "../state/board-state";
 import {
   updateHorizontalSectionInstanceSize,
   updateVerticalSectionInstanceSize,
-} from "../utils/section-actions";
-import type { SectionConfig } from "../utils/section-configs";
+} from "../state/section-actions";
+import type { SectionConfig } from "../state/section-configs";
+import { DottedLine } from "../ui/dotted-line";
+import { SECTION_X_OFFSET, SECTION_Y_OFFSET } from "../utils/constants";
+import { createD3DragElement } from "../utils/create-d3-drag-element";
 
 export const SectionGridStaticPaths: Component = () => {
   return (

@@ -1,6 +1,6 @@
 import { getLoadedOrUndefined } from "jazz-tools";
 import type { EdgeInstance, TaskInstance } from "~/integrations/jazz/schema";
-import type { BoardStateContextValue } from "../contexts/board-state";
+import type { BoardStateContextValue } from "./board-state";
 import { getEdgeMap, getSectionXMap, getSectionYMap, getTaskMap } from "./instance-maps";
 
 type UpdateTaskPositionsArgs = {

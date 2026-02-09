@@ -1,6 +1,6 @@
 import { getLoadedOrUndefined } from "jazz-tools";
-import type { BoardStateContextValue } from "../contexts/board-state";
-import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "./constants";
+import { TASK_RECT_HEIGHT, TASK_RECT_WIDTH } from "../utils/constants";
+import type { BoardStateContextValue } from "./board-state";
 import { getEdgeMap, getTaskMap } from "./instance-maps";
 
 export type InsertEdgeInstanceToPointArgs = {

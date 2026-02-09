@@ -13,7 +13,6 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Tooltip } from "~/ui/tooltip/tooltip";
-import { useBoardStateContext } from "../contexts/board-state";
 import { useBoardTransformContext } from "../contexts/board-transform";
 import { useExportStateContext } from "../contexts/export-state";
 import { useSelectionStateContext } from "../contexts/selection-state";
@@ -22,9 +21,10 @@ import {
   useToolsStateContext,
   type ToolType,
 } from "../contexts/tools-state";
+import { useBoardStateContext } from "../state/board-state";
+import { deleteEdgeInstance } from "../state/edge-actions";
+import { deleteTaskInstance } from "../state/task-actions";
 import { SVG_EXPORT_SELECTOR } from "../utils/constants";
-import { deleteEdgeInstance } from "../utils/edge-actions";
-import { deleteTaskInstance } from "../utils/task-actions";
 
 export const ToolsBar: Component = () => {
   const { t } = useI18n();
