@@ -1,7 +1,7 @@
 import { getLoadedOrUndefined } from "jazz-tools";
 import type { TaskInstance } from "~/integrations/jazz/schema";
 import type { BoardStateContextValue } from "./board-state";
-import { getTaskMap } from "./instance-maps";
+import { findTask } from "./instance-maps";
 
 export type InsertTaskInstanceArgs = Pick<
   TaskInstance,
@@ -57,8 +57,7 @@ export const updateTaskInstancePosition = ({
   sectionY,
 }: UpdateTaskInstancePositionArgs) => {
   const board = boardState.board();
-  const taskMap = getTaskMap(board);
-  const instance = taskMap.get(taskId);
+  const instance = findTask(board, taskId);
 
   if (!instance) {
     return;
@@ -87,8 +86,7 @@ export const updateTaskInstanceDetails = ({
   title,
 }: UpdateTaskInstanceDetailsArgs) => {
   const board = boardState.board();
-  const taskMap = getTaskMap(board);
-  const instance = taskMap.get(taskId);
+  const instance = findTask(board, taskId);
 
   if (!instance) {
     return;

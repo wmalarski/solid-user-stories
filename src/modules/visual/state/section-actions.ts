@@ -1,12 +1,12 @@
 import { getLoadedOrUndefined } from "jazz-tools";
 import type { EdgeInstance, TaskInstance } from "~/integrations/jazz/schema";
 import type { BoardStateContextValue } from "./board-state";
-import { getEdgeMap, getSectionXMap, getSectionYMap, getTaskMap } from "./instance-maps";
+import { findSectionX, findSectionY, getEdgeMap, getTaskMap } from "./instance-maps";
 
 type UpdateTaskPositionsArgs = {
   attribute: "positionY" | "positionX";
   shift: number;
-  taskPositions: Map<string, TaskInstance>;
+  taskMap: Map<string, TaskInstance>;
   startPositions: Map<string, number>;
 };
 
@@ -14,22 +14,22 @@ const updateTaskPositions = ({
   startPositions,
   shift,
   attribute,
-  taskPositions,
+  taskMap,
 }: UpdateTaskPositionsArgs) => {
   for (const [taskId, from] of startPositions.entries()) {
-    taskPositions.get(taskId)?.$jazz.set(attribute, from + shift);
+    taskMap.get(taskId)?.$jazz.set(attribute, from + shift);
   }
 };
 
 type UpdateEdgePositionsArgs = {
   startPositions: Map<string, number>;
   shift: number;
-  edgePositions: Map<string, EdgeInstance>;
+  edgeMap: Map<string, EdgeInstance>;
 };
 
-const updateEdgePositions = ({ startPositions, shift, edgePositions }: UpdateEdgePositionsArgs) => {
+const updateEdgePositions = ({ startPositions, shift, edgeMap }: UpdateEdgePositionsArgs) => {
   for (const [edgeId, from] of startPositions.entries()) {
-    edgePositions.get(edgeId)?.$jazz.set("breakX", from + shift);
+    edgeMap.get(edgeId)?.$jazz.set("breakX", from + shift);
   }
 };
 
@@ -37,12 +37,12 @@ type ShiftTasksArgs = {
   shift: number;
   position: number;
   attribute: "positionY" | "positionX";
-  taskPositions: Map<string, TaskInstance>;
+  taskMap: Map<string, TaskInstance>;
 };
 
-const shiftTasks = ({ shift, position, attribute, taskPositions }: ShiftTasksArgs) => {
+const shiftTasks = ({ shift, position, attribute, taskMap }: ShiftTasksArgs) => {
   const tasksToMove = new Map(
-    taskPositions.entries().filter(([_taskId, taskPosition]) => taskPosition[attribute] > position),
+    taskMap.entries().filter(([_taskId, taskPosition]) => taskPosition[attribute] > position),
   );
   const startPositions = new Map(
     tasksToMove.entries().map(([taskId, position]) => [taskId, position[attribute]]),
@@ -51,25 +51,25 @@ const shiftTasks = ({ shift, position, attribute, taskPositions }: ShiftTasksArg
     attribute,
     shift,
     startPositions,
-    taskPositions: tasksToMove,
+    taskMap: tasksToMove,
   });
 };
 
 type ShiftEdgesArgs = {
   shift: number;
   position: number;
-  edgePositions: Map<string, EdgeInstance>;
+  edgeMap: Map<string, EdgeInstance>;
 };
 
-const shiftEdges = ({ shift, position, edgePositions }: ShiftEdgesArgs) => {
+const shiftEdges = ({ shift, position, edgeMap }: ShiftEdgesArgs) => {
   const edgesToMove = new Map(
-    edgePositions.entries().filter(([_edgeId, edgeSize]) => edgeSize.breakX > position),
+    edgeMap.entries().filter(([_edgeId, edgeSize]) => edgeSize.breakX > position),
   );
   const startPositions = new Map(
     edgesToMove.entries().map(([edgeId, size]) => [edgeId, size.breakX]),
   );
   updateEdgePositions({
-    edgePositions,
+    edgeMap: edgeMap,
     shift,
     startPositions,
   });
@@ -87,9 +87,10 @@ export const insertHorizontalSectionInstance = ({
   boardState,
 }: InsertHorizontalSectionInstance) => {
   const board = boardState.board();
+  const edgeMap = getEdgeMap(board);
+  const taskMap = getTaskMap(board);
+  const position = boardState.sectionXConfigs()[index].end;
   const shift = 500;
-  const edgePositions = getEdgeMap(board);
-  const taskPositions = getTaskMap(board);
 
   getLoadedOrUndefined(board.sectionX)?.$jazz.splice(index + 1, 0, {
     name,
@@ -97,9 +98,8 @@ export const insertHorizontalSectionInstance = ({
     tasks: [],
   });
 
-  const position = boardState.sectionXConfigs()[index].end;
-  shiftTasks({ attribute: "positionX", position, shift, taskPositions });
-  shiftEdges({ edgePositions, position, shift });
+  shiftTasks({ attribute: "positionX", position, shift, taskMap: taskMap });
+  shiftEdges({ edgeMap, position, shift });
 };
 
 export type InsertVerticalSectionInstanceArgs = {
@@ -114,8 +114,9 @@ export const insertVerticalSectionInstance = ({
   index,
 }: InsertVerticalSectionInstanceArgs) => {
   const board = boardState.board();
+  const taskMap = getTaskMap(board);
+  const position = boardState.sectionYConfigs()[index].end;
   const shift = 500;
-  const taskPositions = getTaskMap(board);
 
   getLoadedOrUndefined(board.sectionY)?.$jazz.splice(index + 1, 0, {
     name,
@@ -123,8 +124,7 @@ export const insertVerticalSectionInstance = ({
     tasks: [],
   });
 
-  const position = boardState.sectionYConfigs()[index].end;
-  shiftTasks({ attribute: "positionY", position, shift, taskPositions });
+  shiftTasks({ attribute: "positionY", position, shift, taskMap: taskMap });
 };
 
 export type UpdateHorizontalSectionInstanceSizeArgs = {
@@ -145,18 +145,17 @@ export const updateHorizontalSectionInstanceSize = ({
   sectionStart,
 }: UpdateHorizontalSectionInstanceSizeArgs) => {
   const board = boardState.board();
-  const sectionsYMap = getSectionYMap(board);
-  const taskPositions = getTaskMap(board);
-  const sectionSize = sectionsYMap.get(sectionId);
+  const section = findSectionY(board, sectionId);
+  const taskMap = getTaskMap(board);
 
-  sectionSize?.$jazz.set("size", position - sectionStart);
+  section?.$jazz.set("size", position - sectionStart);
   const shift = position - startPosition;
 
   updateTaskPositions({
     attribute: "positionY",
     shift,
     startPositions: draggedTasks,
-    taskPositions,
+    taskMap: taskMap,
   });
 };
 
@@ -180,23 +179,21 @@ export const updateVerticalSectionInstanceSize = ({
   sectionId,
 }: UpdateVerticalSectionInstanceSizeArgs) => {
   const board = boardState.board();
-  const edgePositions = getEdgeMap(board);
-  const taskPositions = getTaskMap(board);
-  const sectionsXMap = getSectionXMap(board);
-  const sectionSize = sectionsXMap.get(sectionId);
-
-  sectionSize?.$jazz.set("size", position - sectionStart);
-
+  const edgeMap = getEdgeMap(board);
+  const taskMap = getTaskMap(board);
+  const section = findSectionX(board, sectionId);
   const shift = position - startPosition;
+
+  section?.$jazz.set("size", position - sectionStart);
 
   updateTaskPositions({
     attribute: "positionX",
     shift,
     startPositions: draggedTasks,
-    taskPositions,
+    taskMap,
   });
   updateEdgePositions({
-    edgePositions,
+    edgeMap,
     shift,
     startPositions: draggedEdges,
   });
@@ -216,12 +213,12 @@ export const deleteHorizontalSectionInstance = ({
   shift,
 }: DeleteHorizontalSectionInstanceArgs) => {
   const board = boardState.board();
-  const edgePositions = getEdgeMap(board);
-  const taskPositions = getTaskMap(board);
+  const edgeMap = getEdgeMap(board);
+  const taskMap = getTaskMap(board);
 
   getLoadedOrUndefined(board.sectionX)?.$jazz.remove((section) => section.$jazz.id === sectionId);
-  shiftTasks({ attribute: "positionX", position: endPosition, shift, taskPositions });
-  shiftEdges({ edgePositions, position: endPosition, shift });
+  shiftTasks({ attribute: "positionX", position: endPosition, shift, taskMap: taskMap });
+  shiftEdges({ edgeMap, position: endPosition, shift });
 };
 
 export type DeleteVerticalSectionInstanceArgs = {
@@ -238,42 +235,42 @@ export const deleteVerticalSectionInstance = ({
   shift,
 }: DeleteVerticalSectionInstanceArgs) => {
   const board = boardState.board();
-  const taskPositions = getTaskMap(board);
+  const taskMap = getTaskMap(board);
 
   getLoadedOrUndefined(board.sectionY)?.$jazz.remove((section) => section.$jazz.id === sectionId);
-  shiftTasks({ attribute: "positionY", position: endPosition, shift, taskPositions });
+  shiftTasks({ attribute: "positionY", position: endPosition, shift, taskMap: taskMap });
 };
 
 export type UpdateHorizontalSectionInstanceArgs = {
   boardState: BoardStateContextValue;
   name: string;
-  id: string;
+  sectionId: string;
 };
 
 export const updateHorizontalSectionInstance = ({
   boardState,
-  id,
+  sectionId,
   name,
 }: UpdateHorizontalSectionInstanceArgs) => {
   const board = boardState.board();
-  const sections = getLoadedOrUndefined(board.sectionX);
-  const section = sections?.find((section) => section.$jazz.id === id);
+  const section = findSectionX(board, sectionId);
+
   getLoadedOrUndefined(section)?.$jazz.set("name", name);
 };
 
 export type UpdateVerticalSectionInstanceArgs = {
   boardState: BoardStateContextValue;
   name: string;
-  id: string;
+  sectionId: string;
 };
 
 export const updateVerticalSectionInstance = ({
   boardState,
-  id,
+  sectionId,
   name,
 }: UpdateVerticalSectionInstanceArgs) => {
   const board = boardState.board();
-  const sections = getLoadedOrUndefined(board.sectionY);
-  const section = sections?.find((section) => section.$jazz.id === id);
+  const section = findSectionY(board, sectionId);
+
   getLoadedOrUndefined(section)?.$jazz.set("name", name);
 };

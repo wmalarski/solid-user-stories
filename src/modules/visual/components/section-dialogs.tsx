@@ -146,7 +146,12 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
       return;
     }
 
-    const section = { boardState, id: props.section.id, name: parsed.output.name };
+    const section = {
+      boardState,
+      name: parsed.output.name,
+      sectionId: props.section.id,
+    };
+
     if (props.orientation === "horizontal") {
       updateHorizontalSectionInstance(section);
     } else {
