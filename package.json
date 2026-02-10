@@ -23,7 +23,7 @@
     "@zumer/snapdom": "^2.0.2",
     "d3": "^7.9.0",
     "decode-formdata": "^0.9.0",
-    "jazz-tools": "^0.20.8",
+    "jazz-tools": "^0.20.9",
     "solid-js": "^1.9.11",
     "tailwind-merge": "^3.4.0",
     "tailwind-variants": "^3.2.2",
@@ -31,12 +31,12 @@
     "valibot": "^1.2.0"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.23.1",
+    "@cloudflare/vite-plugin": "^1.24.0",
     "@types/d3": "^7.4.3",
     "daisyui": "^5.5.18",
     "knip": "^5.83.1",
-    "oxfmt": "^0.28.0",
-    "oxlint": "^1.43.0",
+    "oxfmt": "^0.31.0",
+    "oxlint": "^1.46.0",
     "oxlint-tsgolint": "^0.11.5",
     "solid-devtools": "^0.34.5",
     "sonda": "^0.10.2",
@@ -44,6 +44,6 @@
     "vite": "^7.3.1",
     "vite-plugin-solid": "^2.11.10",
     "vite-tsconfig-paths": "^6.1.0",
-    "wrangler": "^4.63.0"
+    "wrangler": "^4.64.0"
   }
 }

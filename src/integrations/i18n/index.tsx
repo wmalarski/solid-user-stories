@@ -23,6 +23,7 @@ const enDict = {
       ySectionDefault: "Feature 1",
     },
     invite: {
+      acceptInvite: "Accept invite",
       invite: "Invite",
     },
     sections: {
@@ -64,7 +65,6 @@ const enDict = {
     confirm: "Are you sure you want to proceed?",
     delete: "Delete",
     edit: "Edit",
-    loading: "Loading...",
     openMenu: "Open Menu",
     save: "Save",
     update: "Update",
