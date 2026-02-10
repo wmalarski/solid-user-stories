@@ -26,9 +26,22 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   createEffect(() => {
     const boardIdValue = boardId();
     onCleanup(
-      BoardSchema.subscribe(boardIdValue, (value) => {
-        setStore(reconcile(mapToBoardModel(value)));
-      }),
+      BoardSchema.subscribe(
+        boardIdValue,
+        {
+          resolve: {
+            edges: { $each: true },
+            sectionX: false,
+            sectionY: false,
+            tasks: { $each: true },
+          },
+        },
+        (value) => {
+          console.log("CATCH");
+          console.log(JSON.stringify(value, null, 2));
+          setStore(reconcile(mapToBoardModel(value)));
+        },
+      ),
     );
   });
 

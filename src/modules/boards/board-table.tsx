@@ -1,7 +1,7 @@
 import { Key } from "@solid-primitives/keyed";
 import { A } from "@solidjs/router";
 import { Show, Suspense, type Component } from "solid-js";
-import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
+import { createJazzResourceSubscription } from "~/integrations/jazz/create-jazz-resource-subscription";
 import { useJazzAccount } from "~/integrations/jazz/provider";
 import { BoardSchema, BoardsListSchema } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
@@ -12,8 +12,9 @@ import { UpdateBoardDialog } from "./update-board-dialog";
 export const BoardTable: Component = () => {
   const account = useJazzAccount();
 
-  const boards = createJazzResource(() => ({
+  const boards = createJazzResourceSubscription(() => ({
     id: account().root.boards.$jazz.id,
+    key: "BOARD_LIST",
     options: { resolve: true },
     schema: BoardsListSchema,
   }));
@@ -34,8 +35,9 @@ type BoardTableItemProps = {
 };
 
 const BoardTableItem: Component<BoardTableItemProps> = (props) => {
-  const board = createJazzResource(() => ({
+  const board = createJazzResourceSubscription(() => ({
     id: props.boardId,
+    key: "BOARD_ITEM",
     options: { resolve: false },
     schema: BoardSchema,
   }));

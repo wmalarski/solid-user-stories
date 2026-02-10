@@ -1,6 +1,6 @@
 import { createUniqueId, type Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
-import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
+import { createJazzResourceSubscription } from "~/integrations/jazz/create-jazz-resource-subscription";
 import { useJazzAccount } from "~/integrations/jazz/provider";
 import { BoardsListSchema } from "~/integrations/jazz/schema";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
@@ -16,8 +16,9 @@ export const DeleteBoardDialog: Component<DeleteBoardDialogProps> = (props) => {
 
   const account = useJazzAccount();
 
-  const boards = createJazzResource(() => ({
+  const boards = createJazzResourceSubscription(() => ({
     id: account().root.boards.$jazz.id,
+    key: "DELETE",
     options: { resolve: true },
     schema: BoardsListSchema,
   }));

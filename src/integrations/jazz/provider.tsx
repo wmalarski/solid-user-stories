@@ -8,7 +8,7 @@ import {
   type Component,
   type ParentProps,
 } from "solid-js";
-import { createJazzResource } from "./create-jazz-resource";
+import { createJazzResourceSubscription } from "./create-jazz-resource-subscription";
 import { BoardAccount } from "./schema";
 
 const createJazzContext = () => {
@@ -36,8 +36,9 @@ const createJazzContext = () => {
     }
     const id = currentValue.me.$jazz.id;
 
-    return createJazzResource(() => ({
+    return createJazzResourceSubscription(() => ({
       id,
+      key: "PROVIDER",
       options: { resolve: { root: true } },
       schema: BoardAccount,
     }));

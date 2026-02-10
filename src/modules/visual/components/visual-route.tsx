@@ -29,8 +29,9 @@ export const VisualRoute: Component = () => {
   const params = useParams();
   const boardId = createMemo(() => params.boardId ?? "");
 
-  const board = createJazzResource(() => ({
+  const [board] = createJazzResource(() => ({
     id: boardId(),
+    key: "BOARD",
     schema: BoardSchema,
   }));
 

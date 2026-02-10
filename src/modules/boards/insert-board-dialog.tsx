@@ -4,7 +4,7 @@ import { Group } from "jazz-tools";
 import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
-import { createJazzResource } from "~/integrations/jazz/create-jazz-resource";
+import { createJazzResourceSubscription } from "~/integrations/jazz/create-jazz-resource-subscription";
 import { useJazzAccount } from "~/integrations/jazz/provider";
 import { BoardSchema, BoardsListSchema } from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
@@ -28,8 +28,9 @@ export const InsertBoardDialog: Component = () => {
 
   const account = useJazzAccount();
 
-  const boards = createJazzResource(() => ({
+  const boards = createJazzResourceSubscription(() => ({
     id: account().root.boards.$jazz.id,
+    key: "INSERT",
     options: { resolve: true },
     schema: BoardsListSchema,
   }));

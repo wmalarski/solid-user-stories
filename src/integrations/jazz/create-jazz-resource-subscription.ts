@@ -1,12 +1,12 @@
 import type {
   BranchDefinition,
   CoValueClassOrSchema,
-  InstanceOfSchema,
   ResolveQuery,
   ResolveQueryStrict,
   SchemaResolveQuery,
 } from "jazz-tools";
-import { createResource, type Accessor } from "solid-js";
+import { createEffect, createMemo, onCleanup, type Accessor } from "solid-js";
+import { createJazzResource } from "./create-jazz-resource";
 
 type CreateJazzResourceArgs<
   S extends CoValueClassOrSchema,
@@ -23,19 +23,30 @@ type CreateJazzResourceArgs<
   key?: string;
 }>;
 
-export const createJazzResource = <
+export const createJazzResourceSubscription = <
   S extends CoValueClassOrSchema,
   // @ts-expect-error we can't statically enforce the schema's resolve query is a valid resolve query, but in practice it is
   R extends ResolveQuery<S> = SchemaResolveQuery<S>,
 >(
   args: CreateJazzResourceArgs<S, R>,
 ) => {
-  return createResource<
-    InstanceOfSchema<S>,
-    ReturnType<CreateJazzResourceArgs<S, R>>
-    // oxlint-disable-next-line typescript/no-explicit-any
-  >(args, async (args: any) => {
-    const root = await args.schema.load(args.id, args.options);
-    return root.$isLoaded ? root : null;
-  });
+  const [boards, { mutate }] = createJazzResource(args);
+  const id = createMemo(() => args().id);
+  // oxlint-disable-next-line typescript/no-explicit-any
+  const shema = createMemo((): any => args().schema);
+  createEffect(() =>
+    onCleanup(
+      // oxlint-disable-next-line typescript/no-explicit-any
+      shema().subscribe(id(), (data: any) => {
+        console.log("[JAZZ]", args().key);
+        try {
+          console.log(JSON.stringify(data, null, 2));
+        } catch (error) {
+          console.error(error);
+        }
+        mutate(data);
+      }),
+    ),
+  );
+  return boards;
 };
