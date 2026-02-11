@@ -1,5 +1,5 @@
 import { getLoadedOrUndefined } from "jazz-tools";
-import type { EdgeInstance, TaskInstance } from "~/integrations/jazz/schema";
+import { SectionSchema, type EdgeInstance, type TaskInstance } from "~/integrations/jazz/schema";
 import type { BoardStateContextValue } from "./board-state";
 import { findSectionX, findSectionY, getEdgeMap, getTaskMap } from "./instance-maps";
 
@@ -92,10 +92,14 @@ export const insertHorizontalSectionInstance = ({
   const position = boardState.sectionXConfigs()[index].end;
   const shift = 500;
 
-  getLoadedOrUndefined(board.sectionX)?.$jazz.splice(index + 1, 0, {
-    name,
-    size: shift,
-  });
+  const sectionX = getLoadedOrUndefined(board.sectionX);
+
+  if (!sectionX) {
+    return;
+  }
+
+  const section = SectionSchema.create({ name, size: shift }, { owner: board.$jazz.owner });
+  sectionX.$jazz.splice(index + 1, 0, section);
 
   shiftTasks({ attribute: "positionX", position, shift, taskMap: taskMap });
   shiftEdges({ edgeMap, position, shift });
@@ -117,10 +121,14 @@ export const insertVerticalSectionInstance = ({
   const position = boardState.sectionYConfigs()[index].end;
   const shift = 500;
 
-  getLoadedOrUndefined(board.sectionY)?.$jazz.splice(index + 1, 0, {
-    name,
-    size: shift,
-  });
+  const sectionY = getLoadedOrUndefined(board.sectionY);
+
+  if (!sectionY) {
+    return;
+  }
+
+  const section = SectionSchema.create({ name, size: shift }, { owner: board.$jazz.owner });
+  sectionY.$jazz.splice(index + 1, 0, section);
 
   shiftTasks({ attribute: "positionY", position, shift, taskMap: taskMap });
 };

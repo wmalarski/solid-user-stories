@@ -13,7 +13,7 @@ export const insertTaskInstance = ({ boardState, ...args }: InsertTaskInstanceAr
   if (!tasksValue) {
     return;
   }
-  const task = TaskSchema.create(args);
+  const task = TaskSchema.create(args, { owner: board.$jazz.owner });
   tasksValue.$jazz.push(task);
   return task.$jazz.id;
 };

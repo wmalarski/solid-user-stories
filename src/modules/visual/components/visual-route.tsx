@@ -31,7 +31,6 @@ export const VisualRoute: Component = () => {
 
   const [board] = createJazzResource(() => ({
     id: boardId(),
-    key: "BOARD",
     schema: BoardSchema,
   }));
 

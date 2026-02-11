@@ -66,7 +66,7 @@ export const insertEdgeInstanceToPoint = ({
 
   const breakX = (currentTask.positionX + cursorTask.positionX + TASK_RECT_WIDTH) / 2;
 
-  const edge = EdgeSchema.create({ breakX, source, target });
+  const edge = EdgeSchema.create({ breakX, source, target }, { owner: board.$jazz.owner });
   edges.$jazz.push(edge);
 
   return edge.$jazz.id;
@@ -97,11 +97,14 @@ export const insertEdgeInstanceToSecondTask = ({
 
   const breakX = (currentTask.positionX + secondTask.positionX + TASK_RECT_WIDTH) / 2;
 
-  const edge = EdgeSchema.create({
-    breakX,
-    source: isSource ? taskId : secondTaskId,
-    target: isSource ? secondTaskId : taskId,
-  });
+  const edge = EdgeSchema.create(
+    {
+      breakX,
+      source: isSource ? taskId : secondTaskId,
+      target: isSource ? secondTaskId : taskId,
+    },
+    { owner: board.$jazz.owner },
+  );
   edges.$jazz.push(edge);
 
   return edge.$jazz.id;
