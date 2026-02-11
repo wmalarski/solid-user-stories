@@ -37,8 +37,6 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
           },
         },
         (value) => {
-          console.log("CATCH");
-          console.log(JSON.stringify(value, null, 2));
           setStore(reconcile(mapToBoardModel(value)));
         },
       ),

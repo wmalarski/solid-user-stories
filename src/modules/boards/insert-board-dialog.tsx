@@ -75,6 +75,7 @@ export const InsertBoardDialog: Component = () => {
     );
 
     const boardId = board.$jazz.id;
+    accountValue.root.boards.$jazz.push(board);
 
     navigate(createLink("/board/:boardId", { params: { boardId } }));
   };

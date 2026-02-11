@@ -25,6 +25,7 @@ const enDict = {
     invite: {
       acceptInvite: "Accept invite",
       invite: "Invite",
+      share: "Copy invite to the board.",
     },
     sections: {
       confirmDelete: "Confirm delete task",

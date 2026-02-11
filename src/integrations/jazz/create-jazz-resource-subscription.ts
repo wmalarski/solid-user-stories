@@ -34,19 +34,6 @@ export const createJazzResourceSubscription = <
   const id = createMemo(() => args().id);
   // oxlint-disable-next-line typescript/no-explicit-any
   const shema = createMemo((): any => args().schema);
-  createEffect(() =>
-    onCleanup(
-      // oxlint-disable-next-line typescript/no-explicit-any
-      shema().subscribe(id(), (data: any) => {
-        console.log("[JAZZ]", args().key);
-        try {
-          console.log(JSON.stringify(data, null, 2));
-        } catch (error) {
-          console.error(error);
-        }
-        mutate(data);
-      }),
-    ),
-  );
+  createEffect(() => onCleanup(shema().subscribe(id(), mutate)));
   return boards;
 };

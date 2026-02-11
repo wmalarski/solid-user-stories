@@ -1,5 +1,5 @@
 import { createInviteLink } from "jazz-tools";
-import { createUniqueId, Show, type Component, type ParentProps } from "solid-js";
+import { createSignal, createUniqueId, Show, type Component, type ParentProps } from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
 import { useJazzAccount } from "~/integrations/jazz/provider";
@@ -8,7 +8,19 @@ import { ThemeToggle } from "~/integrations/theme/theme-toggle";
 import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Button } from "~/ui/button/button";
-import { closeDialog, DialogTrigger } from "~/ui/dialog/dialog";
+import {
+  closeDialog,
+  Dialog,
+  DialogActions,
+  DialogBackdrop,
+  DialogBox,
+  DialogClose,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+  openDialog,
+} from "~/ui/dialog/dialog";
+import { FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { DownloadIcon } from "~/ui/icons/download-icon";
 import { HandIcon } from "~/ui/icons/hand-icon";
 import { LinkIcon } from "~/ui/icons/link-icon";
@@ -16,6 +28,7 @@ import { MinusIcon } from "~/ui/icons/minus-icon";
 import { PlusIcon } from "~/ui/icons/plus-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
+import { Input } from "~/ui/input/input";
 import { Tooltip } from "~/ui/tooltip/tooltip";
 import { useBoardTransformContext } from "../contexts/board-transform";
 import { useExportStateContext } from "../contexts/export-state";
@@ -247,25 +260,44 @@ const InviteButton = () => {
   const account = useJazzAccount();
   const boardState = useBoardStateContext();
 
+  const dialogId = createUniqueId();
+  const [inviteLink, setInviteLink] = createSignal<string>();
+
   const onClick = () => {
     const boardValue = boardState.board();
     const url = createLink("/invite", {});
-    createInviteLink(boardValue, "writer", url);
+    const link = createInviteLink(boardValue, "writer", url);
+    setInviteLink(link);
+    openDialog(dialogId);
   };
 
   return (
-    <Show when={account().canAdmin(boardState.board())}>
-      <Tooltip data-tip={t("board.invite.invite")}>
-        <Button
-          aria-label={t("board.invite.invite")}
-          onClick={onClick}
-          shape="circle"
-          size="sm"
-          variant="ghost"
-        >
-          <LinkIcon />
-        </Button>
-      </Tooltip>
-    </Show>
+    <>
+      <Show when={account().canAdmin(boardState.board())}>
+        <Tooltip data-tip={t("board.invite.invite")}>
+          <Button
+            aria-label={t("board.invite.invite")}
+            onClick={onClick}
+            shape="circle"
+            size="sm"
+            variant="ghost"
+          >
+            <LinkIcon />
+          </Button>
+        </Tooltip>
+      </Show>
+      <Dialog id={dialogId}>
+        <DialogBox>
+          <DialogTitle>{t("board.invite.invite")}</DialogTitle>
+          <DialogDescription>{t("board.invite.share")}</DialogDescription>
+          <FieldsetLabel for="link">{t("board.tasks.link")}</FieldsetLabel>
+          <Input readOnly name="link" value={inviteLink()} />
+          <DialogActions>
+            <DialogClose />
+          </DialogActions>
+        </DialogBox>
+        <DialogBackdrop />
+      </Dialog>
+    </>
   );
 };

@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 import { consumeInviteLink } from "jazz-tools";
 import type { Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
@@ -9,19 +9,13 @@ import { Button } from "~/ui/button/button";
 export const InviteRoute: Component = () => {
   const { t } = useI18n();
 
-  const location = useLocation();
-
   const navigate = useNavigate();
 
   const onClick = async () => {
-    const hash = location.hash;
-
     const result = await consumeInviteLink({
-      inviteURL: hash,
+      inviteURL: globalThis.location.toString(),
       invitedObjectSchema: BoardSchema,
     });
-
-    console.log("[result]", result);
 
     if (result) {
       navigate(createLink("/board/:boardId", { params: { boardId: result.valueID } }));
