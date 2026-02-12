@@ -63,7 +63,7 @@ export const JazzProvider: Component<ParentProps> = (props) => {
 export const useJazzContext = () => {
   const value = useContext(JazzContext);
   if (!value) {
-    throw new Error("ToolsStateContext not defined");
+    throw new Error("JazzContext not defined");
   }
   return value;
 };
@@ -73,7 +73,7 @@ export const useJazzAccount = () => {
   return createMemo(() => {
     const account = value?.account;
     if (!account) {
-      throw new Error("ToolsStateContext not defined");
+      throw new Error("JazzContext not defined");
     }
     return account;
   });

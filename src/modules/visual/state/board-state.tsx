@@ -2,6 +2,7 @@ import {
   createContext,
   createEffect,
   createMemo,
+  createResource,
   onCleanup,
   useContext,
   type Accessor,
@@ -9,8 +10,14 @@ import {
   type ParentProps,
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { BoardSchema, type BoardInstance } from "~/integrations/jazz/schema";
+import {
+  BoardSchema,
+  CURSOR_FEED_TYPE,
+  CursorFeedSchema,
+  type BoardInstance,
+} from "~/integrations/jazz/schema";
 
+import { createCurrentDate } from "~/integrations/jazz/create-current-date";
 import { mapToBoardModel, type BoardModel } from "./board-model";
 import { getSectionConfig } from "./section-configs";
 
@@ -35,8 +42,11 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const sectionXConfigs = createMemo(() => getSectionConfig(store.sectionsX));
   const sectionYConfigs = createMemo(() => getSectionConfig(store.sectionsY));
 
+  const cursors = createCursorsFeed(board);
+
   return {
     board,
+    cursors,
     sectionXConfigs,
     sectionYConfigs,
     store,
@@ -63,4 +73,31 @@ export const BoardStateProvider: Component<BoardStateProviderProps> = (props) =>
   const value = createBoardStateContext(() => props.board);
 
   return <BoardStateContext.Provider value={value}>{props.children}</BoardStateContext.Provider>;
+};
+
+export const createCursorsFeed = (board: Accessor<BoardInstance>) => {
+  const date = createCurrentDate();
+
+  const [cursors] = createResource(
+    () => ({ board: board() }),
+    async ({ board }) => {
+      const group = board.$jazz.owner;
+
+      const feed = await CursorFeedSchema.getOrCreateUnique({
+        owner: group,
+        unique: {
+          date: date(),
+          origin: globalThis.location.origin,
+          type: CURSOR_FEED_TYPE,
+        },
+        value: [],
+      });
+
+      board.$jazz.set("cursors", feed);
+
+      return feed;
+    },
+  );
+
+  return cursors;
 };
