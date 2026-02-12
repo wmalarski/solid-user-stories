@@ -4,9 +4,15 @@ import { Group } from "jazz-tools";
 import { createSignal, createUniqueId, type Component, type ComponentProps } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
+import { createCurrentDate } from "~/integrations/jazz/create-current-date";
 import { createJazzResourceSubscription } from "~/integrations/jazz/create-jazz-resource-subscription";
 import { useJazzAccount } from "~/integrations/jazz/provider";
-import { BoardSchema, BoardsListSchema } from "~/integrations/jazz/schema";
+import {
+  BoardSchema,
+  BoardsListSchema,
+  CURSOR_FEED_TYPE,
+  CursorFeedSchema,
+} from "~/integrations/jazz/schema";
 import { createLink } from "~/integrations/router/create-link";
 import { Button } from "~/ui/button/button";
 import {
@@ -39,6 +45,7 @@ export const InsertBoardDialog: Component = () => {
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
+  const date = createCurrentDate();
 
   const [issues, setIssues] = createSignal<FormIssues>();
 
@@ -62,8 +69,18 @@ export const InsertBoardDialog: Component = () => {
 
     const group = Group.create({ owner: accountValue });
 
+    const cursors = CursorFeedSchema.create([], {
+      owner: group,
+      unique: {
+        date: date(),
+        origin: globalThis.location.origin,
+        type: CURSOR_FEED_TYPE,
+      },
+    });
+
     const board = BoardSchema.create(
       {
+        cursors,
         description: parsed.output.description,
         edges: [],
         sectionX: [{ name: t("board.forms.xSectionDefault"), size: 500 }],

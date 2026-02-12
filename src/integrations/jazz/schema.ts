@@ -1,5 +1,24 @@
 import { co, z } from "jazz-tools";
 
+export const CURSOR_FEED_TYPE = "cursor-feed";
+
+export const CursorFeedSchema = co.feed(
+  z.object({
+    position: z.object({
+      x: z.number(),
+      y: z.number(),
+    }),
+  }),
+);
+
+export const CursorProfileSchema = co
+  .profile({
+    name: z.string(),
+  })
+  .withPermissions({
+    onCreate: (newGroup) => newGroup.makePublic(),
+  });
+
 export const SectionSchema = co.map({
   name: z.string(),
   size: z.number(),
@@ -29,6 +48,7 @@ export const SectionListSchema = co.list(SectionSchema);
 export const TaskListSchema = co.list(TaskSchema);
 
 export const BoardSchema = co.map({
+  cursors: CursorFeedSchema,
   description: z.string(),
   edges: EdgesListSchema,
   sectionX: SectionListSchema,
@@ -45,13 +65,18 @@ export const BoardAccountRoot = co.map({
 
 export const BoardAccount = co
   .account({
-    profile: co.profile(),
+    profile: CursorProfileSchema,
     root: BoardAccountRoot,
   })
   .withMigration((account) => {
     if (!account.$jazz.has("root")) {
       account.$jazz.set("root", {
         boards: [],
+      });
+    }
+    if (!account.$jazz.has("profile")) {
+      account.$jazz.set("profile", {
+        name: "Anonymous user",
       });
     }
   });
