@@ -93,6 +93,10 @@ export const createCursorsFeed = (board: Accessor<BoardInstance>) => {
         value: [],
       });
 
+      if (!feed.$isLoaded) {
+        throw new Error("feed is not loaded");
+      }
+
       board.$jazz.set("cursors", feed);
 
       return feed;

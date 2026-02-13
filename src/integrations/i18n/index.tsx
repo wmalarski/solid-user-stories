@@ -11,6 +11,9 @@ import {
 
 const enDict = {
   board: {
+    cursors: {
+      anonymous: "Anonymous",
+    },
     forms: {
       createBoard: "Create Board",
       deleteBoard: "Delete board",

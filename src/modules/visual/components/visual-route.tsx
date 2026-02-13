@@ -13,6 +13,7 @@ import { BoardStateProvider, useBoardStateContext } from "../state/board-state";
 import { getBoardBox } from "../state/get-board-box";
 import { SVG_CLASS, SVG_EXPORT_CLASS } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
+import { CursorPaths } from "./cursor-paths";
 import { DraggedEdge } from "./dragged-edge";
 import { EdgePath, ExportableEdgePath } from "./edge-path";
 import {
@@ -76,6 +77,7 @@ const BoardContent: Component = () => {
         <SectionGridStaticPaths />
         <SelectableGroup />
         <DraggedEdge />
+        <CursorPaths />
         <SectionItems />
       </svg>
       <ToolsBar />
