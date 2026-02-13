@@ -31,19 +31,19 @@
     "valibot": "^1.2.0"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.24.0",
+    "@cloudflare/vite-plugin": "^1.25.0",
     "@types/d3": "^7.4.3",
     "daisyui": "^5.5.18",
     "knip": "^5.83.1",
-    "oxfmt": "^0.31.0",
-    "oxlint": "^1.46.0",
-    "oxlint-tsgolint": "^0.12.0",
+    "oxfmt": "^0.32.0",
+    "oxlint": "^1.47.0",
+    "oxlint-tsgolint": "^0.12.2",
     "solid-devtools": "^0.34.5",
     "sonda": "^0.10.2",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-solid": "^2.11.10",
-    "vite-tsconfig-paths": "^6.1.0",
-    "wrangler": "^4.64.0"
+    "vite-tsconfig-paths": "^6.1.1",
+    "wrangler": "^4.65.0"
   }
 }
