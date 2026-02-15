@@ -65,5 +65,7 @@ const CursorPath: Component<CursorPathProps> = (props) => {
     return props.profile?.name && t("board.cursors.anonymous");
   });
 
-  return null;
+  return (
+    <rect class="fill-accent" width={10} height={10} x={props.position.x} y={props.position.y} />
+  );
 };
