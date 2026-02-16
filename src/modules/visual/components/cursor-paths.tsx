@@ -1,6 +1,8 @@
 import { Key } from "@solid-primitives/keyed";
+import { makeMousePositionListener, type MousePosition } from "@solid-primitives/mouse";
+import { throttle } from "@solid-primitives/scheduled";
 import type { Profile } from "jazz-tools";
-import { createMemo, type Component } from "solid-js";
+import { createMemo, onCleanup, Show, type Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
 import { useJazzAccount } from "~/integrations/jazz/provider";
 import { useBoardStateContext } from "../state/board-state";
@@ -11,6 +13,12 @@ const OLD_CURSOR_AGE_SECONDS = 10_000;
 
 export const CursorPaths: Component = () => {
   const boardState = useBoardStateContext();
+
+  const throttled = throttle((pos: MousePosition) => {
+    boardState.cursors()?.$jazz.push({ position: { x: pos.x, y: pos.y } });
+  }, 250);
+
+  onCleanup(makeMousePositionListener(globalThis.window, throttled, { touch: false }));
 
   return (
     <Key each={Object.entries(boardState.cursors()?.perSession ?? {})} by={([key]) => key}>
@@ -53,9 +61,9 @@ const CursorPath: Component<CursorPathProps> = (props) => {
     );
   });
 
-  const age = createMemo(() => {
-    return Date.now() - new Date(props.madeAt).getTime();
-  });
+  // const age = createMemo(() => {
+  //   return Date.now() - new Date(props.madeAt).getTime();
+  // });
 
   const color = createMemo(() => {
     return getColor(props.sessionId);
@@ -66,6 +74,18 @@ const CursorPath: Component<CursorPathProps> = (props) => {
   });
 
   return (
-    <rect class="fill-accent" width={10} height={10} x={props.position.x} y={props.position.y} />
+    <Show when={!isMe()}>
+      <rect
+        opacity={active() ? 100 : 90}
+        style={{ fill: color() }}
+        width={10}
+        height={10}
+        x={props.position.x}
+        y={props.position.y}
+      />
+      <text x={props.position.x} y={props.position.y}>
+        {name()}
+      </text>
+    </Show>
   );
 };
