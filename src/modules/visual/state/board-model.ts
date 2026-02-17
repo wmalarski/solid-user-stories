@@ -1,6 +1,7 @@
 import { getLoadedOrUndefined, type MaybeLoaded } from "jazz-tools";
 import type {
   BoardInstance,
+  CursorFeedSchemaInstance,
   EdgeInstance,
   EdgeInstanceInput,
   EdgeListInstance,
@@ -108,4 +109,26 @@ const mapToTaskModel = (task: MaybeLoaded<TaskInstance>): TaskModel | null => {
     sectionY: loaded.sectionY,
     title: loaded.title,
   };
+};
+
+export type CursorModel = {
+  x: number;
+  y: number;
+  name?: string;
+  madeAt: Date;
+  sessionId: string;
+};
+
+export const mapToCursorModel = (cursors: MaybeLoaded<CursorFeedSchemaInstance>) => {
+  const loadedCursors = getLoadedOrUndefined(cursors);
+  const entries = Object.entries(loadedCursors?.perSession ?? {});
+  return entries.map(
+    ([sessionId, cursor]): CursorModel => ({
+      madeAt: cursor.madeAt,
+      name: getLoadedOrUndefined(cursor.by?.profile)?.name,
+      sessionId,
+      x: cursor.value.position.x,
+      y: cursor.value.position.y,
+    }),
+  );
 };

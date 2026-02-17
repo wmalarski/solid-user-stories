@@ -88,6 +88,7 @@ export type EdgeListInstance = co.loaded<typeof EdgesListSchema>;
 export type TaskInstance = co.loaded<typeof TaskSchema>;
 export type TaskListInstance = co.loaded<typeof TaskListSchema>;
 export type BoardInstance = co.loaded<typeof BoardSchema>;
+export type CursorFeedSchemaInstance = co.loaded<typeof CursorFeedSchema>;
 
 export type SectionInstanceInput = co.input<typeof SectionSchema>;
 export type EdgeInstanceInput = co.input<typeof EdgeSchema>;

@@ -18,7 +18,12 @@ import {
 } from "~/integrations/jazz/schema";
 
 import { createCurrentDate } from "~/integrations/jazz/create-current-date";
-import { mapToBoardModel, type BoardModel } from "./board-model";
+import {
+  mapToBoardModel,
+  mapToCursorModel,
+  type BoardModel,
+  type CursorModel,
+} from "./board-model";
 import { getSectionConfig } from "./section-configs";
 
 const createBoardStateContext = (board: Accessor<BoardInstance>) => {
@@ -42,11 +47,27 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const sectionXConfigs = createMemo(() => getSectionConfig(store.sectionsX));
   const sectionYConfigs = createMemo(() => getSectionConfig(store.sectionsY));
 
-  const cursors = createCursorsFeed(board);
+  const cursorsFeed = createCursorsFeed(board);
+  const [cursors, setCursors] = createStore<CursorModel[]>([]);
+
+  createEffect(() => {
+    const cursorsFeedValue = cursorsFeed();
+
+    if (!cursorsFeedValue) {
+      return;
+    }
+
+    onCleanup(
+      cursorsFeedValue.$jazz.subscribe({}, (cursors) => {
+        setCursors(mapToCursorModel(cursors));
+      }),
+    );
+  });
 
   return {
     board,
     cursors,
+    cursorsFeed,
     sectionXConfigs,
     sectionYConfigs,
     store,
