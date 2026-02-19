@@ -30,6 +30,7 @@ import {
   openDialog,
 } from "~/ui/dialog/dialog";
 import { FieldsetLabel } from "~/ui/fieldset/fieldset";
+import { CheckCircleIcon } from "~/ui/icons/check-circle-icon";
 import { DownloadIcon } from "~/ui/icons/download-icon";
 import { HandIcon } from "~/ui/icons/hand-icon";
 import { LinkIcon } from "~/ui/icons/link-icon";
@@ -204,7 +205,7 @@ export const ZoomBar: Component = () => {
   };
 
   return (
-    <ToolContainer class="absolute bottom-2 right-6">
+    <ToolContainer class="absolute bottom-2 left-6">
       <Tooltip data-tip={t("board.zoom.zoomIn")}>
         <Button
           aria-label={t("board.zoom.zoomIn")}
@@ -264,6 +265,17 @@ const InviteButton = () => {
   const dialogId = createUniqueId();
   const [inviteLink, setInviteLink] = createSignal<string>();
 
+  const [showSuccess, setShowSuccess] = createSignal(false);
+
+  const onCopy = () => {
+    const inviteLinkValue = inviteLink();
+    if (inviteLinkValue) {
+      navigator.clipboard.writeText(inviteLinkValue);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 1000);
+    }
+  };
+
   const onClick = () => {
     const boardValue = boardState.board();
     const url = createLink("/invite", {});
@@ -286,7 +298,19 @@ const InviteButton = () => {
           <DialogTitle>{t("board.invite.invite")}</DialogTitle>
           <DialogDescription>{t("board.invite.share")}</DialogDescription>
           <FieldsetLabel for="link">{t("board.tasks.link")}</FieldsetLabel>
-          <Input readOnly name="link" value={inviteLink()} />
+          <div class="w-full flex gap-2">
+            <Input
+              readOnly
+              class="grow"
+              name="link"
+              value={`${globalThis.window.location.href}${inviteLink()}`}
+            />
+            <Button class="w-20" color="primary" onClick={onCopy}>
+              <Show when={showSuccess()} fallback={t("board.invite.copy")}>
+                <CheckCircleIcon />
+              </Show>
+            </Button>
+          </div>
           <DialogActions>
             <DialogClose />
           </DialogActions>
@@ -338,5 +362,29 @@ const CursorAvatar: Component<CursorAvatarProps> = (props) => {
         <AvatarContent>{name().at(0)}</AvatarContent>
       </Avatar>
     </Tooltip>
+  );
+};
+
+export const InfoBar: Component = () => {
+  const { t } = useI18n();
+
+  const boardState = useBoardStateContext();
+
+  const { onClick, onClose } = useDialogBoardToolUtils();
+
+  return (
+    <ToolContainer class="absolute top-2 right-6 items-center">
+      <AvatarGroup>
+        <Key each={boardState.cursors} by="sessionId">
+          {(cursor) => <CursorAvatar cursor={cursor()} />}
+        </Key>
+      </AvatarGroup>
+      <InviteButton />
+      <ExportToPngButton />
+      <Tooltip data-tip={t("board.forms.update")} placement="bottom">
+        <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
+      </Tooltip>
+      <ThemeToggle />
+    </ToolContainer>
   );
 };

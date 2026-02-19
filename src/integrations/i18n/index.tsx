@@ -27,6 +27,7 @@ const enDict = {
     },
     invite: {
       acceptInvite: "Accept invite",
+      copy: "Copy",
       invite: "Invite",
       share: "Copy invite to the board.",
     },
