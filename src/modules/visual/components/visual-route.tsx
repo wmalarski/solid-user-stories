@@ -24,7 +24,7 @@ import {
 import { ExportableSectionItems, SectionItems } from "./section-items";
 import { InsertTaskByToolDialog } from "./task-dialogs";
 import { ExportableTaskGroup, TaskGroup } from "./task-group";
-import { ToolsBar, ZoomBar } from "./tools-bar";
+import { PresenceBar, ToolsBar, ZoomBar } from "./tools-bar";
 
 export const VisualRoute: Component = () => {
   const params = useParams();
@@ -80,6 +80,7 @@ const BoardContent: Component = () => {
         <CursorPaths />
         <SectionItems />
       </svg>
+      <PresenceBar />
       <ToolsBar />
       <ZoomBar />
       <InsertTaskByToolDialog />

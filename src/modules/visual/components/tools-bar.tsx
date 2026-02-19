@@ -1,5 +1,13 @@
+import { Key } from "@solid-primitives/keyed";
 import { createInviteLink } from "jazz-tools";
-import { createSignal, createUniqueId, Show, type Component, type ParentProps } from "solid-js";
+import {
+  createMemo,
+  createSignal,
+  createUniqueId,
+  Show,
+  type Component,
+  type ParentProps,
+} from "solid-js";
 import { cx } from "tailwind-variants";
 import { useI18n } from "~/integrations/i18n";
 import { useJazzAccount } from "~/integrations/jazz/provider";
@@ -7,6 +15,7 @@ import { createLink } from "~/integrations/router/create-link";
 import { ThemeToggle } from "~/integrations/theme/theme-toggle";
 import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
+import { Avatar, AvatarContent, AvatarGroup } from "~/ui/avatar/avatar";
 import { Button } from "~/ui/button/button";
 import {
   closeDialog,
@@ -38,6 +47,7 @@ import {
   useToolsStateContext,
   type ToolType,
 } from "../contexts/tools-state";
+import type { CursorModel } from "../state/board-model";
 import { useBoardStateContext } from "../state/board-state";
 import { deleteEdgeInstance } from "../state/edge-actions";
 import { deleteTaskInstance } from "../state/task-actions";
@@ -46,9 +56,6 @@ import { SVG_EXPORT_SELECTOR } from "../utils/constants";
 export const ToolsBar: Component = () => {
   const { t } = useI18n();
 
-  const boardState = useBoardStateContext();
-
-  const { onClick, onClose } = useDialogBoardToolUtils();
   const [toolsState, { onToolChage }] = useToolsStateContext();
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
@@ -83,12 +90,6 @@ export const ToolsBar: Component = () => {
           </Button>
         </Tooltip>
         <DeleteSelectedElementDialog />
-        <InviteButton />
-        <ExportToPngButton />
-        <Tooltip data-tip={t("board.forms.update")} placement="top">
-          <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
-        </Tooltip>
-        <ThemeToggle />
       </ToolContainer>
     </div>
   );
@@ -173,7 +174,7 @@ const ExportToPngButton: Component = () => {
   };
 
   return (
-    <Tooltip data-tip={t("board.tools.export")} placement="top">
+    <Tooltip data-tip={t("board.tools.export")} placement="bottom">
       <Button aria-label={t("board.tools.export")} shape="circle" size="sm" onClick={onClick}>
         <DownloadIcon class="size-5" />
       </Button>
@@ -274,15 +275,9 @@ const InviteButton = () => {
   return (
     <>
       <Show when={account().canAdmin(boardState.board())}>
-        <Tooltip data-tip={t("board.invite.invite")}>
-          <Button
-            aria-label={t("board.invite.invite")}
-            onClick={onClick}
-            shape="circle"
-            size="sm"
-            variant="ghost"
-          >
-            <LinkIcon />
+        <Tooltip data-tip={t("board.invite.invite")} placement="bottom">
+          <Button aria-label={t("board.invite.invite")} onClick={onClick} shape="circle" size="sm">
+            <LinkIcon class="size-5" />
           </Button>
         </Tooltip>
       </Show>
@@ -299,5 +294,49 @@ const InviteButton = () => {
         <DialogBackdrop />
       </Dialog>
     </>
+  );
+};
+
+export const PresenceBar: Component = () => {
+  const { t } = useI18n();
+
+  const boardState = useBoardStateContext();
+
+  const { onClick, onClose } = useDialogBoardToolUtils();
+
+  return (
+    <ToolContainer class="absolute top-2 right-6 items-center">
+      <AvatarGroup>
+        <Key each={boardState.cursors} by="sessionId">
+          {(cursor) => <CursorAvatar cursor={cursor()} />}
+        </Key>
+      </AvatarGroup>
+      <InviteButton />
+      <ExportToPngButton />
+      <Tooltip data-tip={t("board.forms.update")} placement="bottom">
+        <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
+      </Tooltip>
+      <ThemeToggle />
+    </ToolContainer>
+  );
+};
+
+type CursorAvatarProps = {
+  cursor: CursorModel;
+};
+
+const CursorAvatar: Component<CursorAvatarProps> = (props) => {
+  const { t } = useI18n();
+
+  const name = createMemo(() => {
+    return props.cursor.name ?? t("board.cursors.anonymous");
+  });
+
+  return (
+    <Tooltip data-tip={name()}>
+      <Avatar placeholder>
+        <AvatarContent>{name().at(0)}</AvatarContent>
+      </Avatar>
+    </Tooltip>
   );
 };
