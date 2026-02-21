@@ -117,18 +117,26 @@ export type CursorModel = {
   name?: string;
   madeAt: Date;
   sessionId: string;
+  active: boolean;
 };
+
+const OLD_CURSOR_AGE_SECONDS = 10;
 
 export const mapToCursorModel = (cursors: MaybeLoaded<CursorFeedSchemaInstance>) => {
   const loadedCursors = getLoadedOrUndefined(cursors);
   const entries = Object.entries(loadedCursors?.perSession ?? {});
-  return entries.map(
-    ([sessionId, cursor]): CursorModel => ({
-      madeAt: cursor.madeAt,
-      name: getLoadedOrUndefined(cursor.by?.profile)?.name,
-      sessionId,
-      x: cursor.value.position.x,
-      y: cursor.value.position.y,
-    }),
-  );
+  return entries
+    .map(
+      ([sessionId, cursor]): CursorModel => ({
+        madeAt: cursor.madeAt,
+        name: getLoadedOrUndefined(cursor.by?.profile)?.name,
+        sessionId,
+        x: cursor.value.position.x,
+        y: cursor.value.position.y,
+        active:
+          cursor.value.online &&
+          cursor.madeAt >= new Date(Date.now() - 1000 * OLD_CURSOR_AGE_SECONDS),
+      }),
+    )
+    .filter((cursor) => cursor.active);
 };

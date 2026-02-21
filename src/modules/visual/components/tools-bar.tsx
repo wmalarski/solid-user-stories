@@ -53,6 +53,7 @@ import type { CursorModel } from "../state/board-model";
 import { useBoardStateContext } from "../state/board-state";
 import { deleteEdgeInstance } from "../state/edge-actions";
 import { deleteTaskInstance } from "../state/task-actions";
+import { getColor } from "../utils/colors";
 import { SVG_EXPORT_SELECTOR } from "../utils/constants";
 
 const ToolContainer: Component<ToolContainerProps> = (props) => {
@@ -260,7 +261,6 @@ type ToolContainerProps = ParentProps<{
 const InviteButton = () => {
   const { t } = useI18n();
 
-  const account = useJazzAccount();
   const boardState = useBoardStateContext();
 
   const dialogId = createUniqueId();
@@ -286,13 +286,11 @@ const InviteButton = () => {
 
   return (
     <>
-      <Show when={account().canAdmin(boardState.board())}>
-        <Tooltip data-tip={t("board.invite.invite")} placement="bottom">
-          <Button aria-label={t("board.invite.invite")} onClick={onClick} shape="circle" size="sm">
-            <LinkIcon class="size-5" />
-          </Button>
-        </Tooltip>
-      </Show>
+      <Tooltip data-tip={t("board.invite.invite")} placement="bottom">
+        <Button aria-label={t("board.invite.invite")} onClick={onClick} shape="circle" size="sm">
+          <LinkIcon class="size-5" />
+        </Button>
+      </Tooltip>
       <Dialog id={dialogId}>
         <DialogBox>
           <DialogTitle>{t("board.invite.invite")}</DialogTitle>
@@ -332,9 +330,13 @@ const CursorAvatar: Component<CursorAvatarProps> = (props) => {
     return props.cursor.name ?? t("board.cursors.anonymous");
   });
 
+  const color = createMemo(() => {
+    return getColor(props.cursor.sessionId);
+  });
+
   return (
     <Tooltip data-tip={name()}>
-      <Avatar placeholder>
+      <Avatar placeholder style={{ "background-color": color() }}>
         <AvatarContent>{name().at(0)}</AvatarContent>
       </Avatar>
     </Tooltip>
@@ -344,6 +346,8 @@ const CursorAvatar: Component<CursorAvatarProps> = (props) => {
 export const PresenceBar: Component = () => {
   const { t } = useI18n();
 
+  const account = useJazzAccount();
+
   const boardState = useBoardStateContext();
 
   const { onClick, onClose } = useDialogBoardToolUtils();
@@ -351,15 +355,17 @@ export const PresenceBar: Component = () => {
   return (
     <ToolContainer class="absolute top-2 right-6 items-center">
       <AvatarGroup>
-        <Key each={boardState.cursors} by="sessionId">
+        <Key each={boardState.cursors.slice(0, 5)} by="sessionId">
           {(cursor) => <CursorAvatar cursor={cursor()} />}
         </Key>
       </AvatarGroup>
-      <InviteButton />
+      <Show when={account().canAdmin(boardState.board())}>
+        <InviteButton />
+        <Tooltip data-tip={t("board.forms.update")} placement="bottom">
+          <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
+        </Tooltip>
+      </Show>
       <ExportToPngButton />
-      <Tooltip data-tip={t("board.forms.update")} placement="bottom">
-        <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
-      </Tooltip>
       <ThemeToggle />
     </ToolContainer>
   );

@@ -4,6 +4,7 @@ export const CURSOR_FEED_TYPE = "cursor-feed";
 
 export const CursorFeedSchema = co.feed(
   z.object({
+    online: z.boolean(),
     position: z.object({
       x: z.number(),
       y: z.number(),

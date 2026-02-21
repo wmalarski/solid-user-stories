@@ -78,10 +78,14 @@ export const CursorPaths: Component = () => {
   const boardState = useBoardStateContext();
 
   const throttled = throttle((pos: MousePosition) => {
-    boardState.cursorsFeed()?.$jazz.push({ position: { x: pos.x, y: pos.y } });
+    boardState.cursorsFeed()?.$jazz.push({ online: true, position: { x: pos.x, y: pos.y } });
   }, 100);
 
   onCleanup(makeMousePositionListener(globalThis.window, throttled, { touch: false }));
+
+  onCleanup(() => {
+    boardState.cursorsFeed()?.$jazz.push({ online: false, position: { x: 0, y: 0 } });
+  });
 
   return (
     <Key each={boardState.cursors} by="sessionId">
