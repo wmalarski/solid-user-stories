@@ -33,6 +33,7 @@ import { FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { CheckCircleIcon } from "~/ui/icons/check-circle-icon";
 import { DownloadIcon } from "~/ui/icons/download-icon";
 import { HandIcon } from "~/ui/icons/hand-icon";
+import { InfoIcon } from "~/ui/icons/info-icon";
 import { LinkIcon } from "~/ui/icons/link-icon";
 import { MinusIcon } from "~/ui/icons/minus-icon";
 import { PlusIcon } from "~/ui/icons/plus-icon";
@@ -54,44 +55,10 @@ import { deleteEdgeInstance } from "../state/edge-actions";
 import { deleteTaskInstance } from "../state/task-actions";
 import { SVG_EXPORT_SELECTOR } from "../utils/constants";
 
-export const ToolsBar: Component = () => {
-  const { t } = useI18n();
-
-  const [toolsState, { onToolChage }] = useToolsStateContext();
-  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
-
-  const onToolClickFactory = (tool: ToolType) => () => {
-    onToolChage(tool);
-    onSelectionChange(null);
-  };
-
+const ToolContainer: Component<ToolContainerProps> = (props) => {
   return (
-    <div class="absolute bottom-2 w-full flex justify-center">
-      <ToolContainer class="justify-center items-center px-3 py-2">
-        <Tooltip data-tip={t("board.tools.pane")} placement="top">
-          <Button
-            aria-label={t("board.tools.pane")}
-            onClick={onToolClickFactory("pane")}
-            shape="circle"
-            size="sm"
-            color={toolsState() === "pane" ? "primary" : undefined}
-          >
-            <HandIcon class="size-5" />
-          </Button>
-        </Tooltip>
-        <Tooltip data-tip={t("board.tools.task")} placement="top">
-          <Button
-            aria-label={t("board.tools.task")}
-            onClick={onToolClickFactory("create-task")}
-            shape="circle"
-            size="sm"
-            color={toolsState() === "create-task" ? "primary" : undefined}
-          >
-            <SquareIcon class="size-5" />
-          </Button>
-        </Tooltip>
-        <DeleteSelectedElementDialog />
-      </ToolContainer>
+    <div class={cx("flex gap-1 rounded-3xl bg-base-200 p-1 shadow-lg", props.class)}>
+      {props.children}
     </div>
   );
 };
@@ -142,6 +109,48 @@ const DeleteSelectedElementDialog: Component = () => {
         title={t("common.delete")}
       />
     </>
+  );
+};
+
+export const ToolsBar: Component = () => {
+  const { t } = useI18n();
+
+  const [toolsState, { onToolChage }] = useToolsStateContext();
+  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
+
+  const onToolClickFactory = (tool: ToolType) => () => {
+    onToolChage(tool);
+    onSelectionChange(null);
+  };
+
+  return (
+    <div class="absolute bottom-2 w-full flex justify-center">
+      <ToolContainer class="justify-center items-center px-3 py-2">
+        <Tooltip data-tip={t("board.tools.pane")} placement="top">
+          <Button
+            aria-label={t("board.tools.pane")}
+            onClick={onToolClickFactory("pane")}
+            shape="circle"
+            size="sm"
+            color={toolsState() === "pane" ? "primary" : undefined}
+          >
+            <HandIcon class="size-5" />
+          </Button>
+        </Tooltip>
+        <Tooltip data-tip={t("board.tools.task")} placement="top">
+          <Button
+            aria-label={t("board.tools.task")}
+            onClick={onToolClickFactory("create-task")}
+            shape="circle"
+            size="sm"
+            color={toolsState() === "create-task" ? "primary" : undefined}
+          >
+            <SquareIcon class="size-5" />
+          </Button>
+        </Tooltip>
+        <DeleteSelectedElementDialog />
+      </ToolContainer>
+    </div>
   );
 };
 
@@ -248,14 +257,6 @@ type ToolContainerProps = ParentProps<{
   class?: string;
 }>;
 
-const ToolContainer: Component<ToolContainerProps> = (props) => {
-  return (
-    <div class={cx("flex gap-1 rounded-3xl bg-base-200 p-1 shadow-lg", props.class)}>
-      {props.children}
-    </div>
-  );
-};
-
 const InviteButton = () => {
   const { t } = useI18n();
 
@@ -321,6 +322,26 @@ const InviteButton = () => {
   );
 };
 
+type CursorAvatarProps = {
+  cursor: CursorModel;
+};
+
+const CursorAvatar: Component<CursorAvatarProps> = (props) => {
+  const { t } = useI18n();
+
+  const name = createMemo(() => {
+    return props.cursor.name ?? t("board.cursors.anonymous");
+  });
+
+  return (
+    <Tooltip data-tip={name()}>
+      <Avatar placeholder>
+        <AvatarContent>{name().at(0)}</AvatarContent>
+      </Avatar>
+    </Tooltip>
+  );
+};
+
 export const PresenceBar: Component = () => {
   const { t } = useI18n();
 
@@ -345,46 +366,38 @@ export const PresenceBar: Component = () => {
   );
 };
 
-type CursorAvatarProps = {
-  cursor: CursorModel;
-};
-
-const CursorAvatar: Component<CursorAvatarProps> = (props) => {
-  const { t } = useI18n();
-
-  const name = createMemo(() => {
-    return props.cursor.name ?? t("board.cursors.anonymous");
-  });
-
-  return (
-    <Tooltip data-tip={name()}>
-      <Avatar placeholder>
-        <AvatarContent>{name().at(0)}</AvatarContent>
-      </Avatar>
-    </Tooltip>
-  );
-};
-
 export const InfoBar: Component = () => {
   const { t } = useI18n();
 
-  const boardState = useBoardStateContext();
+  const dialogId = createUniqueId();
 
   const { onClick, onClose } = useDialogBoardToolUtils();
 
   return (
-    <ToolContainer class="absolute top-2 right-6 items-center">
-      <AvatarGroup>
-        <Key each={boardState.cursors} by="sessionId">
-          {(cursor) => <CursorAvatar cursor={cursor()} />}
-        </Key>
-      </AvatarGroup>
-      <InviteButton />
-      <ExportToPngButton />
-      <Tooltip data-tip={t("board.forms.update")} placement="bottom">
-        <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
-      </Tooltip>
-      <ThemeToggle />
-    </ToolContainer>
+    <>
+      <ToolContainer class="absolute bottom-2 right-6 items-center">
+        <Tooltip data-tip={t("board.info.aboutProject")} placement="top">
+          <DialogTrigger
+            for={dialogId}
+            aria-label={t("board.info.aboutProject")}
+            onClick={onClick}
+            shape="circle"
+            size="sm"
+          >
+            <InfoIcon class="size-5" />
+          </DialogTrigger>
+        </Tooltip>
+      </ToolContainer>
+      <Dialog id={dialogId} onClose={onClose}>
+        <DialogBox>
+          <DialogTitle>{t("board.info.aboutProject")}</DialogTitle>
+          <DialogDescription>{t("board.info.aboutProject")}</DialogDescription>
+          <DialogActions>
+            <DialogClose />
+          </DialogActions>
+        </DialogBox>
+        <DialogBackdrop />
+      </Dialog>
+    </>
   );
 };

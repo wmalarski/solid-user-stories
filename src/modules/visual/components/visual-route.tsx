@@ -24,102 +24,7 @@ import {
 import { ExportableSectionItems, SectionItems } from "./section-items";
 import { InsertTaskByToolDialog } from "./task-dialogs";
 import { ExportableTaskGroup, TaskGroup } from "./task-group";
-import { PresenceBar, ToolsBar, ZoomBar } from "./tools-bar";
-
-export const VisualRoute: Component = () => {
-  const params = useParams();
-  const boardId = createMemo(() => params.boardId ?? "");
-
-  const [board] = createJazzResource(() => ({
-    id: boardId(),
-    schema: BoardSchema,
-  }));
-
-  return (
-    <Suspense fallback={"Loading..."}>
-      <Show when={board()} fallback={"No board..."}>
-        {(board) => <VisualPanel board={board()} />}
-      </Show>
-    </Suspense>
-  );
-};
-
-type VisualPanelProps = {
-  board: BoardInstance;
-};
-
-const VisualPanel: Component<VisualPanelProps> = (props) => {
-  return (
-    <BoardStateProvider board={props.board}>
-      <ToolsStateProvider>
-        <DragStateProvider>
-          <SelectionStateProvider>
-            <BoardTransformProvider>
-              <EdgeDragStateProvider>
-                <ExportStateProvider>
-                  <BoardContent />
-                </ExportStateProvider>
-              </EdgeDragStateProvider>
-            </BoardTransformProvider>
-          </SelectionStateProvider>
-        </DragStateProvider>
-      </ToolsStateProvider>
-    </BoardStateProvider>
-  );
-};
-
-const BoardContent: Component = () => {
-  return (
-    <>
-      <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
-        <SvgDefinitions />
-        <BackgroundRect />
-        <SectionGridStaticPaths />
-        <SelectableGroup />
-        <DraggedEdge />
-        <CursorPaths />
-        <SectionItems />
-      </svg>
-      <PresenceBar />
-      <ToolsBar />
-      <ZoomBar />
-      <InsertTaskByToolDialog />
-      <ExportableBoard />
-    </>
-  );
-};
-
-const SelectableGroup: Component = () => {
-  const boardState = useBoardStateContext();
-
-  const [isDragging] = useDragStateContext();
-  const [transform] = useBoardTransformContext();
-
-  return (
-    <g cursor={isDragging() ? "grabbing" : "grab"}>
-      <SectionGridPaths />
-      <g transform={transform() as unknown as string}>
-        <For each={boardState.store.edges}>{(edge) => <EdgePath edge={edge} />}</For>
-        <For each={boardState.store.tasks}>{(task) => <TaskGroup task={task} />}</For>
-      </g>
-    </g>
-  );
-};
-
-const BackgroundRect: Component = () => {
-  const [rectRef, setRectRef] = createSignal<SVGElement>();
-
-  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
-
-  createD3ClickListener({
-    onClick() {
-      onSelectionChange(null);
-    },
-    ref: rectRef,
-  });
-
-  return <rect ref={setRectRef} x={0} y={0} width="100%" height="100%" class="fill-base-100" />;
-};
+import { InfoBar, PresenceBar, ToolsBar, ZoomBar } from "./tools-bar";
 
 const SvgDefinitions: Component = () => {
   return (
@@ -178,5 +83,101 @@ const ExportableBoard: Component = () => {
         <ExportableSectionItems />
       </svg>
     </Show>
+  );
+};
+
+const SelectableGroup: Component = () => {
+  const boardState = useBoardStateContext();
+
+  const [isDragging] = useDragStateContext();
+  const [transform] = useBoardTransformContext();
+
+  return (
+    <g cursor={isDragging() ? "grabbing" : "grab"}>
+      <SectionGridPaths />
+      <g transform={transform() as unknown as string}>
+        <For each={boardState.store.edges}>{(edge) => <EdgePath edge={edge} />}</For>
+        <For each={boardState.store.tasks}>{(task) => <TaskGroup task={task} />}</For>
+      </g>
+    </g>
+  );
+};
+
+const BackgroundRect: Component = () => {
+  const [rectRef, setRectRef] = createSignal<SVGElement>();
+
+  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
+
+  createD3ClickListener({
+    onClick() {
+      onSelectionChange(null);
+    },
+    ref: rectRef,
+  });
+
+  return <rect ref={setRectRef} x={0} y={0} width="100%" height="100%" class="fill-base-100" />;
+};
+
+const BoardContent: Component = () => {
+  return (
+    <>
+      <svg class={cx("w-screen h-screen z-10 isolate", SVG_CLASS)}>
+        <SvgDefinitions />
+        <BackgroundRect />
+        <SectionGridStaticPaths />
+        <SelectableGroup />
+        <DraggedEdge />
+        <CursorPaths />
+        <SectionItems />
+      </svg>
+      <PresenceBar />
+      <ToolsBar />
+      <ZoomBar />
+      <InfoBar />
+      <InsertTaskByToolDialog />
+      <ExportableBoard />
+    </>
+  );
+};
+
+type VisualPanelProps = {
+  board: BoardInstance;
+};
+
+const VisualPanel: Component<VisualPanelProps> = (props) => {
+  return (
+    <BoardStateProvider board={props.board}>
+      <ToolsStateProvider>
+        <DragStateProvider>
+          <SelectionStateProvider>
+            <BoardTransformProvider>
+              <EdgeDragStateProvider>
+                <ExportStateProvider>
+                  <BoardContent />
+                </ExportStateProvider>
+              </EdgeDragStateProvider>
+            </BoardTransformProvider>
+          </SelectionStateProvider>
+        </DragStateProvider>
+      </ToolsStateProvider>
+    </BoardStateProvider>
+  );
+};
+
+export const VisualRoute: Component = () => {
+  const params = useParams();
+  const boardId = createMemo(() => params.boardId ?? "");
+
+  const [board] = createJazzResource(() => ({
+    id: boardId(),
+    schema: BoardSchema,
+  }));
+
+  return (
+    <Suspense fallback={"Loading..."}>
+      <Show when={board()} fallback={"No board..."}>
+        {(value) => <VisualPanel board={value()} />}
+      </Show>
+    </Suspense>
   );
 };

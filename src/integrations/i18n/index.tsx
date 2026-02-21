@@ -25,6 +25,9 @@ const enDict = {
       xSectionDefault: "Sprint 1",
       ySectionDefault: "Feature 1",
     },
+    info: {
+      aboutProject: "About project",
+    },
     invite: {
       acceptInvite: "Accept invite",
       copy: "Copy",

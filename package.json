@@ -27,7 +27,6 @@
     "decode-formdata": "^0.9.0",
     "jazz-tools": "^0.20.10",
     "solid-js": "^1.9.11",
-    "tailwind-merge": "^3.5.0",
     "tailwind-variants": "^3.2.2",
     "tailwindcss": "^4.2.0",
     "valibot": "^1.2.0"
@@ -35,11 +34,11 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.25.2",
     "@types/d3": "^7.4.3",
-    "daisyui": "^5.5.18",
+    "daisyui": "^5.5.19",
     "knip": "^5.84.1",
-    "oxfmt": "^0.33.0",
-    "oxlint": "^1.48.0",
-    "oxlint-tsgolint": "^0.14.1",
+    "oxfmt": "^0.34.0",
+    "oxlint": "^1.49.0",
+    "oxlint-tsgolint": "^0.14.2",
     "solid-devtools": "^0.34.5",
     "sonda": "^0.11.0",
     "typescript": "^5.9.3",
