@@ -20,7 +20,8 @@ export interface NavigationPaths {
 export const buildSearchParams = (query?: Record<string, unknown>): URLSearchParams => {
   const entries = Object.entries(query ?? {});
   const pairs = entries.flatMap(([key, value]) =>
-    value !== undefined && value !== null ? [[key, JSON.stringify(value)]] : [],
+    // oxlint-disable-next-line typescript/no-base-to-string
+    value !== undefined && value !== null ? [[key, String(value)]] : [],
   );
   return new URLSearchParams(pairs);
 };
@@ -40,7 +41,7 @@ export const createLink = <Key extends keyof NavigationPaths>(
   };
   const searchParams = buildSearchParams(unsafeOptions.search);
   const resolvedPath = Object.entries(unsafeOptions.params ?? {}).reduce(
-    (previous, [key, value]) => previous.replace(`:${key}`, JSON.stringify(value)),
+    (previous, [key, value]) => previous.replace(`:${key}`, String(value)),
     String(path),
   );
 

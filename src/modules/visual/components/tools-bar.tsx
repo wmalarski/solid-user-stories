@@ -303,7 +303,7 @@ const InviteButton = () => {
               readOnly
               class="grow"
               name="link"
-              value={`${globalThis.window.location.href}${inviteLink()}`}
+              value={`${globalThis.window.location.origin}${inviteLink()}`}
             />
             <Button class="w-20" color="primary" onClick={onCopy}>
               <Show when={showSuccess()} fallback={t("board.invite.copy")}>

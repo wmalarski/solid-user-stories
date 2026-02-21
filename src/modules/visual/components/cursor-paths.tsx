@@ -7,6 +7,7 @@ import { useJazzAccount } from "~/integrations/jazz/provider";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import type { CursorModel } from "../state/board-model";
 import { useBoardStateContext } from "../state/board-state";
+import { MultilineText } from "../ui/multiline-text";
 import { getColor } from "../utils/colors";
 
 const OLD_CURSOR_AGE_SECONDS = 10_000;
@@ -31,7 +32,7 @@ const CursorPath: Component<CursorPathProps> = (props) => {
   });
 
   const name = createMemo(() => {
-    return props.cursor.name && t("board.cursors.anonymous");
+    return props.cursor.name ?? t("board.cursors.anonymous");
   });
 
   const transformStyle = createMemo(() => {
@@ -46,13 +47,29 @@ const CursorPath: Component<CursorPathProps> = (props) => {
       <rect
         opacity={active() ? 100 : 90}
         style={{ fill: color(), transform: transformStyle() }}
-        width={20}
-        height={20}
+        width={10}
+        height={10}
         class="duration-100 transition-transform"
       />
-      <text style={{ transform: transformStyle() }} class="duration-100  transition-transform">
-        {name()}
-      </text>
+      <rect
+        opacity={active() ? 100 : 90}
+        style={{ fill: color(), transform: transformStyle() }}
+        width={100}
+        height={20}
+        class="duration-100 transition-transform"
+        rx="10"
+        ry="10"
+      />
+      <MultilineText
+        maxWidth={80}
+        x={10}
+        y={14}
+        font-size="12"
+        maxLines={1}
+        content={name()}
+        style={{ transform: transformStyle() }}
+        class="duration-100  transition-transform"
+      />
     </Show>
   );
 };
