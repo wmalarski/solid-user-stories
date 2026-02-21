@@ -32,7 +32,7 @@ const CursorPath: Component<CursorPathProps> = (props) => {
   });
 
   const name = createMemo(() => {
-    return props.cursor.name ?? t("board.cursors.anonymous");
+    return props.cursor.name ?? t("board.account.anonymous");
   });
 
   const transformStyle = createMemo(() => {

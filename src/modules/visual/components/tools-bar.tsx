@@ -14,6 +14,7 @@ import { useJazzAccount } from "~/integrations/jazz/provider";
 import { createLink } from "~/integrations/router/create-link";
 import { ThemeToggle } from "~/integrations/theme/theme-toggle";
 import { UpdateBoardDialog } from "~/modules/boards/update-board-dialog";
+import { UpdateAccountDialog } from "~/modules/invite/update-account-dialog";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { Avatar, AvatarContent, AvatarGroup } from "~/ui/avatar/avatar";
 import { Button } from "~/ui/button/button";
@@ -327,7 +328,7 @@ const CursorAvatar: Component<CursorAvatarProps> = (props) => {
   const { t } = useI18n();
 
   const name = createMemo(() => {
-    return props.cursor.name ?? t("board.cursors.anonymous");
+    return props.cursor.name ?? t("board.account.anonymous");
   });
 
   const color = createMemo(() => {
@@ -365,6 +366,9 @@ export const PresenceBar: Component = () => {
           <UpdateBoardDialog onClose={onClose} onOpen={onClick} board={boardState.board()} />
         </Tooltip>
       </Show>
+      <Tooltip data-tip={t("board.account.update")} placement="bottom">
+        <UpdateAccountDialog onClose={onClose} onOpen={onClick} />
+      </Tooltip>
       <ExportToPngButton />
       <ThemeToggle />
     </ToolContainer>

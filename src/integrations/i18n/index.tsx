@@ -11,8 +11,11 @@ import {
 
 const enDict = {
   board: {
-    cursors: {
+    account: {
+      name: "Name",
       anonymous: "Anonymous",
+      update: "Update name",
+      updateDescription: "Enter updated profile information.",
     },
     forms: {
       createBoard: "Create Board",
