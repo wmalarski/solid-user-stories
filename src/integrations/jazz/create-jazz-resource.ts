@@ -34,8 +34,8 @@ export const createJazzResource = <
     InstanceOfSchema<S>,
     ReturnType<CreateJazzResourceArgs<S, R>>
     // oxlint-disable-next-line typescript/no-explicit-any
-  >(args, async (args: any) => {
-    const root = await args.schema.load(args.id, args.options);
+  >(args, async (resolvedArgs: any) => {
+    const root = await resolvedArgs.schema.load(resolvedArgs.id, resolvedArgs.options);
     return root.$isLoaded ? root : null;
   });
 };

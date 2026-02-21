@@ -23,16 +23,6 @@ type EdgeEntry = {
   target: TaskModel;
 };
 
-type EdgePathProps = {
-  edge: EdgeModel;
-};
-
-export const EdgePath: Component<EdgePathProps> = (props) => {
-  const entry = createEntryResource(() => props.edge);
-
-  return <Show when={entry()}>{(entry) => <EdgeContainer entry={entry()} />}</Show>;
-};
-
 const createEntryResource = (edge: Accessor<EdgeModel>) => {
   const boardState = useBoardStateContext();
 
@@ -46,54 +36,6 @@ const createEntryResource = (edge: Accessor<EdgeModel>) => {
   });
 
   return entry;
-};
-
-type EdgeContainerProps = {
-  entry: EdgeEntry;
-};
-
-const EdgeContainer: Component<EdgeContainerProps> = (props) => {
-  const [ref, setRef] = createSignal<SVGElement>();
-
-  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
-
-  const isSelected = useIsSelected(() => props.entry.edge.id);
-
-  const path = createEdgePath(() => props.entry);
-
-  createD3ClickListener({
-    onClick() {
-      onSelectionChange({ id: props.entry.edge.id, kind: "edge" });
-    },
-    ref,
-  });
-
-  return (
-    <>
-      <AnimatedPath d={path()} stroke-width={2} stroke-opacity={0.7} />
-      <SelectablePath ref={setRef} d={path()} isSelected={isSelected()} />
-      <Show when={isSelected()}>
-        <EdgeHandle entry={props.entry} />
-      </Show>
-    </>
-  );
-};
-
-type ExportableEdgePathProps = {
-  edge: EdgeModel;
-};
-
-export const ExportableEdgePath: Component<ExportableEdgePathProps> = (props) => {
-  const entry = createEntryResource(() => props.edge);
-
-  return (
-    <Show when={entry()}>
-      {(entry) => {
-        const path = createEdgePath(() => entry());
-        return <SimplePath d={path()} />;
-      }}
-    </Show>
-  );
 };
 
 export const createEdgePath = (entry: Accessor<EdgeEntry>) => {
@@ -147,5 +89,63 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
       width={EDGE_HANDLE_SIZE}
       height={EDGE_HANDLE_SIZE}
     />
+  );
+};
+
+type EdgeContainerProps = {
+  entry: EdgeEntry;
+};
+
+const EdgeContainer: Component<EdgeContainerProps> = (props) => {
+  const [ref, setRef] = createSignal<SVGElement>();
+
+  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
+
+  const isSelected = useIsSelected(() => props.entry.edge.id);
+
+  const path = createEdgePath(() => props.entry);
+
+  createD3ClickListener({
+    onClick() {
+      onSelectionChange({ id: props.entry.edge.id, kind: "edge" });
+    },
+    ref,
+  });
+
+  return (
+    <>
+      <AnimatedPath d={path()} stroke-width={2} stroke-opacity={0.7} />
+      <SelectablePath ref={setRef} d={path()} isSelected={isSelected()} />
+      <Show when={isSelected()}>
+        <EdgeHandle entry={props.entry} />
+      </Show>
+    </>
+  );
+};
+
+type EdgePathProps = {
+  edge: EdgeModel;
+};
+
+export const EdgePath: Component<EdgePathProps> = (props) => {
+  const entry = createEntryResource(() => props.edge);
+
+  return <Show when={entry()}>{(resolvedEntry) => <EdgeContainer entry={resolvedEntry()} />}</Show>;
+};
+
+type ExportableEdgePathProps = {
+  edge: EdgeModel;
+};
+
+export const ExportableEdgePath: Component<ExportableEdgePathProps> = (props) => {
+  const entry = createEntryResource(() => props.edge);
+
+  return (
+    <Show when={entry()}>
+      {(resolvedEntry) => {
+        const path = createEdgePath(() => resolvedEntry());
+        return <SimplePath d={path()} />;
+      }}
+    </Show>
   );
 };

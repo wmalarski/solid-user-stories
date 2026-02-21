@@ -50,33 +50,82 @@ export const TaskFieldsSchema = v.object({
   title: v.string(),
 });
 
-export const InsertTaskByToolDialog: Component = () => {
-  const [position, setPosition] = createSignal<Point2D>({ x: 0, y: 0 });
+type TaskFieldsProps = {
+  pending?: boolean;
+  issues?: FormIssues;
+  initialValues?: Partial<TaskModel>;
+};
 
-  const dialogId = createUniqueId();
+const TaskFields: Component<TaskFieldsProps> = (props) => {
+  const { t } = useI18n();
 
-  const { onClick } = useDialogBoardToolUtils();
+  return (
+    <Fieldset>
+      <FormError message={props.issues?.error} />
 
-  const [toolsState] = useToolsStateContext();
+      <FieldsetLabel for="title">{t("board.tasks.title")}</FieldsetLabel>
+      <Input
+        disabled={props.pending}
+        id="title"
+        name="title"
+        required={true}
+        width="full"
+        value={props.initialValues?.title}
+        {...getInvalidStateProps({
+          errorMessageId: "title-error",
+          isInvalid: Boolean(props.issues?.errors?.title),
+        })}
+      />
+      <FieldError id="title-error" message={props.issues?.errors?.title} />
 
-  createEffect(() => {
-    const isCreateTask = toolsState() === "create-task";
+      <FieldsetLabel for="description">{t("board.tasks.description")}</FieldsetLabel>
+      <Input
+        disabled={props.pending}
+        id="description"
+        name="description"
+        required={true}
+        width="full"
+        value={props.initialValues?.description}
+        {...getInvalidStateProps({
+          errorMessageId: "description-error",
+          isInvalid: Boolean(props.issues?.errors?.description),
+        })}
+      />
+      <FieldError id="description-error" message={props.issues?.errors?.description} />
 
-    if (!isCreateTask) {
-      return;
-    }
+      <FieldsetLabel for="estimate">{t("board.tasks.estimate")}</FieldsetLabel>
+      <Input
+        disabled={props.pending}
+        id="estimate"
+        name="estimate"
+        required={true}
+        width="full"
+        type="number"
+        step={1}
+        min={0}
+        value={props.initialValues?.estimate}
+        {...getInvalidStateProps({
+          errorMessageId: "estimate-error",
+          isInvalid: Boolean(props.issues?.errors?.estimate),
+        })}
+      />
+      <FieldError id="estimate-error" message={props.issues?.errors?.estimate} />
 
-    createD3ClickListener({
-      onClick(event) {
-        onClick();
-        setPosition({ x: event.x, y: event.y });
-        openDialog(dialogId);
-      },
-      ref: () => SVG_SELECTOR,
-    });
-  });
-
-  return <InsertTaskDialog dialogId={dialogId} position={position()} />;
+      <FieldsetLabel for="link">{t("board.tasks.link")}</FieldsetLabel>
+      <Input
+        disabled={props.pending}
+        id="link"
+        name="link"
+        width="full"
+        value={props.initialValues?.link}
+        {...getInvalidStateProps({
+          errorMessageId: "link-error",
+          isInvalid: Boolean(props.issues?.errors?.link),
+        })}
+      />
+      <FieldError id="link-error" message={props.issues?.errors?.link} />
+    </Fieldset>
+  );
 };
 
 type InsertTaskDialogProps = {
@@ -161,6 +210,35 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
   );
 };
 
+export const InsertTaskByToolDialog: Component = () => {
+  const [position, setPosition] = createSignal<Point2D>({ x: 0, y: 0 });
+
+  const dialogId = createUniqueId();
+
+  const { onClick } = useDialogBoardToolUtils();
+
+  const [toolsState] = useToolsStateContext();
+
+  createEffect(() => {
+    const isCreateTask = toolsState() === "create-task";
+
+    if (!isCreateTask) {
+      return;
+    }
+
+    createD3ClickListener({
+      onClick(event) {
+        onClick();
+        setPosition({ x: event.x, y: event.y });
+        openDialog(dialogId);
+      },
+      ref: () => SVG_SELECTOR,
+    });
+  });
+
+  return <InsertTaskDialog dialogId={dialogId} position={position()} />;
+};
+
 type UpdateTaskDialogProps = {
   task: TaskModel;
 };
@@ -228,84 +306,6 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
         <DialogBackdrop />
       </Dialog>
     </>
-  );
-};
-
-type TaskFieldsProps = {
-  pending?: boolean;
-  issues?: FormIssues;
-  initialValues?: Partial<TaskModel>;
-};
-
-const TaskFields: Component<TaskFieldsProps> = (props) => {
-  const { t } = useI18n();
-
-  return (
-    <Fieldset>
-      <FormError message={props.issues?.error} />
-
-      <FieldsetLabel for="title">{t("board.tasks.title")}</FieldsetLabel>
-      <Input
-        disabled={props.pending}
-        id="title"
-        name="title"
-        required={true}
-        width="full"
-        value={props.initialValues?.title}
-        {...getInvalidStateProps({
-          errorMessageId: "title-error",
-          isInvalid: Boolean(props.issues?.errors?.title),
-        })}
-      />
-      <FieldError id="title-error" message={props.issues?.errors?.title} />
-
-      <FieldsetLabel for="description">{t("board.tasks.description")}</FieldsetLabel>
-      <Input
-        disabled={props.pending}
-        id="description"
-        name="description"
-        required={true}
-        width="full"
-        value={props.initialValues?.description}
-        {...getInvalidStateProps({
-          errorMessageId: "description-error",
-          isInvalid: Boolean(props.issues?.errors?.description),
-        })}
-      />
-      <FieldError id="description-error" message={props.issues?.errors?.description} />
-
-      <FieldsetLabel for="estimate">{t("board.tasks.estimate")}</FieldsetLabel>
-      <Input
-        disabled={props.pending}
-        id="estimate"
-        name="estimate"
-        required={true}
-        width="full"
-        type="number"
-        step={1}
-        min={0}
-        value={props.initialValues?.estimate}
-        {...getInvalidStateProps({
-          errorMessageId: "estimate-error",
-          isInvalid: Boolean(props.issues?.errors?.estimate),
-        })}
-      />
-      <FieldError id="estimate-error" message={props.issues?.errors?.estimate} />
-
-      <FieldsetLabel for="link">{t("board.tasks.link")}</FieldsetLabel>
-      <Input
-        disabled={props.pending}
-        id="link"
-        name="link"
-        width="full"
-        value={props.initialValues?.link}
-        {...getInvalidStateProps({
-          errorMessageId: "link-error",
-          isInvalid: Boolean(props.issues?.errors?.link),
-        })}
-      />
-      <FieldError id="link-error" message={props.issues?.errors?.link} />
-    </Fieldset>
   );
 };
 

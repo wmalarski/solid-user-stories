@@ -40,6 +40,37 @@ const SectionFieldsSchema = v.object({
   name: v.string(),
 });
 
+type SectionFieldsProps = {
+  pending?: boolean;
+  issues?: FormIssues;
+  initialValues?: Partial<SectionModel>;
+};
+
+const SectionFields: Component<SectionFieldsProps> = (props) => {
+  const { t } = useI18n();
+
+  return (
+    <Fieldset>
+      <FormError message={props.issues?.error} />
+
+      <FieldsetLabel for="name">{t("board.sections.name")}</FieldsetLabel>
+      <Input
+        disabled={props.pending}
+        id="name"
+        name="name"
+        required={true}
+        width="full"
+        value={props.initialValues?.name}
+        {...getInvalidStateProps({
+          errorMessageId: "name-error",
+          isInvalid: Boolean(props.issues?.errors?.name),
+        })}
+      />
+      <FieldError id="name-error" message={props.issues?.errors?.name} />
+    </Fieldset>
+  );
+};
+
 type InsertSectionDialogProps = {
   orientation: Orientation;
   index: number;
@@ -188,37 +219,6 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
         <DialogBackdrop />
       </Dialog>
     </>
-  );
-};
-
-type SectionFieldsProps = {
-  pending?: boolean;
-  issues?: FormIssues;
-  initialValues?: Partial<SectionModel>;
-};
-
-const SectionFields: Component<SectionFieldsProps> = (props) => {
-  const { t } = useI18n();
-
-  return (
-    <Fieldset>
-      <FormError message={props.issues?.error} />
-
-      <FieldsetLabel for="name">{t("board.sections.name")}</FieldsetLabel>
-      <Input
-        disabled={props.pending}
-        id="name"
-        name="name"
-        required={true}
-        width="full"
-        value={props.initialValues?.name}
-        {...getInvalidStateProps({
-          errorMessageId: "name-error",
-          isInvalid: Boolean(props.issues?.errors?.name),
-        })}
-      />
-      <FieldError id="name-error" message={props.issues?.errors?.name} />
-    </Fieldset>
   );
 };
 

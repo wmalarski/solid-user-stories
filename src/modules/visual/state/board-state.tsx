@@ -26,6 +26,34 @@ import {
 } from "./board-model";
 import { getSectionConfig } from "./section-configs";
 
+export const createCursorsFeed = (board: Accessor<BoardInstance>) => {
+  const date = createCurrentDate();
+
+  const [cursors] = createResource(board, async (resolvedBoard) => {
+    const group = resolvedBoard.$jazz.owner;
+
+    const feed = await CursorFeedSchema.getOrCreateUnique({
+      owner: group,
+      unique: {
+        date: date(),
+        origin: globalThis.location.origin,
+        type: CURSOR_FEED_TYPE,
+      },
+      value: [],
+    });
+
+    if (!feed.$isLoaded) {
+      throw new Error("feed is not loaded");
+    }
+
+    resolvedBoard.$jazz.set("cursors", feed);
+
+    return feed;
+  });
+
+  return cursors;
+};
+
 const createBoardStateContext = (board: Accessor<BoardInstance>) => {
   const [store, setStore] = createStore<BoardModel>({
     edges: [],
@@ -58,8 +86,8 @@ const createBoardStateContext = (board: Accessor<BoardInstance>) => {
     }
 
     onCleanup(
-      cursorsFeedValue.$jazz.subscribe({}, (cursors) => {
-        setCursors(mapToCursorModel(cursors));
+      cursorsFeedValue.$jazz.subscribe({}, (resolvedCursors) => {
+        setCursors(mapToCursorModel(resolvedCursors));
       }),
     );
   });
@@ -94,35 +122,4 @@ export const BoardStateProvider: Component<BoardStateProviderProps> = (props) =>
   const value = createBoardStateContext(() => props.board);
 
   return <BoardStateContext.Provider value={value}>{props.children}</BoardStateContext.Provider>;
-};
-
-export const createCursorsFeed = (board: Accessor<BoardInstance>) => {
-  const date = createCurrentDate();
-
-  const [cursors] = createResource(
-    () => ({ board: board() }),
-    async ({ board }) => {
-      const group = board.$jazz.owner;
-
-      const feed = await CursorFeedSchema.getOrCreateUnique({
-        owner: group,
-        unique: {
-          date: date(),
-          origin: globalThis.location.origin,
-          type: CURSOR_FEED_TYPE,
-        },
-        value: [],
-      });
-
-      if (!feed.$isLoaded) {
-        throw new Error("feed is not loaded");
-      }
-
-      board.$jazz.set("cursors", feed);
-
-      return feed;
-    },
-  );
-
-  return cursors;
 };

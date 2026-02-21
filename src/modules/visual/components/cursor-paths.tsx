@@ -11,26 +11,6 @@ import { getColor } from "../utils/colors";
 
 const OLD_CURSOR_AGE_SECONDS = 10_000;
 
-export const CursorPaths: Component = () => {
-  const boardState = useBoardStateContext();
-
-  const throttled = throttle((pos: MousePosition) => {
-    boardState.cursorsFeed()?.$jazz.push({ position: { x: pos.x, y: pos.y } });
-  }, 100);
-
-  onCleanup(makeMousePositionListener(globalThis.window, throttled, { touch: false }));
-
-  return (
-    <Key each={boardState.cursors} by="sessionId">
-      {(value) => <CursorPath cursor={value()} />}
-    </Key>
-  );
-};
-
-type CursorPathProps = {
-  cursor: CursorModel;
-};
-
 const CursorPath: Component<CursorPathProps> = (props) => {
   const { t } = useI18n();
 
@@ -78,4 +58,24 @@ const CursorPath: Component<CursorPathProps> = (props) => {
       </text>
     </Show>
   );
+};
+
+export const CursorPaths: Component = () => {
+  const boardState = useBoardStateContext();
+
+  const throttled = throttle((pos: MousePosition) => {
+    boardState.cursorsFeed()?.$jazz.push({ position: { x: pos.x, y: pos.y } });
+  }, 100);
+
+  onCleanup(makeMousePositionListener(globalThis.window, throttled, { touch: false }));
+
+  return (
+    <Key each={boardState.cursors} by="sessionId">
+      {(value) => <CursorPath cursor={value()} />}
+    </Key>
+  );
+};
+
+type CursorPathProps = {
+  cursor: CursorModel;
 };

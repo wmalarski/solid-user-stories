@@ -12,58 +12,6 @@ import { SECTION_X_OFFSET, SECTION_Y_OFFSET, TEXT_HEIGHT, TEXT_PADDING } from ".
 import type { Orientation } from "../utils/types";
 import { DeleteSectionDialog, InsertSectionDialog, UpdateSectionDialog } from "./section-dialogs";
 
-export const SectionItems: Component = () => {
-  const boardState = useBoardStateContext();
-
-  const xLength = createMemo(() => boardState.sectionXConfigs().length);
-  const yLength = createMemo(() => boardState.sectionYConfigs().length);
-
-  return (
-    <>
-      <HorizontalBackgroundRect />
-      <VerticalBackgroundRect />
-      <Index each={boardState.sectionXConfigs()}>
-        {(entry) => <HorizontalItemRect totalLength={xLength()} config={entry()} />}
-      </Index>
-      <Index each={boardState.sectionYConfigs()}>
-        {(entry) => <VerticalItemRect totalLength={yLength()} config={entry()} />}
-      </Index>
-      <CenterRect />
-    </>
-  );
-};
-
-export const ExportableSectionItems: Component = () => {
-  const boardState = useBoardStateContext();
-
-  return (
-    <>
-      <rect
-        class="fill-base-300"
-        x={0}
-        y={0}
-        height={SECTION_Y_OFFSET}
-        width="100%"
-        filter="url(#dropshadow)"
-      />
-      <rect
-        class="fill-base-300"
-        x={0}
-        y={0}
-        height="100%"
-        width={SECTION_X_OFFSET}
-        filter="url(#dropshadow)"
-      />
-      <Index each={boardState.sectionXConfigs()}>
-        {(entry) => <ExportableHorizontalItemRect config={entry()} />}
-      </Index>
-      <Index each={boardState.sectionYConfigs()}>
-        {(entry) => <ExportableVerticalItemRect config={entry()} />}
-      </Index>
-    </>
-  );
-};
-
 const HorizontalBackgroundRect: Component = () => {
   return (
     <>
@@ -93,6 +41,70 @@ const VerticalBackgroundRect: Component = () => {
       />
       <rect class="fill-base-300" x={0} y={0} height="100%" width={SECTION_X_OFFSET} />
     </>
+  );
+};
+
+const createSectionItemValues = (
+  orientation: Accessor<Orientation>,
+  config: Accessor<SectionConfig>,
+) => {
+  const boardState = useBoardStateContext();
+
+  const tasks = createMemo(() => {
+    const configValue = config();
+    const isVerticalValue = orientation() === "vertical";
+    const sectionId = configValue.section.id;
+    return boardState.store.tasks.filter((entry) =>
+      isVerticalValue ? entry.sectionY === sectionId : entry.sectionX === sectionId,
+    );
+  });
+
+  const esitmationSum = createMemo(() => {
+    return tasks()?.reduce((previous, current) => previous + current.estimate, 0);
+  });
+
+  return { esitmationSum, tasks };
+};
+
+type SectionItemContentProps = {
+  config: SectionConfig;
+  totalLength: number;
+  orientation: Orientation;
+};
+
+const SectionItemContent: Component<SectionItemContentProps> = (props) => {
+  const isVertical = createMemo(() => {
+    return props.orientation === "vertical";
+  });
+
+  const { esitmationSum, tasks } = createSectionItemValues(
+    () => props.orientation,
+    () => props.config,
+  );
+
+  return (
+    <div class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[1fr_auto] p-2">
+      <span class="text-sm truncate font-semibold min-h-4">{props.config.section.name}</span>
+      <div
+        class={cx("flex gap-1 justify-end", {
+          "flex-col items-end": isVertical(),
+          "items-center": !isVertical(),
+        })}
+      >
+        <InsertSectionDialog orientation={props.orientation} index={props.config.index} />
+        <UpdateSectionDialog orientation={props.orientation} section={props.config.section} />
+        <Show when={props.totalLength > 1 && tasks()?.length === 0}>
+          <DeleteSectionDialog
+            orientation={props.orientation}
+            section={props.config.section}
+            endPosition={props.config.end}
+          />
+        </Show>
+        <Badge size="sm" color="accent" class="my-1">
+          {esitmationSum()}
+        </Badge>
+      </div>
+    </div>
   );
 };
 
@@ -146,70 +158,6 @@ const VerticalItemRect: Component<VerticalItemRectProps> = (props) => {
   );
 };
 
-type SectionItemContentProps = {
-  config: SectionConfig;
-  totalLength: number;
-  orientation: Orientation;
-};
-
-const SectionItemContent: Component<SectionItemContentProps> = (props) => {
-  const isVertical = createMemo(() => {
-    return props.orientation === "vertical";
-  });
-
-  const { esitmationSum, tasks } = createSectionItemValues(
-    () => props.orientation,
-    () => props.config,
-  );
-
-  return (
-    <div class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[1fr_auto] p-2">
-      <span class="text-sm truncate font-semibold min-h-4">{props.config.section.name}</span>
-      <div
-        class={cx("flex gap-1 justify-end", {
-          "flex-col items-end": isVertical(),
-          "items-center": !isVertical(),
-        })}
-      >
-        <InsertSectionDialog orientation={props.orientation} index={props.config.index} />
-        <UpdateSectionDialog orientation={props.orientation} section={props.config.section} />
-        <Show when={props.totalLength > 1 && tasks()?.length === 0}>
-          <DeleteSectionDialog
-            orientation={props.orientation}
-            section={props.config.section}
-            endPosition={props.config.end}
-          />
-        </Show>
-        <Badge size="sm" color="accent" class="my-1">
-          {esitmationSum()}
-        </Badge>
-      </div>
-    </div>
-  );
-};
-
-const createSectionItemValues = (
-  orientation: Accessor<Orientation>,
-  config: Accessor<SectionConfig>,
-) => {
-  const boardState = useBoardStateContext();
-
-  const tasks = createMemo(() => {
-    const configValue = config();
-    const isVerticalValue = orientation() === "vertical";
-    const sectionId = configValue.section.id;
-    return boardState.store.tasks.filter((entry) =>
-      isVerticalValue ? entry.sectionY === sectionId : entry.sectionX === sectionId,
-    );
-  });
-
-  const esitmationSum = createMemo(() => {
-    return tasks()?.reduce((previous, current) => previous + current.estimate, 0);
-  });
-
-  return { esitmationSum, tasks };
-};
-
 const CenterRect: Component = () => {
   const boardState = useBoardStateContext();
 
@@ -231,6 +179,27 @@ const CenterRect: Component = () => {
         </div>
       </div>
     </foreignObject>
+  );
+};
+
+export const SectionItems: Component = () => {
+  const boardState = useBoardStateContext();
+
+  const xLength = createMemo(() => boardState.sectionXConfigs().length);
+  const yLength = createMemo(() => boardState.sectionYConfigs().length);
+
+  return (
+    <>
+      <HorizontalBackgroundRect />
+      <VerticalBackgroundRect />
+      <Index each={boardState.sectionXConfigs()}>
+        {(entry) => <HorizontalItemRect totalLength={xLength()} config={entry()} />}
+      </Index>
+      <Index each={boardState.sectionYConfigs()}>
+        {(entry) => <VerticalItemRect totalLength={yLength()} config={entry()} />}
+      </Index>
+      <CenterRect />
+    </>
   );
 };
 
@@ -318,6 +287,37 @@ const ExportableVerticalItemRect: Component<ExportableVerticalItemRectProps> = (
       >
         {esitmationSum()}
       </text>
+    </>
+  );
+};
+
+export const ExportableSectionItems: Component = () => {
+  const boardState = useBoardStateContext();
+
+  return (
+    <>
+      <rect
+        class="fill-base-300"
+        x={0}
+        y={0}
+        height={SECTION_Y_OFFSET}
+        width="100%"
+        filter="url(#dropshadow)"
+      />
+      <rect
+        class="fill-base-300"
+        x={0}
+        y={0}
+        height="100%"
+        width={SECTION_X_OFFSET}
+        filter="url(#dropshadow)"
+      />
+      <Index each={boardState.sectionXConfigs()}>
+        {(entry) => <ExportableHorizontalItemRect config={entry()} />}
+      </Index>
+      <Index each={boardState.sectionYConfigs()}>
+        {(entry) => <ExportableVerticalItemRect config={entry()} />}
+      </Index>
     </>
   );
 };

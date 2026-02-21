@@ -34,6 +34,217 @@ import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dia
 
 type TaskHandleKind = "source" | "target";
 
+type TaskContentProps = {
+  task: TaskModel;
+  newTaskPoint: Point2D;
+  newTaskHandle: TaskHandleKind;
+};
+
+const TaskContent: Component<TaskContentProps> = (props) => {
+  const { t } = useI18n();
+
+  const boardState = useBoardStateContext();
+
+  const insertTaskDialogId = createUniqueId();
+
+  const isSelected = useIsSelected(() => props.task.id);
+
+  const onInsertSuccess = (newTaskId: string) => {
+    insertEdgeInstanceToSecondTask({
+      boardState,
+      isSource: props.newTaskHandle === "source",
+      secondTaskId: newTaskId,
+      taskId: props.task.id,
+    });
+  };
+
+  return (
+    <div
+      data-selected={isSelected()}
+      class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[auto_1fr_auto] py-2 px-3"
+    >
+      <span class="text-sm truncate font-semibold">{props.task.title}</span>
+      <span class="text-xs line-clamp-3 opacity-80">{props.task.description}</span>
+      <div class="flex gap-1 w-full justify-end items-center">
+        <Show when={props.task.link}>
+          {(link) => (
+            <LinkButton
+              size="sm"
+              shape="circle"
+              href={link()}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t("board.tasks.link")}
+            >
+              <LinkIcon class="size-4" />
+            </LinkButton>
+          )}
+        </Show>
+        <UpdateTaskDialog task={props.task} />
+        <DeleteTaskDialog task={props.task} />
+        <InsertTaskDialog
+          dialogId={insertTaskDialogId}
+          position={props.newTaskPoint}
+          onInsertSuccess={onInsertSuccess}
+        />
+        <Badge size="sm" color="accent">
+          {props.task.estimate}
+        </Badge>
+      </div>
+    </div>
+  );
+};
+
+type TaskHandleProps = {
+  x: number;
+  y: number;
+  kind: TaskHandleKind;
+  task: TaskModel;
+};
+
+const TaskHandle: Component<TaskHandleProps> = (props) => {
+  const boardState = useBoardStateContext();
+  const [transform] = useBoardTransformContext();
+
+  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
+  const [_edgeDragState, { onDrag, onDragEnd, onDragStart }] = useEdgeDragStateContext();
+
+  const [rectRef, setRectRef] = createSignal<SVGElement>();
+
+  const xShift = createMemo(
+    () => (props.kind === "source" ? TASK_RECT_WIDTH : 0) - TASK_HANDLE_SIZE_HALF,
+  );
+
+  createD3DragElement({
+    onDragEnded(event) {
+      onDragEnd();
+
+      const edgeId = insertEdgeInstanceToPoint({
+        boardState,
+        isSource: props.kind === "source",
+        taskId: props.task.id,
+        x: event.x,
+        y: event.y,
+      });
+
+      if (edgeId) {
+        onSelectionChange({ id: edgeId, kind: "edge" });
+      }
+    },
+    onDragStarted() {
+      const transformValue = transform();
+      onDragStart({
+        x: translateX(transformValue, props.x + xShift() + TASK_HANDLE_SIZE_HALF),
+        y: translateY(transformValue, props.y + TASK_RECT_HEIGHT_HALF),
+      });
+    },
+    onDragged(event) {
+      const transformValue = transform();
+      onDrag({
+        x: translateX(transformValue, event.x),
+        y: translateY(transformValue, event.y),
+      });
+    },
+    ref: rectRef,
+  });
+
+  return (
+    <rect
+      ref={setRectRef}
+      x={props.x + xShift()}
+      y={props.y + TASK_HANDLE_Y_SHIFT}
+      width={TASK_HANDLE_SIZE}
+      height={TASK_HANDLE_SIZE}
+      class="fill-accent"
+    />
+  );
+};
+
+const ARROW_HEIGHT_HALF = 10;
+const ARROW_WIDTH = 10;
+
+type ChevronPathProps = {
+  task: TaskModel;
+  ref: (element: SVGElement) => void;
+};
+
+const ChevronRightPath: Component<ChevronPathProps> = (props) => {
+  const path = createMemo(() => {
+    const x = props.task.positionX + TASK_RECT_WIDTH + TASK_ARROW_OFFSET;
+    const y = props.task.positionY + TASK_RECT_HEIGHT_HALF;
+
+    const context = d3.path();
+    context.moveTo(x, y - ARROW_HEIGHT_HALF);
+    context.lineTo(x + ARROW_WIDTH, y);
+    context.lineTo(x, y + ARROW_HEIGHT_HALF);
+    return context.toString();
+  });
+
+  return (
+    <path ref={props.ref} d={path()} class="stroke-accent" fill="transparent" stroke-width={4} />
+  );
+};
+
+const ChevronLeftPath: Component<ChevronPathProps> = (props) => {
+  const path = createMemo(() => {
+    const x = props.task.positionX - TASK_ARROW_OFFSET;
+    const y = props.task.positionY + TASK_RECT_HEIGHT_HALF;
+
+    const context = d3.path();
+    context.moveTo(x, y - ARROW_HEIGHT_HALF);
+    context.lineTo(x - ARROW_WIDTH, y);
+    context.lineTo(x, y + ARROW_HEIGHT_HALF);
+    return context.toString();
+  });
+
+  return (
+    <path ref={props.ref} d={path()} class="stroke-accent" fill="transparent" stroke-width={4} />
+  );
+};
+
+type TaskArrowsProps = {
+  task: TaskModel;
+  onArrowClick: (taskPoint: Point2D, orientation: TaskHandleKind) => void;
+};
+
+const TaskArrows: Component<TaskArrowsProps> = (props) => {
+  const [rightPathRef, setRightPathRef] = createSignal<SVGElement>();
+  const [leftPathRef, setLeftPathRef] = createSignal<SVGElement>();
+
+  createD3ClickListener({
+    onClick() {
+      props.onArrowClick(
+        {
+          x: props.task.positionX + TASK_RECT_WIDTH + 400,
+          y: props.task.positionY,
+        },
+        "source",
+      );
+    },
+    ref: rightPathRef,
+  });
+
+  createD3ClickListener({
+    onClick() {
+      props.onArrowClick(
+        {
+          x: props.task.positionX - 400,
+          y: props.task.positionY,
+        },
+        "target",
+      );
+    },
+    ref: leftPathRef,
+  });
+
+  return (
+    <>
+      <ChevronRightPath ref={setRightPathRef} task={props.task} />
+      <ChevronLeftPath ref={setLeftPathRef} task={props.task} />
+    </>
+  );
+};
+
 type TaskGroupProps = {
   task: TaskModel;
 };
@@ -134,67 +345,6 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   );
 };
 
-type TaskContentProps = {
-  task: TaskModel;
-  newTaskPoint: Point2D;
-  newTaskHandle: TaskHandleKind;
-};
-
-const TaskContent: Component<TaskContentProps> = (props) => {
-  const { t } = useI18n();
-
-  const boardState = useBoardStateContext();
-
-  const insertTaskDialogId = createUniqueId();
-
-  const isSelected = useIsSelected(() => props.task.id);
-
-  const onInsertSuccess = (newTaskId: string) => {
-    insertEdgeInstanceToSecondTask({
-      boardState,
-      isSource: props.newTaskHandle === "source",
-      secondTaskId: newTaskId,
-      taskId: props.task.id,
-    });
-  };
-
-  return (
-    <div
-      data-selected={isSelected()}
-      class="bg-base-200 w-full h-full grid grid-cols-1 grid-rows-[auto_1fr_auto] py-2 px-3"
-    >
-      <span class="text-sm truncate font-semibold">{props.task.title}</span>
-      <span class="text-xs line-clamp-3 opacity-80">{props.task.description}</span>
-      <div class="flex gap-1 w-full justify-end items-center">
-        <Show when={props.task.link}>
-          {(link) => (
-            <LinkButton
-              size="sm"
-              shape="circle"
-              href={link()}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t("board.tasks.link")}
-            >
-              <LinkIcon class="size-4" />
-            </LinkButton>
-          )}
-        </Show>
-        <UpdateTaskDialog task={props.task} />
-        <DeleteTaskDialog task={props.task} />
-        <InsertTaskDialog
-          dialogId={insertTaskDialogId}
-          position={props.newTaskPoint}
-          onInsertSuccess={onInsertSuccess}
-        />
-        <Badge size="sm" color="accent">
-          {props.task.estimate}
-        </Badge>
-      </div>
-    </div>
-  );
-};
-
 type ExportableTaskGroupProps = {
   task: TaskModel;
 };
@@ -241,155 +391,5 @@ export const ExportableTaskGroup: Component<ExportableTaskGroupProps> = (props) 
         {props.task.estimate}
       </text>
     </>
-  );
-};
-
-type TaskHandleProps = {
-  x: number;
-  y: number;
-  kind: TaskHandleKind;
-  task: TaskModel;
-};
-
-const TaskHandle: Component<TaskHandleProps> = (props) => {
-  const boardState = useBoardStateContext();
-  const [transform] = useBoardTransformContext();
-
-  const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
-  const [_edgeDragState, { onDrag, onDragEnd, onDragStart }] = useEdgeDragStateContext();
-
-  const [rectRef, setRectRef] = createSignal<SVGElement>();
-
-  const xShift = createMemo(
-    () => (props.kind === "source" ? TASK_RECT_WIDTH : 0) - TASK_HANDLE_SIZE_HALF,
-  );
-
-  createD3DragElement({
-    onDragEnded(event) {
-      onDragEnd();
-
-      const edgeId = insertEdgeInstanceToPoint({
-        boardState,
-        isSource: props.kind === "source",
-        taskId: props.task.id,
-        x: event.x,
-        y: event.y,
-      });
-
-      if (edgeId) {
-        onSelectionChange({ id: edgeId, kind: "edge" });
-      }
-    },
-    onDragStarted() {
-      const transformValue = transform();
-      onDragStart({
-        x: translateX(transformValue, props.x + xShift() + TASK_HANDLE_SIZE_HALF),
-        y: translateY(transformValue, props.y + TASK_RECT_HEIGHT_HALF),
-      });
-    },
-    onDragged(event) {
-      const transformValue = transform();
-      onDrag({
-        x: translateX(transformValue, event.x),
-        y: translateY(transformValue, event.y),
-      });
-    },
-    ref: rectRef,
-  });
-
-  return (
-    <rect
-      ref={setRectRef}
-      x={props.x + xShift()}
-      y={props.y + TASK_HANDLE_Y_SHIFT}
-      width={TASK_HANDLE_SIZE}
-      height={TASK_HANDLE_SIZE}
-      class="fill-accent"
-    />
-  );
-};
-
-type TaskArrowsProps = {
-  task: TaskModel;
-  onArrowClick: (taskPoint: Point2D, orientation: TaskHandleKind) => void;
-};
-
-const TaskArrows: Component<TaskArrowsProps> = (props) => {
-  const [rightPathRef, setRightPathRef] = createSignal<SVGElement>();
-  const [leftPathRef, setLeftPathRef] = createSignal<SVGElement>();
-
-  createD3ClickListener({
-    onClick() {
-      props.onArrowClick(
-        {
-          x: props.task.positionX + TASK_RECT_WIDTH + 400,
-          y: props.task.positionY,
-        },
-        "source",
-      );
-    },
-    ref: rightPathRef,
-  });
-
-  createD3ClickListener({
-    onClick() {
-      props.onArrowClick(
-        {
-          x: props.task.positionX - 400,
-          y: props.task.positionY,
-        },
-        "target",
-      );
-    },
-    ref: leftPathRef,
-  });
-
-  return (
-    <>
-      <ChevronRightPath ref={setRightPathRef} task={props.task} />
-      <ChevronLeftPath ref={setLeftPathRef} task={props.task} />
-    </>
-  );
-};
-
-const ARROW_HEIGHT_HALF = 10;
-const ARROW_WIDTH = 10;
-
-type ChevronPathProps = {
-  task: TaskModel;
-  ref: (element: SVGElement) => void;
-};
-
-const ChevronRightPath: Component<ChevronPathProps> = (props) => {
-  const path = createMemo(() => {
-    const x = props.task.positionX + TASK_RECT_WIDTH + TASK_ARROW_OFFSET;
-    const y = props.task.positionY + TASK_RECT_HEIGHT_HALF;
-
-    const context = d3.path();
-    context.moveTo(x, y - ARROW_HEIGHT_HALF);
-    context.lineTo(x + ARROW_WIDTH, y);
-    context.lineTo(x, y + ARROW_HEIGHT_HALF);
-    return context.toString();
-  });
-
-  return (
-    <path ref={props.ref} d={path()} class="stroke-accent" fill="transparent" stroke-width={4} />
-  );
-};
-
-const ChevronLeftPath: Component<ChevronPathProps> = (props) => {
-  const path = createMemo(() => {
-    const x = props.task.positionX - TASK_ARROW_OFFSET;
-    const y = props.task.positionY + TASK_RECT_HEIGHT_HALF;
-
-    const context = d3.path();
-    context.moveTo(x, y - ARROW_HEIGHT_HALF);
-    context.lineTo(x - ARROW_WIDTH, y);
-    context.lineTo(x, y + ARROW_HEIGHT_HALF);
-    return context.toString();
-  });
-
-  return (
-    <path ref={props.ref} d={path()} class="stroke-accent" fill="transparent" stroke-width={4} />
   );
 };

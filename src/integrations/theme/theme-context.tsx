@@ -47,11 +47,11 @@ const createThemeValue = () => {
     setDOMTheme(initialThemeValue);
   });
 
-  const updateTheme = (theme: AppTheme) => {
-    setDOMTheme(theme);
+  const updateTheme = (update: AppTheme) => {
+    setDOMTheme(update);
     // oxlint-disable-next-line unicorn/no-document-cookie
-    document.cookie = `${APP_THEME_COOKIE_NAME}=${theme}`;
-    setTheme(theme);
+    document.cookie = `${APP_THEME_COOKIE_NAME}=${update}`;
+    setTheme(update);
   };
 
   return [theme, { updateTheme }] as const;

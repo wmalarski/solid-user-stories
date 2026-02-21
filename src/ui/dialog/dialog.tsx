@@ -11,6 +11,16 @@ import {
   modalTitleRecipe,
 } from "./dialog.recipe";
 
+export const closeDialog = (dialogId: string) => {
+  document.querySelector<HTMLDialogElement>(`#${dialogId}`)?.close();
+};
+
+export const openDialog = (dialogId: string) => {
+  const id = `#${dialogId}`;
+  const dialog = document.querySelector<HTMLDialogElement>(id);
+  dialog?.showModal();
+};
+
 export type DialogProps = ComponentVariantProps<"dialog", typeof modalRecipe, { id: string }>;
 
 export const Dialog: Component<DialogProps> = (props) => {
@@ -87,14 +97,4 @@ export type DialogActionsProps = ComponentProps<"div">;
 
 export const DialogActions: Component<DialogActionsProps> = (props) => {
   return <div {...props} class={modalActionRecipe({ class: props.class })} />;
-};
-
-export const closeDialog = (dialogId: string) => {
-  document.querySelector<HTMLDialogElement>(`#${dialogId}`)?.close();
-};
-
-export const openDialog = (dialogId: string) => {
-  const id = `#${dialogId}`;
-  const dialog = document.querySelector<HTMLDialogElement>(id);
-  dialog?.showModal();
 };

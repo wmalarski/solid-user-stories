@@ -17,6 +17,14 @@ export interface NavigationPaths {
   };
 }
 
+export const buildSearchParams = (query?: Record<string, unknown>): URLSearchParams => {
+  const entries = Object.entries(query ?? {});
+  const pairs = entries.flatMap(([key, value]) =>
+    value !== undefined && value !== null ? [[key, `${value}`]] : [],
+  );
+  return new URLSearchParams(pairs);
+};
+
 type PathNeverCond<Type> = [Type] extends [never] ? unknown : { params: Type };
 type SearchNeverCond<Type> = [Type] extends [never] ? unknown : { search: Type };
 
@@ -36,12 +44,4 @@ export const createLink = <Key extends keyof NavigationPaths>(
   );
 
   return searchParams.size === 0 ? resolvedPath : `${resolvedPath}?${searchParams}`;
-};
-
-export const buildSearchParams = (query?: Record<string, unknown>): URLSearchParams => {
-  const entries = Object.entries(query ?? {});
-  const pairs = entries.flatMap(([key, value]) =>
-    value !== undefined && value !== null ? [[key, `${value}`]] : [],
-  );
-  return new URLSearchParams(pairs);
 };

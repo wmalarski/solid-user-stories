@@ -26,24 +26,6 @@ export type BoardModel = {
   sectionsY: SectionModel[];
 };
 
-export const mapToBoardModel = (board: BoardInstance): BoardModel => {
-  return {
-    edges: mapToEdgeModels(board.edges),
-    sectionsX: mapToSectionModels(board.sectionX),
-    sectionsY: mapToSectionModels(board.sectionY),
-    tasks: mapToTaskModels(board.tasks),
-  };
-};
-
-export const mapToEdgeModels = (edges: MaybeLoaded<EdgeListInstance>): EdgeModel[] => {
-  return (
-    getLoadedOrUndefined(edges)?.flatMap((edge): EdgeModel[] => {
-      const model = mapToEdgeModel(edge);
-      return model ? [model] : [];
-    }) ?? []
-  );
-};
-
 const mapToEdgeModel = (edge: MaybeLoaded<EdgeInstance>): EdgeModel | null => {
   const loaded = getLoadedOrUndefined(edge);
 
@@ -59,10 +41,10 @@ const mapToEdgeModel = (edge: MaybeLoaded<EdgeInstance>): EdgeModel | null => {
   };
 };
 
-export const mapToSectionModels = (sections: MaybeLoaded<SectionListInstance>): SectionModel[] => {
+const mapToEdgeModels = (edges: MaybeLoaded<EdgeListInstance>): EdgeModel[] => {
   return (
-    getLoadedOrUndefined(sections)?.flatMap((section): SectionModel[] => {
-      const model = mapToSectionModel(section);
+    getLoadedOrUndefined(edges)?.flatMap((edge): EdgeModel[] => {
+      const model = mapToEdgeModel(edge);
       return model ? [model] : [];
     }) ?? []
   );
@@ -82,10 +64,10 @@ const mapToSectionModel = (section: MaybeLoaded<SectionInstance>): SectionModel 
   };
 };
 
-export const mapToTaskModels = (tasks: MaybeLoaded<TaskListInstance>): TaskModel[] => {
+const mapToSectionModels = (sections: MaybeLoaded<SectionListInstance>): SectionModel[] => {
   return (
-    getLoadedOrUndefined(tasks)?.flatMap((task): TaskModel[] => {
-      const model = mapToTaskModel(task);
+    getLoadedOrUndefined(sections)?.flatMap((section): SectionModel[] => {
+      const model = mapToSectionModel(section);
       return model ? [model] : [];
     }) ?? []
   );
@@ -108,6 +90,24 @@ const mapToTaskModel = (task: MaybeLoaded<TaskInstance>): TaskModel | null => {
     sectionX: loaded.sectionX,
     sectionY: loaded.sectionY,
     title: loaded.title,
+  };
+};
+
+const mapToTaskModels = (tasks: MaybeLoaded<TaskListInstance>): TaskModel[] => {
+  return (
+    getLoadedOrUndefined(tasks)?.flatMap((task): TaskModel[] => {
+      const model = mapToTaskModel(task);
+      return model ? [model] : [];
+    }) ?? []
+  );
+};
+
+export const mapToBoardModel = (board: BoardInstance): BoardModel => {
+  return {
+    edges: mapToEdgeModels(board.edges),
+    sectionsX: mapToSectionModels(board.sectionX),
+    sectionsY: mapToSectionModels(board.sectionY),
+    tasks: mapToTaskModels(board.tasks),
   };
 };
 

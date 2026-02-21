@@ -72,11 +72,12 @@ export const MultilineText: Component<MultilineTextProps> = (props) => {
 
     if (lineNumber >= maxLines) {
       element.textContent = line.join(" ") + ellipsis;
-      const textWidth = element.getComputedTextLength();
+      let textWidth = element.getComputedTextLength();
 
       while (textWidth > maxWidth) {
         line.pop();
         element.textContent = line.join(" ") + ellipsis;
+        textWidth = element.getComputedTextLength();
       }
     }
 

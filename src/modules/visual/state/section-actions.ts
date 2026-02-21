@@ -45,7 +45,7 @@ const shiftTasks = ({ shift, position, attribute, taskMap }: ShiftTasksArgs) => 
     taskMap.entries().filter(([_taskId, taskPosition]) => taskPosition[attribute] > position),
   );
   const startPositions = new Map(
-    tasksToMove.entries().map(([taskId, position]) => [taskId, position[attribute]]),
+    tasksToMove.entries().map(([taskId, movedPosition]) => [taskId, movedPosition[attribute]]),
   );
   updateTaskPositions({
     attribute,

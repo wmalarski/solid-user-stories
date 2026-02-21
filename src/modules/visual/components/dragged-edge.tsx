@@ -3,16 +3,6 @@ import { createMemo, Show, type Component } from "solid-js";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
 import { AnimatedPath } from "../ui/animated-path";
 
-export const DraggedEdge: Component = () => {
-  const [edgeDragState] = useEdgeDragStateContext();
-
-  return (
-    <Show when={edgeDragState.isDragging && edgeDragState.hasPosition}>
-      <DraggedEdgeWithTask />
-    </Show>
-  );
-};
-
 const DraggedEdgeWithTask: Component = () => {
   const [edgeDragState] = useEdgeDragStateContext();
 
@@ -33,4 +23,14 @@ const DraggedEdgeWithTask: Component = () => {
   });
 
   return <AnimatedPath stroke-width={3} d={path()} />;
+};
+
+export const DraggedEdge: Component = () => {
+  const [edgeDragState] = useEdgeDragStateContext();
+
+  return (
+    <Show when={edgeDragState.isDragging && edgeDragState.hasPosition}>
+      <DraggedEdgeWithTask />
+    </Show>
+  );
 };
