@@ -127,6 +127,7 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
         y: event.y,
       });
 
+      // oxlint-disable-next-line typescript/strict-boolean-expressions
       if (edgeId) {
         onSelectionChange({ id: edgeId, kind: "edge" });
       }

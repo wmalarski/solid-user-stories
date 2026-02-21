@@ -29,9 +29,10 @@ const getClientAppTheme = () => {
   } else if (document.cookie.includes(LIGHT_THEME_KEY)) {
     return LIGHT_THEME_KEY;
   }
+  return null;
 };
 
-const setDOMTheme = (theme?: AppTheme) => {
+const setDOMTheme = (theme: AppTheme | null) => {
   const htmlElement = document.querySelector("html");
   if (htmlElement) {
     htmlElement.dataset.theme = theme ? APP_THEME_MAP[theme] : undefined;

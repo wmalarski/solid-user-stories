@@ -35,7 +35,11 @@ export const createJazzResource = <
     ReturnType<CreateJazzResourceArgs<S, R>>
     // oxlint-disable-next-line typescript/no-explicit-any
   >(args, async (resolvedArgs: any) => {
+    // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
+    // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-call typescript/no-unsafe-member-access
     const root = await resolvedArgs.schema.load(resolvedArgs.id, resolvedArgs.options);
+    // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
+    // oxlint-disable-next-line typescript/no-unsafe-return typescript/no-unsafe-member-access
     return root.$isLoaded ? root : null;
   });
 };

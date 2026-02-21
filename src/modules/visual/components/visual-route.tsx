@@ -95,6 +95,7 @@ const SelectableGroup: Component = () => {
   return (
     <g cursor={isDragging() ? "grabbing" : "grab"}>
       <SectionGridPaths />
+      {/* oxlint-disable-next-line typescript/no-unsafe-type-assertion */}
       <g transform={transform() as unknown as string}>
         <For each={boardState.store.edges}>{(edge) => <EdgePath edge={edge} />}</For>
         <For each={boardState.store.tasks}>{(task) => <TaskGroup task={task} />}</For>

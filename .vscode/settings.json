@@ -15,5 +15,6 @@
     "source.fixAll.oxc": "explicit",
     "source.organizeImports": "always"
   },
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "oxc.typeAware": true
 }

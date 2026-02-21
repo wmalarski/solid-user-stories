@@ -42,7 +42,8 @@ export const createD3DragElement = (args: CreateD3DragElementArgs) => {
       .on("drag", onDragged)
       .on("end", onDragEnded);
 
-    // oxlint-disable-next-line no-explicit-any
+    // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
+    // oxlint-disable-next-line no-explicit-any typescript/no-unsafe-argument typescript/no-unsafe-type-assertion
     d3.select(refValue).call(plugin as any);
 
     onCleanup(() => {

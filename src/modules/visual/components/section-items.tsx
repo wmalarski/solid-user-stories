@@ -60,7 +60,7 @@ const createSectionItemValues = (
   });
 
   const esitmationSum = createMemo(() => {
-    return tasks()?.reduce((previous, current) => previous + current.estimate, 0);
+    return tasks().reduce((previous, current) => previous + current.estimate, 0);
   });
 
   return { esitmationSum, tasks };
@@ -93,7 +93,7 @@ const SectionItemContent: Component<SectionItemContentProps> = (props) => {
       >
         <InsertSectionDialog orientation={props.orientation} index={props.config.index} />
         <UpdateSectionDialog orientation={props.orientation} section={props.config.section} />
-        <Show when={props.totalLength > 1 && tasks()?.length === 0}>
+        <Show when={props.totalLength > 1 && tasks().length === 0}>
           <DeleteSectionDialog
             orientation={props.orientation}
             section={props.config.section}

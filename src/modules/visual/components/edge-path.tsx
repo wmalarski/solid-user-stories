@@ -30,9 +30,7 @@ const createEntryResource = (edge: Accessor<EdgeModel>) => {
     const edgeValue = edge();
     const source = boardState.store.tasks.find((task) => task.id === edgeValue.source);
     const target = boardState.store.tasks.find((task) => task.id === edgeValue.target);
-    return edgeValue && source && target
-      ? { edge: edgeValue, source: source, target: target }
-      : null;
+    return source && target ? { edge: edgeValue, source: source, target: target } : null;
   });
 
   return entry;

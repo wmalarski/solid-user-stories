@@ -11,7 +11,7 @@ export const insertTaskInstance = ({ boardState, ...args }: InsertTaskInstanceAr
   const board = boardState.board();
   const tasksValue = getLoadedOrUndefined(board.tasks);
   if (!tasksValue) {
-    return;
+    return null;
   }
   const task = TaskSchema.create(args, { owner: board.$jazz.owner });
   tasksValue.$jazz.push(task);

@@ -27,7 +27,7 @@ export const parseFormValidationError = (issues: v.BaseIssue<unknown>[]): FormIs
   };
 };
 
-export const parseFormException = <T extends { message: string }>(error: T): FormIssues => {
+export const parseFormException = (error: { message: string }): FormIssues => {
   return { error: error.message, success: false };
 };
 

@@ -16,7 +16,8 @@ export const createD3ClickListener = (args: CreateD3ClickListenerArgs) => {
 
     const abortController = new AbortController();
 
-    // oxlint-disable-next-line typescript/no-explicit-any
+    // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
+    // oxlint-disable-next-line typescript/no-explicit-any typescript/no-unsafe-type-assertion
     d3.select(refValue as any).on("click", args.onClick, {
       signal: abortController.signal,
     });

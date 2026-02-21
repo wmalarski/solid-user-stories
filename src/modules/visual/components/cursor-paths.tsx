@@ -23,10 +23,7 @@ const CursorPath: Component<CursorPathProps> = (props) => {
   });
 
   const active = createMemo(() => {
-    return (
-      !OLD_CURSOR_AGE_SECONDS ||
-      props.cursor.madeAt >= new Date(Date.now() - 1000 * OLD_CURSOR_AGE_SECONDS)
-    );
+    return props.cursor.madeAt >= new Date(Date.now() - 1000 * OLD_CURSOR_AGE_SECONDS);
   });
 
   const color = createMemo(() => {

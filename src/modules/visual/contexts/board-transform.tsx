@@ -27,7 +27,8 @@ const createBoardTransformContext = () => {
 
   const [transform, setTransform] = createSignal<Transform>({ k: 1, x: 0, y: 0 });
 
-  // oxlint-disable-next-line no-explicit-any
+  // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
+  // oxlint-disable-next-line no-explicit-any typescript/no-unsafe-return typescript/no-unsafe-type-assertion
   const selection = () => d3.select(SVG_SELECTOR) as any;
 
   const onZoomed = (event: { transform: Transform }) => {
@@ -53,11 +54,13 @@ const createBoardTransformContext = () => {
 
   const zoomIn = (point: Point2D) => {
     const state = transform();
+    // oxlint-disable-next-line typescript/no-unsafe-argument
     plugin.scaleTo(selection(), state.k * SCALE_BY, [point.x, point.y]);
   };
 
   const zoomOut = (point: Point2D) => {
     const state = transform();
+    // oxlint-disable-next-line typescript/no-unsafe-argument
     plugin.scaleTo(selection(), state.k / SCALE_BY, [point.x, point.y]);
   };
 
@@ -69,9 +72,13 @@ const createBoardTransformContext = () => {
     }
 
     createEffect(() => {
+      // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
+      // oxlint-disable-next-line typescript/no-unsafe-call typescript/no-unsafe-member-access
       selection().call(plugin);
 
       onCleanup(() => {
+        // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
+        // oxlint-disable-next-line typescript/no-unsafe-call typescript/no-unsafe-member-access
         selection().on(".zoom", null);
       });
     });

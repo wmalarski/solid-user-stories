@@ -39,6 +39,7 @@ export const MultilineText: Component<MultilineTextProps> = (props) => {
     let word = words.pop();
     let lineNumber = 0;
     let line: string[] = [];
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     let element = (<tspan x={x} y={y} />) as SVGTSpanElement;
 
     text.appendChild(element);
@@ -59,6 +60,7 @@ export const MultilineText: Component<MultilineTextProps> = (props) => {
         }
 
         line = [word];
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
         element = (
           <tspan x={x} y={y + lineNumber * lineHeight}>
             {word}

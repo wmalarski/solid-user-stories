@@ -63,7 +63,7 @@ export const InsertBoardDialog: Component = () => {
 
     const accountValue = account();
     const boardsValue = boards();
-    if (!boardsValue || !accountValue) {
+    if (!boardsValue) {
       return;
     }
 

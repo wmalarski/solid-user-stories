@@ -15,6 +15,7 @@ const createJazzContext = () => {
   const context = new JazzBrowserContextManager<typeof BoardAccount>();
 
   const [isLoaded] = createResource(async () => {
+    // oxlint-disable-next-line typescript/no-unsafe-assignment
     const apiKey = import.meta.env.VITE_JAZZ_API_KEY;
     await context.createContext({
       AccountSchema: BoardAccount,
@@ -27,7 +28,7 @@ const createJazzContext = () => {
 
   const account = createMemo(() => {
     if (!isLoaded()) {
-      return;
+      return null;
     }
 
     const currentValue = context.getCurrentValue();

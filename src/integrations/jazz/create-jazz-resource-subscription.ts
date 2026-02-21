@@ -34,6 +34,8 @@ export const createJazzResourceSubscription = <
   const id = createMemo(() => args().id);
   // oxlint-disable-next-line typescript/no-explicit-any
   const shema = createMemo((): any => args().schema);
+  // oxlint-disable-next-line unicorn/no-abusive-eslint-disable
+  // oxlint-disable-next-line typescript/no-unsafe-member-access typescript/no-unsafe-return typescript/no-unsafe-call
   createEffect(() => onCleanup(shema().subscribe(id(), mutate)));
   return boards;
 };

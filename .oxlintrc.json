@@ -68,12 +68,16 @@
     "typescript/consistent-type-definitions": "off",
     "typescript/explicit-function-return-type": "off",
     "typescript/explicit-module-boundary-types": "off",
+    "typescript/promise-function-async": "off",
+    "typescript/strict-void-return": "off",
+    "typescript/strict-boolean-expressions": "off",
     "typescript/no-misused-promises": [
       "error",
       {
         "checksVoidReturn": false
       }
     ],
+    "typescript/prefer-readonly-parameter-types": "off",
     "unicorn/no-array-reduce": "off",
     "unicorn/no-null": "off",
     "unicorn/number-literal-case": "off",

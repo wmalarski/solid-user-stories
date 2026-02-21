@@ -23,10 +23,10 @@ export const insertEdgeInstanceToPoint = ({
   const edges = getLoadedOrUndefined(board.edges);
 
   if (!edges) {
-    return;
+    return null;
   }
 
-  const loadedEdges = edges?.flatMap((edge) => (edge.$isLoaded ? [edge] : [])) ?? [];
+  const loadedEdges = edges.flatMap((edge) => (edge.$isLoaded ? [edge] : []));
 
   const taskMap = getTaskMap(board);
   const currentTask = taskMap.get(taskId);
@@ -42,13 +42,13 @@ export const insertEdgeInstanceToPoint = ({
     );
 
   if (!found || !currentTask) {
-    return;
+    return null;
   }
 
   const [cursorTaskId, cursorTask] = found;
 
   if (cursorTaskId === taskId) {
-    return;
+    return null;
   }
 
   const source = isSource ? taskId : cursorTaskId;
@@ -61,7 +61,7 @@ export const insertEdgeInstanceToPoint = ({
   );
 
   if (hasTheSameConnection) {
-    return;
+    return null;
   }
 
   const breakX = (currentTask.positionX + cursorTask.positionX + TASK_RECT_WIDTH) / 2;
@@ -92,7 +92,7 @@ export const insertEdgeInstanceToSecondTask = ({
   const edges = getLoadedOrUndefined(board.edges);
 
   if (!secondTask || !currentTask || !edges) {
-    return;
+    return null;
   }
 
   const breakX = (currentTask.positionX + secondTask.positionX + TASK_RECT_WIDTH) / 2;

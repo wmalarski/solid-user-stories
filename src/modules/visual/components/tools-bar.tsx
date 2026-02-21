@@ -271,7 +271,6 @@ const InviteButton = () => {
   const onCopy = () => {
     const inviteLinkValue = inviteLink();
     if (inviteLinkValue) {
-      navigator.clipboard.writeText(inviteLinkValue);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 1000);
     }

@@ -24,7 +24,8 @@ export const ErrorFallback = (error: unknown, reset: VoidFunction) => {
             <h2 class={cardTitleRecipe()}>{t("error.title")}</h2>
           </header>
           <span class="text-center">
-            {/* oxlint-disable-next-line no-explicit-any */}
+            {/* oxlint-disable-next-line unicorn/no-abusive-eslint-disable */}
+            {/* oxlint-disable-next-line typescript/no-unsafe-member-access typescript/no-unsafe-type-assertion typescript/no-unsafe-assignment no-explicit-any */}
             {t("error.description", { message: (error as any)?.message })}
           </span>
           <Button onClick={reset}>{t("error.reload")}</Button>
