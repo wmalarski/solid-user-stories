@@ -12,8 +12,8 @@ import {
 const enDict = {
   board: {
     account: {
-      name: "Name",
       anonymous: "Anonymous",
+      name: "Name",
       update: "Update name",
       updateDescription: "Enter updated profile information.",
     },
