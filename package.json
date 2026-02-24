@@ -17,7 +17,7 @@
   "dependencies": {
     "@solid-primitives/i18n": "^2.2.1",
     "@solid-primitives/keyed": "^1.5.3",
-    "@solid-primitives/mouse": "^2.1.5",
+    "@solid-primitives/mouse": "^2.1.6",
     "@solid-primitives/scheduled": "^1.5.3",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.4",
@@ -32,19 +32,19 @@
     "valibot": "^1.2.0"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.25.4",
+    "@cloudflare/vite-plugin": "^1.25.5",
     "@types/d3": "^7.4.3",
     "daisyui": "^5.5.19",
     "knip": "^5.85.0",
     "oxfmt": "^0.35.0",
     "oxlint": "^1.50.0",
-    "oxlint-tsgolint": "^0.14.2",
+    "oxlint-tsgolint": "^0.15.0",
     "solid-devtools": "^0.34.5",
     "sonda": "^0.11.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-solid": "^2.11.10",
     "vite-tsconfig-paths": "^6.1.1",
-    "wrangler": "^4.68.0"
+    "wrangler": "^4.68.1"
   }
 }
