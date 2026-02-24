@@ -6,7 +6,6 @@ import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
 import { openDialog } from "~/ui/dialog/dialog";
 import { LinkIcon } from "~/ui/icons/link-icon";
-import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
@@ -103,7 +102,6 @@ type TaskHandleProps = {
 
 const TaskHandle: Component<TaskHandleProps> = (props) => {
   const boardState = useBoardStateContext();
-  const [transform] = useBoardTransformContext();
 
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
   const [_edgeDragState, { onDrag, onDragEnd, onDragStart }] = useEdgeDragStateContext();
@@ -132,17 +130,15 @@ const TaskHandle: Component<TaskHandleProps> = (props) => {
       }
     },
     onDragStarted() {
-      const transformValue = transform();
       onDragStart({
-        x: translateX(transformValue, props.x + xShift() + TASK_HANDLE_SIZE_HALF),
-        y: translateY(transformValue, props.y + TASK_RECT_HEIGHT_HALF),
+        x: props.x + xShift() + TASK_HANDLE_SIZE_HALF,
+        y: props.y + TASK_RECT_HEIGHT_HALF,
       });
     },
     onDragged(event) {
-      const transformValue = transform();
       onDrag({
-        x: translateX(transformValue, event.x),
-        y: translateY(transformValue, event.y),
+        x: event.x,
+        y: event.y,
       });
     },
     ref: rectRef,
