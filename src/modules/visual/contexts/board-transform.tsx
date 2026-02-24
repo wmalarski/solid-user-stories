@@ -91,8 +91,16 @@ export const translateX = (transform: Transform, x: number) => {
   return x * transform.k + transform.x;
 };
 
+export const translateXRev = (transform: Transform, x: number) => {
+  return (x - transform.x) / transform.k;
+};
+
 export const translateY = (transform: Transform, y: number) => {
   return y * transform.k + transform.y;
+};
+
+export const translateYRev = (transform: Transform, y: number) => {
+  return (y - transform.y) / transform.k;
 };
 
 const BoardTransformContext = createContext<ReturnType<typeof createBoardTransformContext> | null>(

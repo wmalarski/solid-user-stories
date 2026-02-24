@@ -68,7 +68,7 @@ const CursorPath: Component<CursorPathProps> = (props) => {
         maxLines={1}
         content={name()}
         style={{ transform: transformStyle() }}
-        class="duration-100  transition-transform"
+        class="duration-100 transition-transform"
       />
     </Show>
   );

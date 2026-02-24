@@ -29,6 +29,11 @@ import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
+import {
+  translateXRev,
+  translateYRev,
+  useBoardTransformContext,
+} from "../contexts/board-transform";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils, useToolsStateContext } from "../contexts/tools-state";
 import type { TaskModel } from "../state/board-model";
@@ -218,6 +223,7 @@ export const InsertTaskByToolDialog: Component = () => {
   const { onClick } = useDialogBoardToolUtils();
 
   const [toolsState] = useToolsStateContext();
+  const [transform] = useBoardTransformContext();
 
   createEffect(() => {
     const isCreateTask = toolsState() === "create-task";
@@ -229,7 +235,13 @@ export const InsertTaskByToolDialog: Component = () => {
     createD3ClickListener({
       onClick(event) {
         onClick();
-        setPosition({ x: event.x, y: event.y });
+
+        const transformValue = transform();
+        setPosition({
+          x: translateXRev(transformValue, event.x),
+          y: translateYRev(transformValue, event.y),
+        });
+
         openDialog(dialogId);
       },
       ref: () => SVG_SELECTOR,
