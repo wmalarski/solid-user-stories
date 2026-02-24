@@ -28,6 +28,7 @@ import { FormError } from "~/ui/form-error/form-error";
 import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
+import { Tooltip } from "~/ui/tooltip/tooltip";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
 import {
   translateXRev,
@@ -292,15 +293,17 @@ export const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
 
   return (
     <>
-      <DialogTrigger
-        aria-label={t("board.tasks.updateTask")}
-        shape="circle"
-        size="sm"
-        for={dialogId}
-        onClick={onClick}
-      >
-        <PencilIcon class="size-4" />
-      </DialogTrigger>
+      <Tooltip data-tip={t("board.tasks.updateTask")} placement="top">
+        <DialogTrigger
+          aria-label={t("board.tasks.updateTask")}
+          shape="circle"
+          size="sm"
+          for={dialogId}
+          onClick={onClick}
+        >
+          <PencilIcon class="size-4" />
+        </DialogTrigger>
+      </Tooltip>
       <Dialog id={dialogId} onClose={onClose}>
         <DialogBox>
           <DialogTitle>{t("board.tasks.updateTask")}</DialogTitle>
@@ -347,15 +350,17 @@ export const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
 
   return (
     <>
-      <DialogTrigger
-        aria-label={t("common.delete")}
-        for={dialogId}
-        onClick={onClick}
-        shape="circle"
-        size="sm"
-      >
-        <TrashIcon class="size-4" />
-      </DialogTrigger>
+      <Tooltip data-tip={t("common.delete")} placement="top">
+        <DialogTrigger
+          aria-label={t("common.delete")}
+          for={dialogId}
+          onClick={onClick}
+          shape="circle"
+          size="sm"
+        >
+          <TrashIcon class="size-4" />
+        </DialogTrigger>
+      </Tooltip>
       <AlertDialog
         description={t("common.confirm")}
         dialogId={dialogId}

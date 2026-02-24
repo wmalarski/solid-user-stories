@@ -22,6 +22,7 @@ import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { PlusIcon } from "~/ui/icons/plus-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
+import { Tooltip } from "~/ui/tooltip/tooltip";
 import { getInvalidStateProps, parseFormValidationError, type FormIssues } from "~/ui/utils/forms";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
 import type { SectionModel } from "../state/board-model";
@@ -119,15 +120,17 @@ export const InsertSectionDialog: Component<InsertSectionDialogProps> = (props) 
 
   return (
     <>
-      <DialogTrigger
-        aria-label={t("board.sections.insertSection")}
-        shape="circle"
-        size="sm"
-        for={dialogId}
-        onClick={onClick}
-      >
-        <PlusIcon class="size-4" />
-      </DialogTrigger>
+      <Tooltip data-tip={t("board.sections.insertSection")} placement="left">
+        <DialogTrigger
+          aria-label={t("board.sections.insertSection")}
+          shape="circle"
+          size="sm"
+          for={dialogId}
+          onClick={onClick}
+        >
+          <PlusIcon class="size-4" />
+        </DialogTrigger>
+      </Tooltip>
       <Dialog id={dialogId} onClose={onClose}>
         <DialogBox>
           <DialogTitle>{t("board.sections.insertSection")}</DialogTitle>
@@ -193,15 +196,17 @@ export const UpdateSectionDialog: Component<UpdateSectionDialogProps> = (props) 
 
   return (
     <>
-      <DialogTrigger
-        aria-label={t("board.sections.updateSection")}
-        shape="circle"
-        size="sm"
-        for={dialogId}
-        onClick={onClick}
-      >
-        <PencilIcon class="size-4" />
-      </DialogTrigger>
+      <Tooltip data-tip={t("board.sections.updateSection")} placement="left">
+        <DialogTrigger
+          aria-label={t("board.sections.updateSection")}
+          shape="circle"
+          size="sm"
+          for={dialogId}
+          onClick={onClick}
+        >
+          <PencilIcon class="size-4" />
+        </DialogTrigger>
+      </Tooltip>
       <Dialog id={dialogId} onClose={onClose}>
         <DialogBox>
           <DialogTitle>{t("board.sections.updateSection")}</DialogTitle>
@@ -255,15 +260,17 @@ export const DeleteSectionDialog: Component<DeleteSectionDialogProps> = (props) 
 
   return (
     <>
-      <DialogTrigger
-        aria-label={t("board.sections.deleteSection")}
-        shape="circle"
-        size="sm"
-        for={dialogId}
-        onClick={onClick}
-      >
-        <TrashIcon class="size-4" />
-      </DialogTrigger>
+      <Tooltip data-tip={t("board.sections.deleteSection")} placement="left">
+        <DialogTrigger
+          aria-label={t("board.sections.deleteSection")}
+          shape="circle"
+          size="sm"
+          for={dialogId}
+          onClick={onClick}
+        >
+          <TrashIcon class="size-4" />
+        </DialogTrigger>
+      </Tooltip>
       <AlertDialog
         onClose={onClose}
         description={t("common.confirm")}
