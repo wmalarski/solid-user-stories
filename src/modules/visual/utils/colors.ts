@@ -24,3 +24,16 @@ export const getColor = (str: string): string => {
   // Return the color as an Oklch string
   return `oklch(${lightness} ${chroma} ${hue})`;
 };
+
+export const getFontColorFromOklch = (color: string): string | null => {
+  const regex = /oklch\(([0-9.]+).*\)/;
+  const result = regex.exec(color);
+  const firstGroup = result?.at(1);
+
+  if (!firstGroup) {
+    return null;
+  }
+
+  const brightness = Number(firstGroup);
+  return brightness > 0.5 ? "#ffffff" : "#000000";
+};

@@ -14,7 +14,7 @@ import {
 import type { CursorModel } from "../state/board-model";
 import { useBoardStateContext } from "../state/board-state";
 import { MultilineText } from "../ui/multiline-text";
-import { getColor } from "../utils/colors";
+import { getColor, getFontColorFromOklch } from "../utils/colors";
 
 const OLD_CURSOR_AGE_SECONDS = 10_000;
 
@@ -52,14 +52,16 @@ const CursorPath: Component<CursorPathProps> = (props) => {
     <Show when={!isMe()}>
       <rect
         opacity={active() ? 100 : 90}
-        style={{ fill: color(), transform: transformStyle() }}
+        style={{ transform: transformStyle() }}
+        fill={color()}
         width={10}
         height={10}
         class="duration-100 transition-transform"
       />
       <rect
         opacity={active() ? 100 : 90}
-        style={{ fill: color(), transform: transformStyle() }}
+        fill={color()}
+        style={{ transform: transformStyle() }}
         width={100}
         height={20}
         class="duration-100 transition-transform"
@@ -74,6 +76,7 @@ const CursorPath: Component<CursorPathProps> = (props) => {
         maxLines={1}
         content={name()}
         style={{ transform: transformStyle() }}
+        stroke={getFontColorFromOklch(color()) ?? undefined}
         class="duration-100 transition-transform"
       />
     </Show>
@@ -88,15 +91,13 @@ export const CursorPaths: Component = () => {
   const throttled = throttle((position: MousePosition) => {
     const transformValue = transform();
 
-    boardState
-      .cursorsFeed()
-      ?.$jazz.push({
-        online: true,
-        position: {
-          x: translateXRev(transformValue, position.x),
-          y: translateYRev(transformValue, position.y),
-        },
-      });
+    boardState.cursorsFeed()?.$jazz.push({
+      online: true,
+      position: {
+        x: translateXRev(transformValue, position.x),
+        y: translateYRev(transformValue, position.y),
+      },
+    });
   }, 100);
 
   onCleanup(makeMousePositionListener(globalThis.window, throttled, { touch: false }));

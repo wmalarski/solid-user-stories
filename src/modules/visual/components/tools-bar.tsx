@@ -54,7 +54,7 @@ import type { CursorModel } from "../state/board-model";
 import { useBoardStateContext } from "../state/board-state";
 import { deleteEdgeInstance } from "../state/edge-actions";
 import { deleteTaskInstance } from "../state/task-actions";
-import { getColor } from "../utils/colors";
+import { getColor, getFontColorFromOklch } from "../utils/colors";
 import { SVG_EXPORT_SELECTOR } from "../utils/constants";
 
 const ToolContainer: Component<ToolContainerProps> = (props) => {
@@ -337,7 +337,10 @@ const CursorAvatar: Component<CursorAvatarProps> = (props) => {
 
   return (
     <Tooltip data-tip={name()}>
-      <Avatar placeholder style={{ "background-color": color() }}>
+      <Avatar
+        placeholder
+        style={{ "background-color": color(), color: getFontColorFromOklch(color()) ?? undefined }}
+      >
         <AvatarContent>{name().at(0)}</AvatarContent>
       </Avatar>
     </Tooltip>
