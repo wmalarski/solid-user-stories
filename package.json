@@ -10,6 +10,7 @@
     "build": "vite build",
     "serve": "vite preview",
     "lint": "oxlint --type-aware --fix --fix-suggestions",
+    "deploy": "pnpm run build && wrangler deploy",
     "format": "oxfmt --write .",
     "knip": "knip",
     "cf-typegen": "wrangler types"

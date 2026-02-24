@@ -95,7 +95,7 @@ const enDict = {
   },
   seo: {
     description:
-      "Solid User Stories app is a non-trivial local first demo application built using Solid Start.",
+      "Solid User Stories app is a non-trivial local first demo application built using SolidJS.",
     title: "Solid User Stories",
   },
   theme: {

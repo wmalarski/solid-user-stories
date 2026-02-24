@@ -31,6 +31,7 @@ import {
   openDialog,
 } from "~/ui/dialog/dialog";
 import { FieldsetLabel } from "~/ui/fieldset/fieldset";
+import { ChartNetworkIcon } from "~/ui/icons/chart-network-icon";
 import { CheckCircleIcon } from "~/ui/icons/check-circle-icon";
 import { DownloadIcon } from "~/ui/icons/download-icon";
 import { HandIcon } from "~/ui/icons/hand-icon";
@@ -41,6 +42,7 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { SquareIcon } from "~/ui/icons/square-icon";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { Input } from "~/ui/input/input";
+import { Link } from "~/ui/link/link";
 import { Tooltip } from "~/ui/tooltip/tooltip";
 import { useBoardTransformContext } from "../contexts/board-transform";
 import { useExportStateContext } from "../contexts/export-state";
@@ -402,8 +404,14 @@ export const InfoBar: Component = () => {
       </ToolContainer>
       <Dialog id={dialogId} onClose={onClose}>
         <DialogBox>
-          <DialogTitle>{t("board.info.aboutProject")}</DialogTitle>
-          <DialogDescription>{t("board.info.aboutProject")}</DialogDescription>
+          <DialogTitle class="flex gap-2 items-center">
+            <ChartNetworkIcon />
+            {t("info.title")}
+          </DialogTitle>
+          <DialogDescription>{t("seo.description")}</DialogDescription>
+          <Link href="https://github.com/wmalarski/solid-user-stories" size="xs">
+            {t("info.madeBy")}
+          </Link>
           <DialogActions>
             <DialogClose />
           </DialogActions>
