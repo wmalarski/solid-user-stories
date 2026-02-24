@@ -4,7 +4,13 @@ import { throttle } from "@solid-primitives/scheduled";
 import { createMemo, onCleanup, Show, type Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
 import { useJazzAccount } from "~/integrations/jazz/provider";
-import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
+import {
+  translateX,
+  translateXRev,
+  translateY,
+  translateYRev,
+  useBoardTransformContext,
+} from "../contexts/board-transform";
 import type { CursorModel } from "../state/board-model";
 import { useBoardStateContext } from "../state/board-state";
 import { MultilineText } from "../ui/multiline-text";
@@ -77,8 +83,20 @@ const CursorPath: Component<CursorPathProps> = (props) => {
 export const CursorPaths: Component = () => {
   const boardState = useBoardStateContext();
 
-  const throttled = throttle((pos: MousePosition) => {
-    boardState.cursorsFeed()?.$jazz.push({ online: true, position: { x: pos.x, y: pos.y } });
+  const [transform] = useBoardTransformContext();
+
+  const throttled = throttle((position: MousePosition) => {
+    const transformValue = transform();
+
+    boardState
+      .cursorsFeed()
+      ?.$jazz.push({
+        online: true,
+        position: {
+          x: translateXRev(transformValue, position.x),
+          y: translateYRev(transformValue, position.y),
+        },
+      });
   }, 100);
 
   onCleanup(makeMousePositionListener(globalThis.window, throttled, { touch: false }));
