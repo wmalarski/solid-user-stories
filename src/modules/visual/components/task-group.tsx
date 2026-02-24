@@ -38,14 +38,13 @@ type TaskContentProps = {
   task: TaskModel;
   newTaskPoint: Point2D;
   newTaskHandle: TaskHandleKind;
+  insertTaskDialogId: string;
 };
 
 const TaskContent: Component<TaskContentProps> = (props) => {
   const { t } = useI18n();
 
   const boardState = useBoardStateContext();
-
-  const insertTaskDialogId = createUniqueId();
 
   const isSelected = useIsSelected(() => props.task.id);
 
@@ -83,7 +82,7 @@ const TaskContent: Component<TaskContentProps> = (props) => {
         <UpdateTaskDialog task={props.task} />
         <DeleteTaskDialog task={props.task} />
         <InsertTaskDialog
-          dialogId={insertTaskDialogId}
+          dialogId={props.insertTaskDialogId}
           position={props.newTaskPoint}
           onInsertSuccess={onInsertSuccess}
         />
@@ -325,6 +324,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
           newTaskHandle={newTaskHandle()}
           newTaskPoint={newTaskPoint()}
           task={props.task}
+          insertTaskDialogId={insertTaskDialogId}
         />
       </foreignObject>
       <Show when={isSelected()}>
