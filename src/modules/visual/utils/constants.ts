@@ -15,3 +15,4 @@ export const SVG_EXPORT_CLASS = "cs-svg-export";
 export const SVG_EXPORT_SELECTOR = `#${SVG_EXPORT_CLASS}`;
 export const TEXT_PADDING = 12;
 export const TEXT_HEIGHT = 10;
+export const SNAP_SIZE = 10;

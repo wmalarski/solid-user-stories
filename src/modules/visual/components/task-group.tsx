@@ -29,6 +29,7 @@ import {
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
 import type { Point2D } from "../utils/types";
+import { SnapLines } from "./snap-lines";
 import { DeleteTaskDialog, InsertTaskDialog, UpdateTaskDialog } from "./task-dialogs";
 
 type TaskHandleKind = "source" | "target";
@@ -261,7 +262,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const isSelected = useIsSelected(() => props.task.id);
   const [_selectionState, { onSelectionChange }] = useSelectionStateContext();
 
-  createD3DragElement({
+  const isDragging = createD3DragElement({
     onDragStarted(event) {
       onSelectionChange({ id: props.task.id, kind: "task" });
       setShiftX(props.task.positionX - event.x);
@@ -299,6 +300,9 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
 
   return (
     <>
+      <Show when={isDragging()}>
+        <SnapLines x={props.task.positionX} y={props.task.positionY} />
+      </Show>
       <rect
         x={props.task.positionX}
         y={props.task.positionY}

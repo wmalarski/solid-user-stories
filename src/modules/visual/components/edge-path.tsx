@@ -16,6 +16,7 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
+import { SnapLines } from "./snap-lines";
 
 type EdgeEntry = {
   edge: EdgeModel;
@@ -64,7 +65,7 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
 
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
-  createD3DragElement({
+  const isDragging = createD3DragElement({
     onDragged(event) {
       updateEdgeInstance({
         boardState,
@@ -75,18 +76,27 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
     ref: rectRef,
   });
 
+  const y = createMemo(() => {
+    return (
+      (props.entry.source.positionY + props.entry.target.positionY) / 2 +
+      TASK_RECT_HEIGHT_HALF -
+      EDGE_HANDLE_SIZE_HALF
+    );
+  });
+
   return (
-    <HandleRect
-      ref={setRectRef}
-      x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF}
-      y={
-        (props.entry.source.positionY + props.entry.target.positionY) / 2 +
-        TASK_RECT_HEIGHT_HALF -
-        EDGE_HANDLE_SIZE_HALF
-      }
-      width={EDGE_HANDLE_SIZE}
-      height={EDGE_HANDLE_SIZE}
-    />
+    <>
+      <Show when={isDragging()}>
+        <SnapLines x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF} y={y()} />
+      </Show>
+      <HandleRect
+        ref={setRectRef}
+        x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF}
+        y={y()}
+        width={EDGE_HANDLE_SIZE}
+        height={EDGE_HANDLE_SIZE}
+      />
+    </>
   );
 };
 
