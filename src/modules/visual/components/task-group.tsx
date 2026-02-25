@@ -6,7 +6,7 @@ import { Badge } from "~/ui/badge/badge";
 import { LinkButton } from "~/ui/button/button";
 import { openDialog } from "~/ui/dialog/dialog";
 import { LinkIcon } from "~/ui/icons/link-icon";
-import { useSnapPositionContext } from "../contexts/drag-state";
+import { getSnapPosition, useSnapPositionContext } from "../contexts/drag-state";
 import { useEdgeDragStateContext } from "../contexts/edge-drag-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import { useDialogBoardToolUtils } from "../contexts/tools-state";
@@ -264,6 +264,26 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
   const [_snapPosition, { onSnapPositionChange }] = useSnapPositionContext();
 
   createD3DragElement({
+    onDragEnded(event) {
+      const updatedX = getSnapPosition(event.x + shiftX());
+      const updatedY = getSnapPosition(event.y + shiftY());
+
+      const position = { x: updatedX, y: updatedY };
+      const sectionIds = mapToSections(
+        boardState.sectionXConfigs(),
+        boardState.sectionYConfigs(),
+        position,
+      );
+
+      updateTaskInstancePosition({
+        boardState,
+        positionX: updatedX,
+        positionY: updatedY,
+        sectionX: sectionIds.sectionX?.id ?? null,
+        sectionY: sectionIds.sectionY?.id ?? null,
+        taskId: props.task.id,
+      });
+    },
     onDragStarted(event) {
       onSelectionChange({ id: props.task.id, kind: "task" });
       setShiftX(props.task.positionX - event.x);

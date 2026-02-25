@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Accessor, type Component } from "solid-js";
-import { useSnapPositionContext } from "../contexts/drag-state";
+import { getSnapPosition, useSnapPositionContext } from "../contexts/drag-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import type { EdgeModel, TaskModel } from "../state/board-model";
 import { useBoardStateContext } from "../state/board-state";
@@ -76,6 +76,13 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
   });
 
   createD3DragElement({
+    onDragEnded(event) {
+      updateEdgeInstance({
+        boardState,
+        breakX: getSnapPosition(event.x),
+        edgeId: props.entry.edge.id,
+      });
+    },
     onDragged(event) {
       updateEdgeInstance({
         boardState,
@@ -89,18 +96,13 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
   });
 
   return (
-    <>
-      {/* <Show when={isDragging()}>
-        <SnapLines x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF} y={y()} />
-      </Show> */}
-      <HandleRect
-        ref={setRectRef}
-        x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF}
-        y={y()}
-        width={EDGE_HANDLE_SIZE}
-        height={EDGE_HANDLE_SIZE}
-      />
-    </>
+    <HandleRect
+      ref={setRectRef}
+      x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF}
+      y={y()}
+      width={EDGE_HANDLE_SIZE}
+      height={EDGE_HANDLE_SIZE}
+    />
   );
 };
 

@@ -5,6 +5,7 @@ import {
   type Component,
   type ParentProps,
 } from "solid-js";
+import { SNAP_SIZE } from "../utils/constants";
 import type { Point2D } from "../utils/types";
 
 const createDragStateContext = () => {
@@ -64,4 +65,8 @@ export const DragStateProvider: Component<ParentProps> = (props) => {
       </SnapPositionContext.Provider>
     </DragStateContext.Provider>
   );
+};
+
+export const getSnapPosition = (value: number) => {
+  return Math.floor(value / SNAP_SIZE) * SNAP_SIZE;
 };
