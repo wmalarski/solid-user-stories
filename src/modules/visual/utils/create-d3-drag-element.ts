@@ -1,6 +1,6 @@
 import * as d3 from "d3";
-import { createEffect, createSignal, onCleanup, type Accessor } from "solid-js";
-import { useDragStateContext } from "../contexts/drag-state";
+import { createEffect, onCleanup, type Accessor } from "solid-js";
+import { useDragStateContext, useSnapPositionContext } from "../contexts/drag-state";
 import { useToolsStateContext } from "../contexts/tools-state";
 
 type CreateD3DragElementArgs = {
@@ -12,13 +12,11 @@ type CreateD3DragElementArgs = {
 
 export const createD3DragElement = (args: CreateD3DragElementArgs) => {
   const [_isDragging, { onDragEnd, onDragStart }] = useDragStateContext();
+  const [_snapPosition, { onSnapPositionChange }] = useSnapPositionContext();
   const [toolsState] = useToolsStateContext();
-
-  const [isLocalDragging, setIsLocalDragging] = createSignal(false);
 
   const onDragStarted = (event: DragEvent) => {
     onDragStart();
-    setIsLocalDragging(true);
     args.onDragStarted?.(event);
   };
 
@@ -28,8 +26,8 @@ export const createD3DragElement = (args: CreateD3DragElementArgs) => {
 
   const onDragEnded = (event: DragEvent) => {
     onDragEnd();
-    setIsLocalDragging(false);
     args.onDragEnded?.(event);
+    onSnapPositionChange(null);
   };
 
   createEffect(() => {
@@ -54,6 +52,4 @@ export const createD3DragElement = (args: CreateD3DragElementArgs) => {
       d3.select(refValue).on(".start .drag .end", null);
     });
   });
-
-  return isLocalDragging;
 };

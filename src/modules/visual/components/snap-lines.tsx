@@ -1,4 +1,6 @@
-import { createMemo, type Component, type ComponentProps } from "solid-js";
+import { createMemo, Show, type Component, type ComponentProps } from "solid-js";
+import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
+import { useSnapPositionContext } from "../contexts/drag-state";
 import { SNAP_SIZE } from "../utils/constants";
 
 const sharedProps: ComponentProps<"line"> = {
@@ -8,19 +10,26 @@ const sharedProps: ComponentProps<"line"> = {
   "stroke-width": 1,
 };
 
-type SnapLinesProps = {
-  x: number;
-  y: number;
-};
-
-export const SnapLines: Component<SnapLinesProps> = (props) => {
-  const x = createMemo(() => Math.floor(props.x / SNAP_SIZE) * SNAP_SIZE);
-  const y = createMemo(() => Math.floor(props.y / SNAP_SIZE) * SNAP_SIZE);
+export const SnapLines: Component = () => {
+  const [transform] = useBoardTransformContext();
+  const [snapPosition] = useSnapPositionContext();
 
   return (
-    <>
-      <line x1={0} x2="100%" y1={y()} y2={y()} {...sharedProps} />
-      <line y1={0} y2="100%" x1={x()} x2={x()} {...sharedProps} />
-    </>
+    <Show when={snapPosition()}>
+      {(snapPositionResolved) => {
+        const x = createMemo(() =>
+          translateX(transform(), Math.floor(snapPositionResolved().x / SNAP_SIZE) * SNAP_SIZE),
+        );
+        const y = createMemo(() =>
+          translateY(transform(), Math.floor(snapPositionResolved().y / SNAP_SIZE) * SNAP_SIZE),
+        );
+        return (
+          <>
+            <line x1={0} x2="100%" y1={y()} y2={y()} {...sharedProps} />
+            <line y1={0} y2="100%" x1={x()} x2={x()} {...sharedProps} />
+          </>
+        );
+      }}
+    </Show>
   );
 };

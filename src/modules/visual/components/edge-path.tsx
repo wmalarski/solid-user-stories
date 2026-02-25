@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Accessor, type Component } from "solid-js";
+import { useSnapPositionContext } from "../contexts/drag-state";
 import { useIsSelected, useSelectionStateContext } from "../contexts/selection-state";
 import type { EdgeModel, TaskModel } from "../state/board-model";
 import { useBoardStateContext } from "../state/board-state";
@@ -16,7 +17,6 @@ import {
 } from "../utils/constants";
 import { createD3ClickListener } from "../utils/create-d3-click-listener";
 import { createD3DragElement } from "../utils/create-d3-drag-element";
-import { SnapLines } from "./snap-lines";
 
 type EdgeEntry = {
   edge: EdgeModel;
@@ -65,16 +65,7 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
 
   const [rectRef, setRectRef] = createSignal<SVGRectElement>();
 
-  const isDragging = createD3DragElement({
-    onDragged(event) {
-      updateEdgeInstance({
-        boardState,
-        breakX: event.x,
-        edgeId: props.entry.edge.id,
-      });
-    },
-    ref: rectRef,
-  });
+  const [_snapPosition, { onSnapPositionChange }] = useSnapPositionContext();
 
   const y = createMemo(() => {
     return (
@@ -84,11 +75,24 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
     );
   });
 
+  createD3DragElement({
+    onDragged(event) {
+      updateEdgeInstance({
+        boardState,
+        breakX: event.x,
+        edgeId: props.entry.edge.id,
+      });
+
+      onSnapPositionChange({ x: event.x, y: y() });
+    },
+    ref: rectRef,
+  });
+
   return (
     <>
-      <Show when={isDragging()}>
+      {/* <Show when={isDragging()}>
         <SnapLines x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF} y={y()} />
-      </Show>
+      </Show> */}
       <HandleRect
         ref={setRectRef}
         x={props.entry.edge.breakX - EDGE_HANDLE_SIZE_HALF}

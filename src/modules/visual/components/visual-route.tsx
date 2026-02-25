@@ -22,6 +22,7 @@ import {
   SectionGridStaticPaths,
 } from "./section-grid-paths";
 import { ExportableSectionItems, SectionItems } from "./section-items";
+import { SnapLines } from "./snap-lines";
 import { InsertTaskByToolDialog } from "./task-dialogs";
 import { ExportableTaskGroup, TaskGroup } from "./task-group";
 import { InfoBar, PresenceBar, ToolsBar, ZoomBar } from "./tools-bar";
@@ -126,6 +127,7 @@ const BoardContent: Component = () => {
         <SvgDefinitions />
         <BackgroundRect />
         <SectionGridStaticPaths />
+        <SnapLines />
         <SelectableGroup />
         <DraggedEdge />
         <CursorPaths />
