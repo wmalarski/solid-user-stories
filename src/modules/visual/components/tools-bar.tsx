@@ -1,6 +1,8 @@
+import { createShortcut } from "@solid-primitives/keyboard";
 import { Key } from "@solid-primitives/keyed";
 import { createInviteLink } from "jazz-tools";
 import {
+  createEffect,
   createMemo,
   createSignal,
   createUniqueId,
@@ -92,6 +94,19 @@ const DeleteSelectedElementDialog: Component = () => {
 
     onSelectionChange(null);
   };
+
+  createEffect(() => {
+    const selection = selectionState();
+    if (selection) {
+      createShortcut(
+        ["Delete"],
+        () => {
+          openDialog(dialogId);
+        },
+        { preventDefault: false, requireReset: true },
+      );
+    }
+  });
 
   return (
     <>
