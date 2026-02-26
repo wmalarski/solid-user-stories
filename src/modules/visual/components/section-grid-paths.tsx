@@ -1,5 +1,6 @@
 import { createMemo, createSignal, Index, type Component, type ComponentProps } from "solid-js";
 import { translateX, translateY, useBoardTransformContext } from "../contexts/board-transform";
+import { getSnapPosition } from "../contexts/drag-state";
 import type { EdgeModel, TaskModel } from "../state/board-model";
 import { useBoardStateContext } from "../state/board-state";
 import {
@@ -88,6 +89,21 @@ const HorizontalPath: Component<HorizontalPathProps> = (props) => {
   const [startPosition, setStartPosition] = createSignal<number>(0);
 
   createD3DragElement({
+    onDragEnded(event) {
+      const transformValue = transform();
+
+      const updatedY = (event.y - transformValue.y) / transformValue.k - SECTION_Y_OFFSET;
+      const withLimit = getSnapPosition(Math.max(maxNotDraggedPosition(), updatedY));
+
+      updateHorizontalSectionInstanceSize({
+        boardState,
+        draggedTasks: draggedTasks(),
+        position: withLimit,
+        sectionId: props.config.section.id,
+        sectionStart: props.config.start,
+        startPosition: startPosition(),
+      });
+    },
     onDragStarted() {
       const {
         draggedTasks: updatedDraggedTasks,
@@ -168,6 +184,22 @@ const VerticalPath: Component<VerticalPathProps> = (props) => {
   const [startPosition, setStartPosition] = createSignal<number>(0);
 
   createD3DragElement({
+    onDragEnded(event) {
+      const transformValue = transform();
+
+      const updatedX = (event.x - transformValue.x) / transformValue.k - SECTION_X_OFFSET;
+      const withLimit = getSnapPosition(Math.max(maxNotDraggedPosition(), updatedX));
+
+      updateVerticalSectionInstanceSize({
+        boardState,
+        draggedEdges: draggedEdges(),
+        draggedTasks: draggedTasks(),
+        position: withLimit,
+        sectionId: props.config.section.id,
+        sectionStart: props.config.start,
+        startPosition: startPosition(),
+      });
+    },
     onDragStarted() {
       const {
         draggedTasks: updatedDraggedTasks,
