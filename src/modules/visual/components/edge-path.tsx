@@ -1,3 +1,4 @@
+import { createShortcut } from "@solid-primitives/keyboard";
 import * as d3 from "d3";
 import { createMemo, createSignal, Show, type Accessor, type Component } from "solid-js";
 import { getSnapPosition, useSnapPositionContext } from "../contexts/drag-state";
@@ -12,6 +13,7 @@ import { SimplePath } from "../ui/simple-path";
 import {
   EDGE_HANDLE_SIZE,
   EDGE_HANDLE_SIZE_HALF,
+  SNAP_SIZE,
   TASK_RECT_HEIGHT_HALF,
   TASK_RECT_WIDTH,
 } from "../utils/constants";
@@ -106,6 +108,30 @@ const EdgeHandle: Component<EdgeHandleProps> = (props) => {
   );
 };
 
+type SelectedEdgeKeyboardProviderProps = {
+  entry: EdgeEntry;
+};
+
+const SelectedEdgeKeyboardProvider: Component<SelectedEdgeKeyboardProviderProps> = (props) => {
+  const boardState = useBoardStateContext();
+
+  const onShortcutFactory = (shift: number) => () => {
+    const updatedX = getSnapPosition(props.entry.edge.breakX + shift);
+
+    updateEdgeInstance({
+      boardState,
+      breakX: updatedX,
+      edgeId: props.entry.edge.id,
+    });
+  };
+
+  const sharedOptions = { preventDefault: false, requireReset: true };
+  createShortcut(["ArrowLeft"], onShortcutFactory(-SNAP_SIZE), sharedOptions);
+  createShortcut(["ArrowRight"], onShortcutFactory(SNAP_SIZE), sharedOptions);
+
+  return null;
+};
+
 type EdgeContainerProps = {
   entry: EdgeEntry;
 };
@@ -131,6 +157,7 @@ const EdgeContainer: Component<EdgeContainerProps> = (props) => {
       <AnimatedPath d={path()} stroke-width={2} stroke-opacity={0.7} />
       <SelectablePath ref={setRef} d={path()} isSelected={isSelected()} />
       <Show when={isSelected()}>
+        <SelectedEdgeKeyboardProvider entry={props.entry} />
         <EdgeHandle entry={props.entry} />
       </Show>
     </>

@@ -1,3 +1,4 @@
+import { createShortcut } from "@solid-primitives/keyboard";
 import * as d3 from "d3";
 import { createMemo, createSignal, createUniqueId, Show, type Component } from "solid-js";
 import { cx } from "tailwind-variants";
@@ -17,6 +18,7 @@ import { mapToSections } from "../state/section-configs";
 import { updateTaskInstancePosition } from "../state/task-actions";
 import { MultilineText } from "../ui/multiline-text";
 import {
+  SNAP_SIZE,
   TASK_ARROW_OFFSET,
   TASK_HANDLE_SIZE,
   TASK_HANDLE_SIZE_HALF,
@@ -242,6 +244,43 @@ const TaskArrows: Component<TaskArrowsProps> = (props) => {
   );
 };
 
+type SelectedTaskKeyboardProviderProps = {
+  task: TaskModel;
+};
+
+const SelectedTaskKeyboardProvider: Component<SelectedTaskKeyboardProviderProps> = (props) => {
+  const boardState = useBoardStateContext();
+
+  const onShortcutFactory = (shift: Point2D) => () => {
+    const updatedX = getSnapPosition(props.task.positionX + shift.x);
+    const updatedY = getSnapPosition(props.task.positionY + shift.y);
+
+    const position = { x: updatedX, y: updatedY };
+    const sectionIds = mapToSections(
+      boardState.sectionXConfigs(),
+      boardState.sectionYConfigs(),
+      position,
+    );
+
+    updateTaskInstancePosition({
+      boardState,
+      positionX: updatedX,
+      positionY: updatedY,
+      sectionX: sectionIds.sectionX?.id ?? null,
+      sectionY: sectionIds.sectionY?.id ?? null,
+      taskId: props.task.id,
+    });
+  };
+
+  const sharedOptions = { preventDefault: false, requireReset: true };
+  createShortcut(["ArrowLeft"], onShortcutFactory({ x: -SNAP_SIZE, y: 0 }), sharedOptions);
+  createShortcut(["ArrowRight"], onShortcutFactory({ x: SNAP_SIZE, y: 0 }), sharedOptions);
+  createShortcut(["ArrowUp"], onShortcutFactory({ x: 0, y: -SNAP_SIZE }), sharedOptions);
+  createShortcut(["ArrowDown"], onShortcutFactory({ x: 0, y: SNAP_SIZE }), sharedOptions);
+
+  return null;
+};
+
 type TaskGroupProps = {
   task: TaskModel;
 };
@@ -348,6 +387,7 @@ export const TaskGroup: Component<TaskGroupProps> = (props) => {
         />
       </foreignObject>
       <Show when={isSelected()}>
+        <SelectedTaskKeyboardProvider task={props.task} />
         <TaskHandle
           kind="source"
           x={props.task.positionX}
