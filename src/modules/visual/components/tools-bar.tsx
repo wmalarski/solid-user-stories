@@ -142,6 +142,26 @@ export const ToolsBar: Component = () => {
     onSelectionChange(null);
   };
 
+  createEffect(() => {
+    const toolsStateValue = toolsState();
+    if (toolsStateValue !== "selector") {
+      createShortcut(
+        ["1"],
+        () => {
+          onToolChage("pane");
+        },
+        { preventDefault: false, requireReset: true },
+      );
+      createShortcut(
+        ["2"],
+        () => {
+          onToolChage("create-task");
+        },
+        { preventDefault: false, requireReset: true },
+      );
+    }
+  });
+
   return (
     <div class="absolute bottom-2 w-full flex justify-center">
       <ToolContainer class="justify-center items-center px-3 py-2">
