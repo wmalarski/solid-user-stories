@@ -443,7 +443,7 @@ export const InfoBar: Component = () => {
             <ChartNetworkIcon />
             {t("info.title")}
           </DialogTitle>
-          <DialogDescription>{t("seo.description")}</DialogDescription>
+          <DialogDescription>{t("info.description")}</DialogDescription>
           <Link href="https://github.com/wmalarski/solid-user-stories" size="xs">
             {t("info.madeBy")}
           </Link>

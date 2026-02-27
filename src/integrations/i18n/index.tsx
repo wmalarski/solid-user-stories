@@ -87,16 +87,13 @@ const enDict = {
     title: "Error",
   },
   info: {
+    description:
+      "Solid User Stories app is a non-trivial local first demo application built using SolidJS.",
     madeBy: "Made by wmalarski",
     title: "Solid User Stories",
   },
   notFound: {
     title: "Not Found",
-  },
-  seo: {
-    description:
-      "Solid User Stories app is a non-trivial local first demo application built using SolidJS.",
-    title: "Solid User Stories",
   },
   theme: {
     setDark: "Set dark theme",
